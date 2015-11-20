@@ -31,4 +31,8 @@ class Config
         return $this->conf['stacks'][$stack];
     }
 
+    public function getStacknames() {
+        return array_keys($this->conf['stacks']);
+    }
+
 }

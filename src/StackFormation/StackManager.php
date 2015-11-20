@@ -19,9 +19,15 @@ class StackManager
     public function __construct()
     {
         $region = getenv('AWS_DEFAULT_REGION');
-
         if (empty($region)) {
             throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
+        }
+
+        if (!getenv('AWS_ACCESS_KEY_ID')) {
+            throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var.');
+        }
+        if (!getenv('AWS_SECRET_ACCESS_KEY')) {
+            throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var.');
         }
 
         $this->sdk = new \Aws\Sdk([
@@ -213,10 +219,10 @@ class StackManager
                     $printedEvents[] = $eventId;
                     $rows[] = [
                         // $event['Timestamp'],
-                        $event['Status'],
+                        $this->decorateStatus($event['Status']),
                         $event['ResourceType'],
                         $event['LogicalResourceId'],
-                        wordwrap($event['ResourceStatusReason'], 30, "\n")
+                        wordwrap($event['ResourceStatusReason'], 40, "\n")
                     ];
                 }
             }
@@ -227,7 +233,14 @@ class StackManager
             $output->write($renderedTable);
 
         } while (strpos($status, 'IN_PROGRESS') !== false);
-        $output->writeln("-> Done (Status: $status)");
+
+        $formatter = new \Symfony\Component\Console\Helper\FormatterHelper();
+        if (strpos($status, 'FAILED') !== false) {
+            $formattedBlock = $formatter->formatBlock(['Error!', 'Status: ' . $status], 'error');
+        } else {
+            $formattedBlock = $formatter->formatBlock(['Completed', 'Status: ' . $status], 'info');
+        }
+        $output->writeln($formattedBlock);
 
         // TODO: make this a table
         $outputs = $this->getOutputs($stackName);
@@ -236,6 +249,19 @@ class StackManager
                 printf("%30s: %s\n", $key, $value);
             }
         }
+    }
+
+    protected function decorateStatus($status) {
+        if (strpos($status, 'IN_PROGRESS') !== false) {
+            return "<fg=yellow>$status</>";
+        }
+        if (strpos($status, 'COMPLETE') !== false) {
+            return "<fg=green>$status</>";
+        }
+        if (strpos($status, 'FAILED') !== false) {
+            return "<fg=red>$status</>";
+        }
+        return $status;
     }
 
     public function getStackStatus($stackName) {
