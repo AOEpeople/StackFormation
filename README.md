@@ -1,6 +1,6 @@
 # StackFormation
 
-## LightWeight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor
+**Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor**
 
 Author: [Fabrizio Branca](https://twitter.com/fbrnc)
 
@@ -50,6 +50,7 @@ StackFormation uses the AWS SDK for PHP. You should configure your keys in env v
 ```
 export AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY
 export AWS_SECRET_ACCESS_KEY=INSERT_YOUR_PRIVATE_KEY
+export AWS_DEFAULT_REGION=eu-west-1
 ```
 
 ### `Fn::FileContent`

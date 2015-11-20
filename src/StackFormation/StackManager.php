@@ -18,9 +18,15 @@ class StackManager
 
     public function __construct()
     {
+        $region = getenv('AWS_DEFAULT_REGION');
+
+        if (empty($region)) {
+            throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
+        }
+
         $this->sdk = new \Aws\Sdk([
-            'region' => 'eu-west-1',
-            'version' => 'latest',
+            'region' => $region,
+            'version' => 'latest'
         ]);
         $this->cfnClient = $this->sdk->createClient('CloudFormation');
         $this->config = new Config();
@@ -184,7 +190,6 @@ class StackManager
 
     public function observeStackActivity(
         $stackName,
-        \Symfony\Component\Console\Command\Command $command,
         \Symfony\Component\Console\Output\OutputInterface $output,
         $pollInterval=10)
     {
@@ -216,9 +221,10 @@ class StackManager
                 }
             }
 
-            $table = $command->getHelper('table');
+            $table = new \Symfony\Component\Console\Helper\Table($output);
             $table->setRows($rows);
-            $table->render($output);
+            $renderedTable = $table->render();
+            $output->write($renderedTable);
 
         } while (strpos($status, 'IN_PROGRESS') !== false);
         $output->writeln("-> Done (Status: $status)");
