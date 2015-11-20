@@ -17,5 +17,5 @@
       "": "src"
     }
   },
-  "bin": ["src/sfn.php"]
+  "bin": ["src/stackformation.php"]
 }
