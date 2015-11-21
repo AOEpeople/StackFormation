@@ -149,19 +149,7 @@ class StackManager
         ]);
     }
 
-    /**
-     * Update stack
-     *
-     * @param $stackName
-     * @throws \Exception
-     */
-    public function deployStack($stackName, $onFailure='ROLLBACK')
-    {
-
-        if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
-            throw new \InvalidArgumentException("Invalid value for onFailure parameter");
-        }
-
+    public function getPreprocessedTemplate($stackName) {
         $stackConfig = $this->config->getStackConfig($stackName);
 
         $template = $stackConfig['template'];
@@ -172,25 +160,37 @@ class StackManager
         if (!is_file($template)) {
             throw new \Exception("Template file '$template' not found.");
         }
-
         $preProcessor = new Preprocessor();
+        return $preProcessor->process($template);
+    }
 
-        $stacksFromApi = $this->getStacksFromApi();
-        if (isset($stacksFromApi[$stackName]) && $stacksFromApi[$stackName]['Status'] != 'DELETE_COMPLETE') {
-            $res = $this->cfnClient->updateStack([
-                'Capabilities' => ['CAPABILITY_IAM'],
-                'StackName' => $stackName,
-                'Parameters' => $this->getParametersFromConfig($stackName),
-                'TemplateBody' => $preProcessor->process($template)
-            ]);
+    /**
+     * Update stack
+     *
+     * @param $stackName
+     * @throws \Exception
+     */
+    public function deployStack($stackName, $onFailure='ROLLBACK')
+    {
+        if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
+            throw new \InvalidArgumentException("Invalid value for onFailure parameter");
+        }
+
+        $arguments = [
+            'Capabilities' => ['CAPABILITY_IAM'],
+            'StackName' => $stackName,
+            'Parameters' => $this->getParametersFromConfig($stackName),
+            'TemplateBody' => $this->getPreprocessedTemplate($stackName)
+        ];
+
+        $stackStatus = $this->getStackStatus($stackName);
+        if (strpos($stackName, 'IN_PROGRESS') !== false) {
+            throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
+        } elseif ($stackStatus != 'DELETE_COMPLETE') {
+            $this->cfnClient->updateStack($arguments);
         } else {
-            $res = $this->cfnClient->createStack([
-                'Capabilities' => ['CAPABILITY_IAM'],
-                'OnFailure' => $onFailure,
-                'StackName' => $stackName,
-                'Parameters' => $this->getParametersFromConfig($stackName),
-                'TemplateBody' => $preProcessor->process($template)
-            ]);
+            $arguments['OnFailure'] = $onFailure;
+            $this->cfnClient->createStack($arguments);
         }
     }
 
