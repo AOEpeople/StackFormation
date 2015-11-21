@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command\Stack;
+namespace StackFormation\Command;
 
 use StackFormation\Config;
 use StackFormation\Command\AbstractCommand;
@@ -11,14 +11,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DeleteCommand extends AbstractCommand
+class DeployCommand extends AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:delete')
-            ->setDescription('delete Stack')
+            ->setName('deploy')
+            ->setDescription('Deploy Stack')
             ->addArgument(
                 'stack',
                 InputArgument::IS_ARRAY | InputArgument::REQUIRED,
@@ -32,26 +32,14 @@ class DeleteCommand extends AbstractCommand
         if (count($stacks) == 0) {
             $dialog = $this->getHelper('dialog');
             /* @var $dialog \Symfony\Component\Console\Helper\DialogHelper */
-            $stacksFromApi = array_keys($this->stackManager->getStacksFromApi());
+            $stacksFromConfig = $this->config->getStacknames();
 
             $stack = $dialog->select(
                 $output,
-                'Please select the stack you want to delete',
-                $stacksFromApi
+                'Please select the stack you want to deploy',
+                $stacksFromConfig
             );
-            $input->setArgument('stack', [$stacksFromApi[$stack]]);
-        }
-
-        $stacks = $input->getArgument('stack');
-
-        $dialog = $this->getHelper('dialog');
-        $confirmed = $dialog->askConfirmation(
-            $output,
-            "Are you sure you want to delete ".implode(', ', $stacks)."?",
-            false
-        );
-        if (!$confirmed) {
-            throw new \Exception('Operation aborted');
+            $input->setArgument('stack', [$stacksFromConfig[$stack]]);
         }
     }
 
@@ -59,8 +47,18 @@ class DeleteCommand extends AbstractCommand
     {
         $stacks = $input->getArgument('stack');
         foreach ($stacks as $stack) {
-            $this->stackManager->deleteStack($stack);
-            $output->writeln("Triggered deletion of stack '$stack'.");
+            try {
+                $this->stackManager->deployStack($stack, 'DO_NOTHING'); // TODO: expose to option
+                $output->writeln("Triggered deployment of stack '$stack'.");
+                $output->writeln("Run this is you want to observe the stack creation/update:");
+                $output->writeln("{$GLOBALS['argv'][0]} observe $stack");
+            } catch (\Aws\CloudFormation\Exception\CloudFormationException $exception) {
+                if (strpos($exception->getMessage(), 'No updates are to be performed.') !== false) {
+                    $output->writeln("No updates are to be performed for stack '$stack'");
+                } else {
+                    throw $exception;
+                }
+            }
         }
     }
 

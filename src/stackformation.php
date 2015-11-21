@@ -12,9 +12,9 @@ use Symfony\Component\Console\Application;
 
 $app = new Application('StackFormation', '@package_version@');
 
-$app->add(new \StackFormation\Command\Stack\DeployCommand);
-$app->add(new \StackFormation\Command\Stack\ListCommand);
-$app->add(new \StackFormation\Command\Stack\ObserveCommand);
-$app->add(new \StackFormation\Command\Stack\DeleteCommand);
+$app->add(new \StackFormation\Command\DeployCommand);
+$app->add(new \StackFormation\Command\ListCommand);
+$app->add(new \StackFormation\Command\ObserveCommand);
+$app->add(new \StackFormation\Command\DeleteCommand);
 
 $app->run();

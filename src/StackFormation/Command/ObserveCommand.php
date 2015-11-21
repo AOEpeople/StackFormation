@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command\Stack;
+namespace StackFormation\Command;
 
 use StackFormation\StackManager;
 use StackFormation\Command\AbstractCommand;
@@ -16,7 +16,7 @@ class ObserveCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('stack:observe')
+            ->setName('observe')
             ->setDescription('Observe stack progress')
             ->addArgument(
                 'stack',
