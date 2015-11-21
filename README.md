@@ -53,7 +53,7 @@ export AWS_SECRET_ACCESS_KEY=INSERT_YOUR_PRIVATE_KEY
 export AWS_DEFAULT_REGION=eu-west-1
 ```
 
-### `Fn::FileContent`
+### Function `Fn::FileContent`
 
 Before uploading CloudFormation template to the API there's some pre-processing going on:
 I've introduced a new function "FileContent" that accepts a path to a file. This file will be read, converted into JSON (using `Fn::Join`).
