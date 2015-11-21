@@ -16,7 +16,7 @@ class ObserveCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('observe')
+            ->setName('stack:observe')
             ->setDescription('Observe stack progress')
             ->addArgument(
                 'stack',

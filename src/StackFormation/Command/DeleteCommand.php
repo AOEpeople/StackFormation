@@ -17,8 +17,8 @@ class DeleteCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('delete')
-            ->setDescription('delete Stack')
+            ->setName('stack:delete')
+            ->setDescription('Delete Stack')
             ->addArgument(
                 'stack',
                 InputArgument::IS_ARRAY | InputArgument::REQUIRED,

@@ -16,8 +16,8 @@ class ListCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('list-stacks')
-            ->setDescription('List stacks');
+            ->setName('stack:list')
+            ->setDescription('List Stacks');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

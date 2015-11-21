@@ -17,7 +17,7 @@ class DeployCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('deploy')
+            ->setName('stack:deploy')
             ->setDescription('Deploy Stack')
             ->addArgument(
                 'stack',

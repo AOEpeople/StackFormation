@@ -12,9 +12,8 @@ use Symfony\Component\Console\Application;
 
 $app = new Application('StackFormation', '@package_version@');
 
-$app->add(new \StackFormation\Command\DeployCommand);
-$app->add(new \StackFormation\Command\ListCommand);
-$app->add(new \StackFormation\Command\ObserveCommand);
-$app->add(new \StackFormation\Command\DeleteCommand);
+foreach (\StackFormation\CommandRegistry::getCommands() as $command) {
+    $app->add($command);
+}
 
 $app->run();
