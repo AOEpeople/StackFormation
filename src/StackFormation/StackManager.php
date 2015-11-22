@@ -164,6 +164,11 @@ class StackManager
         return $preProcessor->process($template);
     }
 
+    public function getTemplate($stackName) {
+        $res = $this->cfnClient->getTemplate([ 'StackName' => $stackName]);
+        return $res->get("TemplateBody");
+    }
+
     /**
      * Update stack
      *

@@ -13,7 +13,8 @@ class CommandRegistry {
             new \StackFormation\Command\DeleteCommand(),
             new \StackFormation\Command\ShowParametersCommand(),
             new \StackFormation\Command\ShowTemplateCommand(),
-            new \StackFormation\Command\ShowOutputsCommand()
+            new \StackFormation\Command\ShowOutputsCommand(),
+            new \StackFormation\Command\TemplateDiffCommand()
         ];
     }
 
