@@ -18,24 +18,36 @@ class StackManager
 
     public function __construct()
     {
-        $region = getenv('AWS_DEFAULT_REGION');
-        if (empty($region)) {
-            throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
-        }
-
-        if (!getenv('AWS_ACCESS_KEY_ID')) {
-            throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var.');
-        }
-        if (!getenv('AWS_SECRET_ACCESS_KEY')) {
-            throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var.');
-        }
-
-        $this->sdk = new \Aws\Sdk([
-            'region' => $region,
-            'version' => 'latest'
-        ]);
-        $this->cfnClient = $this->sdk->createClient('CloudFormation');
         $this->config = new Config();
+    }
+
+    protected function getSdk() {
+        if (is_null($this->sdk)) {
+            $region = getenv('AWS_DEFAULT_REGION');
+            if (empty($region)) {
+                throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
+            }
+
+            if (!getenv('AWS_ACCESS_KEY_ID')) {
+                throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var.');
+            }
+            if (!getenv('AWS_SECRET_ACCESS_KEY')) {
+                throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var.');
+            }
+
+            $this->sdk = new \Aws\Sdk([
+                'region' => $region,
+                'version' => 'latest'
+            ]);
+        }
+        return $this->sdk;
+    }
+
+    protected function getCfnClient() {
+        if (is_null($this->cfnClient)) {
+            $this->cfnClient = $this->getSdk()->createClient('CloudFormation');
+        }
+        return $this->cfnClient;
     }
 
     /**
@@ -49,7 +61,7 @@ class StackManager
     public function getParameters($stackName, $key = null)
     {
         if (!isset($this->parametersCache[$stackName])) {
-            $res = $this->cfnClient->describeStacks([
+            $res = $this->getCfnClient()->describeStacks([
                 'StackName' => $stackName,
             ]);
             $parameters = [];
@@ -78,7 +90,7 @@ class StackManager
     public function getOutputs($stackName, $key = null)
     {
         if (!isset($this->outputsCache[$stackName])) {
-            $res = $this->cfnClient->describeStacks([
+            $res = $this->getCfnClient()->describeStacks([
                 'StackName' => $stackName,
             ]);
             $outputs = [];
@@ -111,7 +123,7 @@ class StackManager
     {
         if (!isset($this->resourcesCache[$stackName])) {
 
-            $res = $this->cfnClient->describeStackResources([
+            $res = $this->getCfnClient()->describeStackResources([
                 'StackName' => $stackName,
             ]);
             $resources = [];
@@ -133,7 +145,7 @@ class StackManager
      * @return array
      */
     public function getStacksFromApi() {
-        $res = $this->cfnClient->listStacks([
+        $res = $this->getCfnClient()->listStacks([
             'StackStatusFilter' => explode('|', 'CREATE_IN_PROGRESS|CREATE_FAILED|CREATE_COMPLETE|ROLLBACK_IN_PROGRESS|ROLLBACK_FAILED|ROLLBACK_COMPLETE|DELETE_IN_PROGRESS|DELETE_FAILED|UPDATE_IN_PROGRESS|UPDATE_COMPLETE_CLEANUP_IN_PROGRESS|UPDATE_COMPLETE|UPDATE_ROLLBACK_IN_PROGRESS|UPDATE_ROLLBACK_FAILED|UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS|UPDATE_ROLLBACK_COMPLETE')
         ]);
         $stacks = [];
@@ -144,7 +156,7 @@ class StackManager
     }
 
     public function deleteStack($stackName) {
-        $res = $this->cfnClient->deleteStack([
+        $res = $this->getCfnClient()->deleteStack([
             'StackName' => $stackName,
         ]);
     }
@@ -165,7 +177,7 @@ class StackManager
     }
 
     public function getTemplate($stackName) {
-        $res = $this->cfnClient->getTemplate([ 'StackName' => $stackName]);
+        $res = $this->getCfnClient()->getTemplate([ 'StackName' => $stackName]);
         return $res->get("TemplateBody");
     }
 
@@ -191,11 +203,11 @@ class StackManager
         $stackStatus = $this->getStackStatus($stackName);
         if (strpos($stackName, 'IN_PROGRESS') !== false) {
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
-        } elseif ($stackStatus != 'DELETE_COMPLETE') {
-            $this->cfnClient->updateStack($arguments);
+        } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
+            $this->getCfnClient()->updateStack($arguments);
         } else {
             $arguments['OnFailure'] = $onFailure;
-            $this->cfnClient->createStack($arguments);
+            $this->getCfnClient()->createStack($arguments);
         }
     }
 
@@ -278,7 +290,7 @@ class StackManager
     }
 
     public function describeStackEvents($stackName) {
-        $res = $this->cfnClient->describeStackEvents([
+        $res = $this->getCfnClient()->describeStackEvents([
             'StackName' => $stackName,
         ]);
         $events = [];
