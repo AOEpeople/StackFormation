@@ -27,6 +27,7 @@ stacks:
 - Empty value: keep previous value (when updating existing stack)
 - Output lookup: `output:<stack>:<output>` -> output value
 - Resource lookup: `resource:<stack>:<logicalResource>` -> physical Id of that resource
+- Environment variable lookup: `env:<var>` -> value of environment variable 'var'
 
 Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
 one stacks to the input paramaters needed in another stack that sits on top of the first one without manually 
@@ -42,6 +43,19 @@ stacks:
         template: templates/stack2.template
         parameters:
             db: 'output:stack1-db:DatabaseRds'
+```
+
+### Effective stackname
+
+You can provide an effective stackname that can be different from the key in the `stacks.yml` file. You can use this to 
+include an environment variable in the stackname.
+
+Example
+```
+stacks:
+    build-x:
+        stackname: 'build-{env:BUILD_NUMBER}'
+        template: templates/deploy_build.template
 ```
 
 ### AWS SDK
@@ -85,6 +99,20 @@ will be converted to:
 ]]}
 ```
 
+### Include file content
+
+You can include content from a different file into a script. Use this is you have duplicate code that you need to embed into multiple 
+resource's UserData:
+
+Example:
+```
+#!/usr/bin/env bash
+
+###INCLUDE:../generic/includes/base.sh
+
+[...]
+```
+
 ### Commands
 
 - stack:list
@@ -94,7 +122,7 @@ will be converted to:
 
 ### PHP 
 
-Deploy a stack:
+Deploy a stack programmatically
 ```
 require_once __DIR__ . '/vendor/autoload.php';
 
