@@ -193,14 +193,16 @@ class StackManager
             throw new \InvalidArgumentException("Invalid value for onFailure parameter");
         }
 
+        $effectiveStackName = $this->config->getEffectiveStackName($stackName);
+
         $arguments = [
             'Capabilities' => ['CAPABILITY_IAM'],
-            'StackName' => $stackName,
+            'StackName' => $effectiveStackName,
             'Parameters' => $this->getParametersFromConfig($stackName),
             'TemplateBody' => $this->getPreprocessedTemplate($stackName)
         ];
 
-        $stackStatus = $this->getStackStatus($stackName);
+        $stackStatus = $this->getStackStatus($effectiveStackName);
         if (strpos($stackName, 'IN_PROGRESS') !== false) {
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
@@ -321,6 +323,11 @@ class StackManager
                     $tmp['ParameterValue'] = $this->getOutputs($matches[1], $matches[2]);
                 } elseif (preg_match('/resource:(.*):(.*)/', $parameterValue, $matches)) {
                     $tmp['ParameterValue'] = $this->getResources($matches[1], $matches[2]);
+                } elseif (preg_match('/env:(.*)/', $parameterValue, $matches)) {
+                    if (!getenv($matches[1])) {
+                        throw new \Exception("Environment variable '{$matches[1]}' not found");
+                    }
+                    $tmp['ParameterValue'] = getenv($matches[1]);
                 } else {
                     $tmp['ParameterValue'] = $parameterValue;
                 }
@@ -328,6 +335,10 @@ class StackManager
             $parameters[] = $tmp;
         }
         return $parameters;
+    }
+
+    public function getConfig() {
+        return $this->config;
     }
 
 }

@@ -27,19 +27,7 @@ class ObserveCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        if (empty($stack)) {
-            $dialog = $this->getHelper('dialog');
-            /* @var $dialog \Symfony\Component\Console\Helper\DialogHelper */
-            $stacksFromApi = array_keys($this->stackManager->getStacksFromApi());
-
-            $stack = $dialog->select(
-                $output,
-                'Please select the stack you want to observe',
-                $stacksFromApi
-            );
-            $input->setArgument('stack', $stacksFromApi[$stack]);
-        }
+        $this->interact_askForLiveStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

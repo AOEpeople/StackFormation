@@ -17,8 +17,8 @@ class ShowTemplateCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('stack:show-template')
-            ->setDescription('Show Preprocessed Template')
+            ->setName('stack:template')
+            ->setDescription('Preview preprocessed local template')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
@@ -28,19 +28,7 @@ class ShowTemplateCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        if (empty($stack)) {
-            $dialog = $this->getHelper('dialog');
-            /* @var $dialog \Symfony\Component\Console\Helper\DialogHelper */
-            $stacksFromConfig = $this->config->getStacknames();
-
-            $stack = $dialog->select(
-                $output,
-                'Please select the stack you want to deploy',
-                $stacksFromConfig
-            );
-            $input->setArgument('stack', $stacksFromConfig[$stack]);
-        }
+        $this->interact_askForConfigStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

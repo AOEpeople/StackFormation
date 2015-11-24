@@ -30,13 +30,37 @@ class Preprocessor {
                 throw new \Exception("File $file not found");
             }
 
-            $result = ' {"Fn::Join": ["", ' . json_encode(file($file), JSON_PRETTY_PRINT) . ']}';
+            $fileContent = file_get_contents($file);
+            $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
+
+            $lines = explode("\n", $fileContent);
+            foreach ($lines as &$line) {
+                $line .= "\n";
+            }
+
+            $result = ' {"Fn::Join": ["", ' . json_encode($lines, JSON_PRETTY_PRINT) . ']}';
 
             $whitespace = trim($matches[1], "\n");
             $result = str_replace("\n", "\n".$whitespace, $result);
 
             return $matches[1] . $matches[2] . $result;
         }, $jsonString);
+    }
+
+    public function injectInclude($string, $basePath) {
+        return preg_replace_callback('/###INCLUDE:(.+)/', function(array $matches) use ($basePath) {
+            $file = $basePath . '/' . $matches[1];
+            if (!is_file($file)) {
+                throw new \Exception("File $file not found");
+            }
+
+            $fileContent = file_get_contents($file);
+
+            $fileContent = preg_replace('/\#\!.*/', '', $fileContent);
+            $fileContent = trim($fileContent);
+
+            return $fileContent;
+        }, $string);
     }
 
     public function replaceRef($jsonString) {

@@ -11,14 +11,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DeleteCommand extends AbstractCommand
+class ShowLocalCommand extends AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:delete')
-            ->setDescription('Delete Stack')
+            ->setName('stack:show-local')
+            ->setDescription('Show parameters from local configuration (resolving \'output:*:*\', \'resource:*:*\' and \'env:*\')')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
@@ -28,26 +28,22 @@ class DeleteCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interact_askForLiveStack($input, $output);
-
-        $stack = $input->getArgument('stack');
-
-        $dialog = $this->getHelper('dialog');
-        $confirmed = $dialog->askConfirmation(
-            $output,
-            "Are you sure you want to delete '$stack'? [y/N] ",
-            false
-        );
-        if (!$confirmed) {
-            throw new \Exception('Operation aborted');
-        }
+        $this->interact_askForConfigStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
-        $this->stackManager->deleteStack($stack);
-        $output->writeln("Triggered deletion of stack '$stack'.");
+        $output->writeln("Stack '$stack':");
+
+        $parameters = $this->stackManager->getParametersFromConfig($stack);
+
+        $table = $this->getHelper('table');
+        $table
+            ->setHeaders(array('Key', 'Value'))
+            ->setRows($parameters)
+        ;
+        $table->render($output);
     }
 
 }

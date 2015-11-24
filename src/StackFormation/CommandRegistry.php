@@ -11,9 +11,9 @@ class CommandRegistry {
             new \StackFormation\Command\ListCommand(),
             new \StackFormation\Command\ObserveCommand(),
             new \StackFormation\Command\DeleteCommand(),
-            new \StackFormation\Command\ShowParametersCommand(),
+            new \StackFormation\Command\ShowLocalCommand(),
             new \StackFormation\Command\ShowTemplateCommand(),
-            new \StackFormation\Command\ShowOutputsCommand(),
+            new \StackFormation\Command\ShowLiveCommand(),
             new \StackFormation\Command\TemplateDiffCommand()
         ];
     }

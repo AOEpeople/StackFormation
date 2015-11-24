@@ -21,43 +21,32 @@ class DeployCommand extends AbstractCommand
             ->setDescription('Deploy Stack')
             ->addArgument(
                 'stack',
-                InputArgument::IS_ARRAY | InputArgument::REQUIRED,
+                InputArgument::REQUIRED,
                 'Stack'
             );
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $stacks = $input->getArgument('stack');
-        if (count($stacks) == 0) {
-            $dialog = $this->getHelper('dialog');
-            /* @var $dialog \Symfony\Component\Console\Helper\DialogHelper */
-            $stacksFromConfig = $this->config->getStacknames();
-
-            $stack = $dialog->select(
-                $output,
-                'Please select the stack you want to deploy',
-                $stacksFromConfig
-            );
-            $input->setArgument('stack', [$stacksFromConfig[$stack]]);
-        }
+        $this->interact_askForConfigStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stacks = $input->getArgument('stack');
-        foreach ($stacks as $stack) {
-            try {
-                $this->stackManager->deployStack($stack, 'DO_NOTHING'); // TODO: expose to option
-                $output->writeln("Triggered deployment of stack '$stack'.");
-                $output->writeln("Run this is you want to observe the stack creation/update:");
-                $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stack");
-            } catch (\Aws\CloudFormation\Exception\CloudFormationException $exception) {
-                if (strpos($exception->getMessage(), 'No updates are to be performed.') !== false) {
-                    $output->writeln("No updates are to be performed for stack '$stack'");
-                } else {
-                    throw $exception;
-                }
+        $stack = $input->getArgument('stack');
+        try {
+            $this->stackManager->deployStack($stack, 'DO_NOTHING'); // TODO: expose to option
+
+            $stack = $this->stackManager->getConfig()->getEffectiveStackName($stack);
+
+            $output->writeln("Triggered deployment of stack '$stack'.");
+            $output->writeln("Run this is you want to observe the stack creation/update:");
+            $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stack");
+        } catch (\Aws\CloudFormation\Exception\CloudFormationException $exception) {
+            if (strpos($exception->getMessage(), 'No updates are to be performed.') !== false) {
+                $output->writeln("No updates are to be performed for stack '$stack'");
+            } else {
+                throw $exception;
             }
         }
     }
