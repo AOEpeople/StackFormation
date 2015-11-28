@@ -313,26 +313,29 @@ class StackManager
         $stackConfig = $this->config->getStackConfig($stackName);
 
         $parameters = [];
-        foreach ($stackConfig['parameters'] as $parameterKey => $parameterValue) {
-            $tmp = ['ParameterKey' => $parameterKey];
-            if (is_null($parameterValue)) {
-                $tmp['UsePreviousValue'] = true;
-            } else {
-                $matches = [];
-                if (preg_match('/output:(.*):(.*)/', $parameterValue, $matches)) {
-                    $tmp['ParameterValue'] = $this->getOutputs($matches[1], $matches[2]);
-                } elseif (preg_match('/resource:(.*):(.*)/', $parameterValue, $matches)) {
-                    $tmp['ParameterValue'] = $this->getResources($matches[1], $matches[2]);
-                } elseif (preg_match('/env:(.*)/', $parameterValue, $matches)) {
-                    if (!getenv($matches[1])) {
-                        throw new \Exception("Environment variable '{$matches[1]}' not found");
-                    }
-                    $tmp['ParameterValue'] = getenv($matches[1]);
+
+        if (isset($stackConfig['parameters'])) {
+            foreach ($stackConfig['parameters'] as $parameterKey => $parameterValue) {
+                $tmp = ['ParameterKey' => $parameterKey];
+                if (is_null($parameterValue)) {
+                    $tmp['UsePreviousValue'] = true;
                 } else {
-                    $tmp['ParameterValue'] = $parameterValue;
+                    $matches = [];
+                    if (preg_match('/output:(.*):(.*)/', $parameterValue, $matches)) {
+                        $tmp['ParameterValue'] = $this->getOutputs($matches[1], $matches[2]);
+                    } elseif (preg_match('/resource:(.*):(.*)/', $parameterValue, $matches)) {
+                        $tmp['ParameterValue'] = $this->getResources($matches[1], $matches[2]);
+                    } elseif (preg_match('/env:(.*)/', $parameterValue, $matches)) {
+                        if (!getenv($matches[1])) {
+                            throw new \Exception("Environment variable '{$matches[1]}' not found");
+                        }
+                        $tmp['ParameterValue'] = getenv($matches[1]);
+                    } else {
+                        $tmp['ParameterValue'] = $parameterValue;
+                    }
                 }
+                $parameters[] = $tmp;
             }
-            $parameters[] = $tmp;
         }
         return $parameters;
     }
