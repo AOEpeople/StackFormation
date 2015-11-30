@@ -27,6 +27,7 @@ stacks:
 - Empty value: keep previous value (when updating existing stack)
 - Output lookup: `output:<stack>:<output>` -> output value
 - Resource lookup: `resource:<stack>:<logicalResource>` -> physical Id of that resource
+- Parameter lookup: `parameter:<stack>:<logicalResource>` -> parameter value (note that some parameters will not be shown if they're 'no_echo')
 - Environment variable lookup: `env:<var>` -> value of environment variable 'var'
 
 Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
@@ -42,7 +43,8 @@ stacks:
     stack2-app:
         template: templates/stack2.template
         parameters:
-            db: 'output:stack1-db:DatabaseRds'
+            build: 's3://{output:stack1:bucketName}/{env:BUILD}/build.tar.gz'
+            db: '{output:stack1-db:DatabaseRds}'
 ```
 
 ### Effective stackname

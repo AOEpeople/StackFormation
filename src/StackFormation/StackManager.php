@@ -308,6 +308,34 @@ class StackManager
         return array_reverse($events, true);
     }
 
+    public function resolvePlaceholders($string) {
+
+        // {env:...}
+        $string = preg_replace_callback('/\{env:(.*?)\}/', function($matches) {
+            if (!getenv($matches[1])) {
+                throw new \Exception("Environment variable '{$matches[1]}' not found");
+            }
+            return getenv($matches[1]);
+        }, $string);
+
+        // {output:...:...}
+        $string = preg_replace_callback('/\{output:(.*?):(.*?)\}/', function($matches) {
+            return $this->getOutputs($matches[1], $matches[2]);
+        }, $string);
+
+        // {resource:...:...}
+        $string = preg_replace_callback('/\{resource:(.*?):(.*?)\}/', function($matches) {
+            return $this->getResources($matches[1], $matches[2]);
+        }, $string);
+
+        // {parameter:...:...}
+        $string = preg_replace_callback('/\{parameter:(.*?):(.*?)\}/', function($matches) {
+            return $this->getParameters($matches[1], $matches[2]);
+        }, $string);
+
+        return $string;
+    }
+
     public function getParametersFromConfig($stackName) {
 
         $stackConfig = $this->config->getStackConfig($stackName);
@@ -320,19 +348,7 @@ class StackManager
                 if (is_null($parameterValue)) {
                     $tmp['UsePreviousValue'] = true;
                 } else {
-                    $matches = [];
-                    if (preg_match('/output:(.*):(.*)/', $parameterValue, $matches)) {
-                        $tmp['ParameterValue'] = $this->getOutputs($matches[1], $matches[2]);
-                    } elseif (preg_match('/resource:(.*):(.*)/', $parameterValue, $matches)) {
-                        $tmp['ParameterValue'] = $this->getResources($matches[1], $matches[2]);
-                    } elseif (preg_match('/env:(.*)/', $parameterValue, $matches)) {
-                        if (!getenv($matches[1])) {
-                            throw new \Exception("Environment variable '{$matches[1]}' not found");
-                        }
-                        $tmp['ParameterValue'] = getenv($matches[1]);
-                    } else {
-                        $tmp['ParameterValue'] = $parameterValue;
-                    }
+                    $tmp['ParameterValue'] = $this->resolvePlaceholders($parameterValue);
                 }
                 $parameters[] = $tmp;
             }
