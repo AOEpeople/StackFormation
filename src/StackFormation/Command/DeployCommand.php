@@ -37,15 +37,27 @@ class DeployCommand extends AbstractCommand
         try {
             $this->stackManager->deployStack($stack, 'DO_NOTHING'); // TODO: expose to option
 
-            $stack = $this->stackManager->getConfig()->getEffectiveStackName($stack);
+            $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
 
-            $output->writeln("Triggered deployment of stack '$stack'.");
+            $output->writeln("Triggered deployment of stack '$effectiveStackName'.");
             $output->writeln("Run this if you want to observe the stack creation/update:");
-            $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stack");
+            $output->writeln("{$GLOBALS['argv'][0]} stack:observe $effectiveStackName");
         } catch (\Aws\CloudFormation\Exception\CloudFormationException $exception) {
-            if (strpos($exception->getMessage(), 'No updates are to be performed.') !== false) {
+            $message = (string)$exception->getResponse()->getBody();
+            if (strpos($message, 'No updates are to be performed.') !== false) {
                 $output->writeln("No updates are to be performed for stack '$stack'");
             } else {
+                $xml = simplexml_load_string($message);
+                if ($xml !== false && $xml->Error->Message) {
+                    $formatter = new \Symfony\Component\Console\Helper\FormatterHelper();
+                    $formattedBlock = $formatter->formatBlock([
+                        'Error!',
+                        $xml->Error->Message,
+                        'File: ' . $this->stackManager->getConfig()->getStackConfig($stack)['template']
+                    ], 'error', true);
+                    $output->writeln($formattedBlock);
+                    return 1; // exit code
+                }
                 throw $exception;
             }
         }
