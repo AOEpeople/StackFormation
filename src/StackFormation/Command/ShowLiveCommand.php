@@ -37,7 +37,7 @@ class ShowLiveCommand extends AbstractCommand
         $output->writeln("Stack '$stack':");
 
 
-
+        $output->writeln('');
         $output->writeln("=== PARAMETERS ===");
 
         $outputs = $this->stackManager->getParameters($stack);
@@ -55,6 +55,24 @@ class ShowLiveCommand extends AbstractCommand
         $table->render($output);
 
 
+        $output->writeln('');
+        $output->writeln("=== RESOURCES ===");
+
+        $resources = $this->stackManager->getResources($stack);
+
+        $rows = [];
+        foreach ($resources as $key => $value) {
+            $rows[] = [$key, $value];
+        }
+
+        $table = $this->getHelper('table');
+        $table
+            ->setHeaders(array('Key', 'Value'))
+            ->setRows($rows)
+        ;
+        $table->render($output);
+
+        $output->writeln('');
         $output->writeln("=== OUTPUTS ===");
 
         $outputs = $this->stackManager->getOutputs($stack);

@@ -40,7 +40,7 @@ class DeployCommand extends AbstractCommand
             $stack = $this->stackManager->getConfig()->getEffectiveStackName($stack);
 
             $output->writeln("Triggered deployment of stack '$stack'.");
-            $output->writeln("Run this is you want to observe the stack creation/update:");
+            $output->writeln("Run this if you want to observe the stack creation/update:");
             $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stack");
         } catch (\Aws\CloudFormation\Exception\CloudFormationException $exception) {
             if (strpos($exception->getMessage(), 'No updates are to be performed.') !== false) {
