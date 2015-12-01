@@ -56,7 +56,7 @@ class DeleteCommand extends AbstractCommand
             $output->writeln("No stacks deleted.");
         }
         foreach ($stacks as $stack) {
-            //$this->stackManager->deleteStack($stack);
+            $this->stackManager->deleteStack($stack);
             $output->writeln("Triggered deletion of stack '$stack'.");
         }
     }
