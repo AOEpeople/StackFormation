@@ -8,6 +8,7 @@ class StackManager
     protected $parametersCache = [];
     protected $outputsCache = [];
     protected $resourcesCache = [];
+    protected $tagsCache = [];
 
     protected $config;
     
@@ -82,6 +83,38 @@ class StackManager
             return $this->outputsCache[$stackName][$key];
         }
         return $this->outputsCache[$stackName];
+    }
+
+    /**
+     * Get output values for stack
+     *
+     * @param $stackName
+     * @param null $key
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getTags($stackName, $key = null)
+    {
+        if (!isset($this->tagsCache[$stackName])) {
+            $res = $this->getCfnClient()->describeStacks([
+                'StackName' => $stackName,
+            ]);
+            $outputs = [];
+            $res = $res->search('Stacks[0].Tags');
+            if (is_array($res)) {
+                foreach ($res as $output) {
+                    $outputs[$output['Key']] = $output['Value'];
+                }
+            }
+            $this->tagsCache[$stackName] = $outputs;
+        }
+        if (!is_null($key)) {
+            if (!isset($this->tagsCache[$stackName][$key])) {
+                throw new \Exception("Key '$key' not found");
+            }
+            return $this->tagsCache[$stackName][$key];
+        }
+        return $this->tagsCache[$stackName];
     }
 
     /**
@@ -181,9 +214,11 @@ class StackManager
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
             $this->getCfnClient()->updateStack($arguments);
         } else {
+            $arguments['Tags'] = $this->config->getStackTags($stackName);
             $arguments['OnFailure'] = $onFailure;
             $this->getCfnClient()->createStack($arguments);
         }
+
     }
 
     public function observeStackActivity(
