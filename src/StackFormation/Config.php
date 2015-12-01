@@ -40,12 +40,27 @@ class Config
         if (!empty($stackConfig['stackname'])) {
             $stackName = $stackConfig['stackname'];
         }
+        return $this->resolvePlaceholders($stackName);
+    }
+
+    public function resolvePlaceholders($string) {
         return preg_replace_callback('/\{env:(.*)\}/', function($matches) {
             if (!getenv($matches[1])) {
                 throw new \Exception("Environment variable '{$matches[1]}' not found");
             }
             return getenv($matches[1]);
-        }, $stackName);
+        }, $string);
+    }
+
+    public function getStackTags($stackName) {
+        $tags = [];
+        $stackConfig = $this->getStackConfig($stackName);
+        if (isset($stackConfig['tags'])) {
+            foreach ($stackConfig['tags'] as $key => $value) {
+                $tags[] = ['Key' => $key, 'Value' => $this->resolvePlaceholders($value)];
+            }
+        }
+        return $tags;
     }
 
     public function getStackLabels() {
