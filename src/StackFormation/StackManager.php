@@ -256,26 +256,38 @@ class StackManager
 
             $table = new \Symfony\Component\Console\Helper\Table($output);
             $table->setRows($rows);
-            $renderedTable = $table->render();
-            $output->write($renderedTable);
+            $table->render();
 
         } while (strpos($status, 'IN_PROGRESS') !== false);
 
         $formatter = new \Symfony\Component\Console\Helper\FormatterHelper();
         if (strpos($status, 'FAILED') !== false) {
-            $formattedBlock = $formatter->formatBlock(['Error!', 'Status: ' . $status], 'error');
+            $formattedBlock = $formatter->formatBlock(['Error!', 'Status: ' . $status], 'error', true);
         } else {
-            $formattedBlock = $formatter->formatBlock(['Completed', 'Status: ' . $status], 'info');
+            $formattedBlock = $formatter->formatBlock(['Completed', 'Status: ' . $status], 'info', true);
         }
-        $output->writeln($formattedBlock);
+        $output->writeln("\n\n$formattedBlock\n\n");
 
-        // TODO: make this a table
-        $outputs = $this->getOutputs($stackName);
-        if (is_array($outputs)) {
+        
+        $output->writeln("== OUTPUTS ==");
+        try {
+            $outputs = $this->getOutputs($stackName);
+
+            $rows = [];
             foreach ($outputs as $key => $value) {
-                printf("%30s: %s\n", $key, $value);
+                $value = strlen($value) > 100 ? substr($value, 0, 100) . "..." : $value;
+                $rows[] = [$key, $value];
             }
+
+            $table = new \Symfony\Component\Console\Helper\Table($output);
+            $table
+                ->setHeaders(array('Key', 'Value'))
+                ->setRows($rows);
+            $table->render();
+        } catch(\Exception $e) {
+            // never mind...
         }
+
     }
 
     protected function decorateStatus($status) {
