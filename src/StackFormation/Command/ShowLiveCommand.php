@@ -38,12 +38,32 @@ class ShowLiveCommand extends AbstractCommand
 
 
         $output->writeln('');
+        $output->writeln("=== STACK TAGS ===");
+
+        $tags = $this->stackManager->getTags($stack);
+
+        $rows = [];
+        foreach ($tags as $key => $value) {
+            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
+            $rows[] = [$key, $value];
+        }
+
+        $table = new \Symfony\Component\Console\Helper\Table($output);
+        $table
+            ->setHeaders(array('Key', 'Value'))
+            ->setRows($rows)
+        ;
+        $table->render();
+
+
+        $output->writeln('');
         $output->writeln("=== PARAMETERS ===");
 
         $outputs = $this->stackManager->getParameters($stack);
 
         $rows = [];
         foreach ($outputs as $key => $value) {
+            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
             $rows[] = [$key, $value];
         }
 
@@ -62,6 +82,7 @@ class ShowLiveCommand extends AbstractCommand
 
         $rows = [];
         foreach ($resources as $key => $value) {
+            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
             $rows[] = [$key, $value];
         }
 
@@ -79,6 +100,7 @@ class ShowLiveCommand extends AbstractCommand
 
         $rows = [];
         foreach ($outputs as $key => $value) {
+            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
             $rows[] = [$key, $value];
         }
 
