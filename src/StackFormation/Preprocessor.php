@@ -20,7 +20,16 @@ class Preprocessor {
         $markers = array(
             '###TIMESTAMP###' => date(\DateTime::ISO8601),
         );
-        return str_replace(array_keys($markers), array_values($markers), $json);
+        $json = str_replace(array_keys($markers), array_values($markers), $json);
+
+        $json = preg_replace_callback('/###ENV:([^#:]+)###/', function($matches) {
+            if (!getenv($matches[1])) {
+                throw new \Exception("Environment variable '{$matches[1]}' not found");
+            }
+            return getenv($matches[1]);
+        }, $json);
+
+        return $json;
     }
 
     public function injectFilecontent($jsonString, $basePath) {
