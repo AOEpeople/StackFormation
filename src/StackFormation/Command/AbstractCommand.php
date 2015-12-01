@@ -68,4 +68,29 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
+    protected function extractMessage(\Aws\CloudFormation\Exception\CloudFormationException $exception) {
+        $message = (string)$exception->getResponse()->getBody();
+        $xml = simplexml_load_string($message);
+        if ($xml !== false && $xml->Error->Message) {
+            return $xml->Error->Message;
+        }
+        return $exception->getMessage();
+    }
+
+    public function run(InputInterface $input, OutputInterface $output) {
+        try {
+            return parent::run($input, $output);
+        } catch (\Aws\CloudFormation\Exception\CloudFormationException $exception) {
+            $message = $this->extractMessage($exception);
+            if (strpos($message, 'No updates are to be performed.') !== false) {
+                $output->writeln('No updates are to be performed.');
+            } else {
+                $formatter = new \Symfony\Component\Console\Helper\FormatterHelper();
+                $formattedBlock = $formatter->formatBlock(['[CloudFormationException]', '', $message], 'error', true);
+                $output->writeln("\n\n$formattedBlock\n\n");
+                return 1; // exit code
+            }
+        }
+    }
+
 }
