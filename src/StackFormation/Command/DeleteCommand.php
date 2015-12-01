@@ -2,14 +2,10 @@
 
 namespace StackFormation\Command;
 
-use StackFormation\Config;
-use StackFormation\Command\AbstractCommand;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class DeleteCommand extends AbstractCommand
 {
@@ -32,13 +28,10 @@ class DeleteCommand extends AbstractCommand
 
         $stack = $input->getArgument('stack');
 
-        $dialog = $this->getHelper('dialog');
-        $confirmed = $dialog->askConfirmation(
-            $output,
-            "Are you sure you want to delete '$stack'? [y/N] ",
-            false
-        );
-        if (!$confirmed) {
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion("Are you sure you want to delete '$stack'? [y/N] ", false);
+
+        if (!$helper->ask($input, $output, $question)) {
             throw new \Exception('Operation aborted');
         }
     }

@@ -2,16 +2,10 @@
 
 namespace StackFormation\Command;
 
-use StackFormation\Config;
-use StackFormation\Command\AbstractCommand;
-use StackFormation\Poller;
 use StackFormation\Route53Manager;
 use StackFormation\StackManager;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class UpdateRoute53AliasCommand extends AbstractCommand
@@ -63,7 +57,7 @@ class UpdateRoute53AliasCommand extends AbstractCommand
         $output->writeln("Polling (Change Id: $changeId)");
 
         $result = '';
-        Poller::poll(function() use ($changeId, $output, &$result) {
+        \StackFormation\Poller::poll(function() use ($changeId, $output, &$result) {
             $result = $this->route53Manager->getChange($changeId);
             $output->write('.');
             return ($result != 'PENDING');
