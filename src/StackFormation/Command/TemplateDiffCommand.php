@@ -35,7 +35,8 @@ class TemplateDiffCommand extends AbstractCommand
     {
         $stack = $input->getArgument('stack');
 
-        $live = trim($this->stackManager->getTemplate($stack));
+        $effectiveStackName = $this->config->getEffectiveStackName($stack);
+        $live = trim($this->stackManager->getTemplate($effectiveStackName));
         $file_live = tempnam(sys_get_temp_dir(), 'sfn_live_');
         file_put_contents($file_live, $live);
 
