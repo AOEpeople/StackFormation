@@ -268,7 +268,7 @@ class StackManager
         }
         $output->writeln("\n\n$formattedBlock\n\n");
 
-        
+
         $output->writeln("== OUTPUTS ==");
         try {
             $outputs = $this->getOutputs($stackName);
