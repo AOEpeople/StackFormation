@@ -8,46 +8,19 @@ class StackManager
     protected $parametersCache = [];
     protected $outputsCache = [];
     protected $resourcesCache = [];
-    protected $sdk;
+
     protected $config;
     
-    /**
-     * @var \Aws\CloudFormation\CloudFormationClient
-     */
-    protected $cfnClient;
-
     public function __construct()
     {
         $this->config = new Config();
     }
 
-    protected function getSdk() {
-        if (is_null($this->sdk)) {
-            $region = getenv('AWS_DEFAULT_REGION');
-            if (empty($region)) {
-                throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
-            }
-
-            if (!getenv('AWS_ACCESS_KEY_ID')) {
-                throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var.');
-            }
-            if (!getenv('AWS_SECRET_ACCESS_KEY')) {
-                throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var.');
-            }
-
-            $this->sdk = new \Aws\Sdk([
-                'region' => $region,
-                'version' => 'latest'
-            ]);
-        }
-        return $this->sdk;
-    }
-
+    /**
+     * @return \Aws\CloudFormation\CloudFormationClient
+     */
     protected function getCfnClient() {
-        if (is_null($this->cfnClient)) {
-            $this->cfnClient = $this->getSdk()->createClient('CloudFormation');
-        }
-        return $this->cfnClient;
+        return SdkFactory::getCfnClient();
     }
 
     /**

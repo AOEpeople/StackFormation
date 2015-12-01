@@ -14,7 +14,8 @@ class CommandRegistry {
             new \StackFormation\Command\ShowLocalCommand(),
             new \StackFormation\Command\ShowTemplateCommand(),
             new \StackFormation\Command\ShowLiveCommand(),
-            new \StackFormation\Command\TemplateDiffCommand()
+            new \StackFormation\Command\TemplateDiffCommand(),
+            new \StackFormation\Command\UpdateRoute53AliasCommand()
         ];
     }
 

@@ -38,12 +38,12 @@ class ShowLocalCommand extends AbstractCommand
 
         $parameters = $this->stackManager->getParametersFromConfig($stack);
 
-        $table = $this->getHelper('table');
+        $table = new \Symfony\Component\Console\Helper\Table($output);
         $table
             ->setHeaders(array('Key', 'Value'))
             ->setRows($parameters)
         ;
-        $table->render($output);
+        $table->render();
     }
 
 }

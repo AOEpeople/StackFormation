@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 abstract class AbstractCommand extends Command
 {
@@ -36,16 +37,15 @@ abstract class AbstractCommand extends Command
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
-            $dialog = $this->getHelper('dialog');
-            /* @var $dialog \Symfony\Component\Console\Helper\DialogHelper */
-            $stacksFromConfig = $this->config->getStackLabels();
+            $helper = $this->getHelper('question');
+            $question = new ChoiceQuestion('Please select a stack', $this->config->getStackLabels());
 
-            $stack = $dialog->select(
-                $output,
-                'Please select a stack',
-                $stacksFromConfig
-            );
-            list($stackName) = explode(' ', $stacksFromConfig[$stack]);
+            $question->setErrorMessage('Stack %s is invalid.');
+
+            $stack = $helper->ask($input, $output, $question);
+            $output->writeln('Selected Stack: '.$stack);
+
+            list($stackName) = explode(' ', $stack);
             $input->setArgument('stack', $stackName);
         }
         return $stack;
@@ -54,16 +54,15 @@ abstract class AbstractCommand extends Command
     public function interact_askForLiveStack(InputInterface $input, OutputInterface $output) {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
-            $dialog = $this->getHelper('dialog');
-            /* @var $dialog \Symfony\Component\Console\Helper\DialogHelper */
-            $stacksFromApi = array_keys($this->stackManager->getStacksFromApi());
+            $helper = $this->getHelper('question');
+            $question = new ChoiceQuestion('Please select a stack', array_keys($this->stackManager->getStacksFromApi()));
 
-            $stack = $dialog->select(
-                $output,
-                'Please select a stack',
-                $stacksFromApi
-            );
-            $input->setArgument('stack', $stacksFromApi[$stack]);
+            $question->setErrorMessage('Stack %s is invalid.');
+
+            $stack = $helper->ask($input, $output, $question);
+            $output->writeln('Selected Stack: '.$stack);
+
+            $input->setArgument('stack', $stack);
         }
         return $stack;
     }

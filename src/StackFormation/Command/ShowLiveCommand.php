@@ -47,12 +47,12 @@ class ShowLiveCommand extends AbstractCommand
             $rows[] = [$key, $value];
         }
 
-        $table = $this->getHelper('table');
+        $table = new \Symfony\Component\Console\Helper\Table($output);
         $table
             ->setHeaders(array('Key', 'Value'))
             ->setRows($rows)
         ;
-        $table->render($output);
+        $table->render();
 
 
         $output->writeln('');
@@ -65,12 +65,12 @@ class ShowLiveCommand extends AbstractCommand
             $rows[] = [$key, $value];
         }
 
-        $table = $this->getHelper('table');
+        $table = new \Symfony\Component\Console\Helper\Table($output);
         $table
             ->setHeaders(array('Key', 'Value'))
             ->setRows($rows)
         ;
-        $table->render($output);
+        $table->render();
 
         $output->writeln('');
         $output->writeln("=== OUTPUTS ===");
@@ -82,11 +82,11 @@ class ShowLiveCommand extends AbstractCommand
             $rows[] = [$key, $value];
         }
 
-        $table = $this->getHelper('table');
+        $table = new \Symfony\Component\Console\Helper\Table($output);
         $table
             ->setHeaders(array('Key', 'Value'))
             ->setRows($rows)
         ;
-        $table->render($output);
+        $table->render();
     }
 }

@@ -29,12 +29,12 @@ class ListCommand extends AbstractCommand
             $rows[] = [$stackName, $details['Status']];
         }
 
-        $table = $this->getHelper('table');
+        $table = new \Symfony\Component\Console\Helper\Table($output);
         $table
             ->setHeaders(array('Name', 'Status'))
             ->setRows($rows)
         ;
-        $table->render($output);
+        $table->render();
     }
 
 }
