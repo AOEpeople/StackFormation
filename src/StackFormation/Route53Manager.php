@@ -45,7 +45,7 @@ class Route53Manager
 
         list($elbDNSName, $elbCanonicalHostedZoneNameID) = $this->getElbInfo($elb);
 
-        $res = $this->getRoute53Client()->changeResourceRecordSets([
+        $data = [
             'HostedZoneId' => $hostedZoneId,
             'ChangeBatch' => [
                 'Comment' => 'Updated via StackFormation ('.date(DATE_ISO8601).')',
@@ -66,7 +66,9 @@ class Route53Manager
                     ],
                 ],
             ],
-        ]);
+        ];
+
+        $res = $this->getRoute53Client()->changeResourceRecordSets($data);
 
         return end(explode('/', $res->search('ChangeInfo.Id')));
     }

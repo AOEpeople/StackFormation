@@ -33,8 +33,8 @@ class Preprocessor {
     }
 
     public function injectFilecontent($jsonString, $basePath) {
-        return preg_replace_callback('/(\s*)(.*){\s*"Fn::FileContent"\s*:\s*"(.+?)"\s*}/', function(array $matches) use ($basePath) {
-            $file = $basePath . '/' . $matches[3];
+        return preg_replace_callback('/(\s*)(.*){\s*"Fn::FileContent(TrimLines)?"\s*:\s*"(.+?)"\s*}/', function(array $matches) use ($basePath) {
+            $file = $basePath . '/' . end($matches);
             if (!is_file($file)) {
                 throw new \Exception("File $file not found");
             }
@@ -43,11 +43,17 @@ class Preprocessor {
             $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
 
             $lines = explode("\n", $fileContent);
-            foreach ($lines as &$line) {
+            foreach ($lines as $key => &$line) {
+                if ($matches[3] == 'TrimLines') {
+                    $line = trim($line);
+                    if (empty($line)) {
+                        unset($lines[$key]);
+                    }
+                }
                 $line .= "\n";
             }
 
-            $result = ' {"Fn::Join": ["", ' . json_encode($lines, JSON_PRETTY_PRINT) . ']}';
+            $result = ' {"Fn::Join": ["", ' . json_encode(array_values($lines), JSON_PRETTY_PRINT) . ']}';
 
             $whitespace = trim($matches[1], "\n");
             $result = str_replace("\n", "\n".$whitespace, $result);

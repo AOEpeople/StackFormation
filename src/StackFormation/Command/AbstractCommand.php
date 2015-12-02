@@ -85,14 +85,16 @@ abstract class AbstractCommand extends Command
             $input->setArgument('stack', $resolvedStacks);
         }
 
-        $except = $input->getOption('except');
-        if (!empty($except)) {
-            $stacks = $input->getArgument('stack');
-            if(($key = array_search($except, $stacks)) !== false) {
-                $output->writeln('Excluding stack: '.$stacks[$key]);
-                unset($stacks[$key]);
+        if ($multiple) {
+            $except = $input->getOption('except');
+            if (!empty($except)) {
+                $stacks = $input->getArgument('stack');
+                if (($key = array_search($except, $stacks)) !== false) {
+                    $output->writeln('Excluding stack: ' . $stacks[$key]);
+                    unset($stacks[$key]);
+                }
+                $input->setArgument('stack', $stacks);
             }
-            $input->setArgument('stack', $stacks);
         }
 
         return $stack;
