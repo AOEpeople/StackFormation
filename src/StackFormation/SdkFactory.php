@@ -15,11 +15,13 @@ class SdkFactory
                 throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
             }
 
-            if (!getenv('AWS_ACCESS_KEY_ID')) {
-                throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var.');
-            }
-            if (!getenv('AWS_SECRET_ACCESS_KEY')) {
-                throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var.');
+            if (!getenv('USE_INSTANCE_PROFILE')) {
+                if (!getenv('AWS_ACCESS_KEY_ID')) {
+                    throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var.');
+                }
+                if (!getenv('AWS_SECRET_ACCESS_KEY')) {
+                    throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var.');
+                }
             }
 
             self::$sdk = new \Aws\Sdk([
