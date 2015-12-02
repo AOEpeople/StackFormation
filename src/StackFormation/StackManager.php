@@ -226,6 +226,7 @@ class StackManager
         \Symfony\Component\Console\Output\OutputInterface $output,
         $pollInterval=10)
     {
+        $returnValue = 0;
         $printedEvents = [];
         $first = true;
         do {
@@ -236,7 +237,7 @@ class StackManager
             }
             $status = $this->getStackStatus($stackName);
 
-            $output->writeln("-> Polling... (Status: $status)");
+            $output->writeln("-> Polling... (Stack Status: $status)");
 
             $events = $this->describeStackEvents($stackName);
 
@@ -266,6 +267,11 @@ class StackManager
         } else {
             $formattedBlock = $formatter->formatBlock(['Completed', 'Status: ' . $status], 'info', true);
         }
+
+        if (!in_array($status, ['CREATE_COMPLETE', 'UPDATE_COMPLETE'])) {
+            $returnValue = 1;
+        }
+
         $output->writeln("\n\n$formattedBlock\n\n");
 
 
@@ -287,7 +293,7 @@ class StackManager
         } catch(\Exception $e) {
             // never mind...
         }
-
+        return $returnValue;
     }
 
     protected function decorateStatus($status) {
