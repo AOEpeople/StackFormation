@@ -39,8 +39,11 @@ class StackManager
                 'StackName' => $stackName,
             ]);
             $parameters = [];
-            foreach ($res->search('Stacks[0].Parameters') as $parameter) {
-                $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
+            $res = $res->search('Stacks[0].Parameters');
+            if (is_array($res)) {
+                foreach ($res as $parameter) {
+                    $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
+                }
             }
             $this->parametersCache[$stackName] = $parameters;
         }
