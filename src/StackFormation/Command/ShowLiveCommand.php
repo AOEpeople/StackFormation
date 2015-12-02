@@ -4,6 +4,7 @@ namespace StackFormation\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ShowLiveCommand extends AbstractCommand
@@ -18,6 +19,25 @@ class ShowLiveCommand extends AbstractCommand
                 'stack',
                 InputArgument::REQUIRED,
                 'Stack'
+            )
+            ->addArgument(
+                'section',
+                InputArgument::OPTIONAL,
+                'Section',
+                null
+            )
+            ->addArgument(
+                'key',
+                InputArgument::OPTIONAL,
+                'Key',
+                null
+            )
+            ->addOption(
+                'json',
+                null,
+                InputOption::VALUE_NONE,
+                'JSON Output',
+                null
             );
     }
 
@@ -28,82 +48,46 @@ class ShowLiveCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $asJSON = $input->getOption('json');
+
         $stack = $input->getArgument('stack');
-        $output->writeln("Stack '$stack':");
 
-
-        $output->writeln('');
-        $output->writeln("=== STACK TAGS ===");
-
-        $tags = $this->stackManager->getTags($stack);
-
-        $rows = [];
-        foreach ($tags as $key => $value) {
-            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
-            $rows[] = [$key, $value];
+        $sections = ['tags', 'parameters', 'resources', 'outputs'];
+        $section = array_filter(array_map('trim', explode(',', $input->getArgument('section'))));
+        if($section) {
+            $sections = array_intersect($sections, $section);
         }
 
-        $table = new \Symfony\Component\Console\Helper\Table($output);
-        $table
-            ->setHeaders(array('Key', 'Value'))
-            ->setRows($rows)
-        ;
-        $table->render();
+        $key = array_filter(array_map('trim', explode(',', $input->getArgument('key'))));
 
+        $outputData = [];
 
-        $output->writeln('');
-        $output->writeln("=== PARAMETERS ===");
-
-        $outputs = $this->stackManager->getParameters($stack);
-
-        $rows = [];
-        foreach ($outputs as $key => $value) {
-            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
-            $rows[] = [$key, $value];
+        foreach ($sections as $section) {
+            $data = $this->stackManager->{'get' . ucfirst($section)}($stack);
+            if ($key) {
+                $data = array_intersect_key($data, array_flip($key));
+            }
+            $outputData[$section] = $data;
         }
 
-        $table = new \Symfony\Component\Console\Helper\Table($output);
-        $table
-            ->setHeaders(array('Key', 'Value'))
-            ->setRows($rows)
-        ;
-        $table->render();
+        if ($asJSON) {
+            $output->writeln(json_encode($outputData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT));
+        } else {
+            $output->writeln("Stack '$stack':");
 
-
-        $output->writeln('');
-        $output->writeln("=== RESOURCES ===");
-
-        $resources = $this->stackManager->getResources($stack);
-
-        $rows = [];
-        foreach ($resources as $key => $value) {
-            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
-            $rows[] = [$key, $value];
+            foreach ($outputData as $section => $sectionData) {
+                $rows = [];
+                foreach ($sectionData as $k => $v) {
+                    $v = strlen($v) > 100 ? substr($v, 0, 100) . "..." : $v;
+                    $rows[] = [$k, $v];
+                }
+                $output->writeln('');
+                $output->writeln("=== " . strtoupper($section) . " ===");
+                $table = new \Symfony\Component\Console\Helper\Table($output);
+                $table->setHeaders(array('Key', 'Value'))
+                    ->setRows($rows)
+                    ->render();
+            }
         }
-
-        $table = new \Symfony\Component\Console\Helper\Table($output);
-        $table
-            ->setHeaders(array('Key', 'Value'))
-            ->setRows($rows)
-        ;
-        $table->render();
-
-        $output->writeln('');
-        $output->writeln("=== OUTPUTS ===");
-
-        $outputs = $this->stackManager->getOutputs($stack);
-
-        $rows = [];
-        foreach ($outputs as $key => $value) {
-            $value = strlen($value) > 100 ? substr($value, 0, 100)."..." : $value;
-            $rows[] = [$key, $value];
-        }
-
-        $table = new \Symfony\Component\Console\Helper\Table($output);
-        $table
-            ->setHeaders(array('Key', 'Value'))
-            ->setRows($rows)
-        ;
-        $table->render();
     }
 }
