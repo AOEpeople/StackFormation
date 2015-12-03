@@ -23,7 +23,7 @@ class DeployCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interact_askForConfigStack($input, $output);
+        $this->interactAskForConfigStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

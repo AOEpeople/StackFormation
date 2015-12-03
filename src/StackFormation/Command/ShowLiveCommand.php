@@ -44,7 +44,7 @@ class ShowLiveCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interact_askForLiveStack($input, $output);
+        $this->interactAskForLiveStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

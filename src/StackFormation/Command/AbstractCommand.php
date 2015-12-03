@@ -27,7 +27,7 @@ abstract class AbstractCommand extends Command
     }
 
 
-    protected function interact_askForConfigStack(InputInterface $input, OutputInterface $output)
+    protected function interactAskForConfigStack(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
@@ -46,7 +46,7 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
-    public function interact_askForLiveStack(InputInterface $input, OutputInterface $output, $multiple = false, $resolveWildcard = false)
+    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $multiple = false, $resolveWildcard = false)
     {
         $stack = $input->getArgument('stack');
         $choices = null;
