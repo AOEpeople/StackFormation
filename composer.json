@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "StackFormation\\": "src/"
+            "StackFormation\\": "src/StackFormation/"
         }
     },
     "bin": [
