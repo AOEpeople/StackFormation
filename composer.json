@@ -1,21 +1,32 @@
 {
-  "name": "aoepeople/stackformation",
-  "description": "Lightweight AWS CloudFormation Stack Manager",
-  "authors": [
-    {
-      "name": "Fabrizio Branca",
-      "email": "firstname.lastname@aoe.com"
-    }
-  ],
-  "require": {
-    "symfony/console": "*",
-    "symfony/yaml": "*",
-    "aws/aws-sdk-php": "^3.8"
-  },
-  "autoload": {
-    "psr-4": {
-      "": "src"
-    }
-  },
-  "bin": ["src/stackformation.php"]
+    "name": "aoepeople/stackformation",
+    "description": "Lightweight AWS CloudFormation Stack Manager",
+    "license": "OSL-3.0",
+    "authors": [
+        {
+            "name": "Fabrizio Branca",
+            "email": "firstname.lastname@aoe.com",
+            "homepage": "https://github.com/fbrnc",
+            "role": "Author"
+        },
+        {
+            "name": "Lee Saferite",
+            "email": "lee.saferite@aoe.com",
+            "homepage": "https://github.com/LeeSaferite",
+            "role": "Contributor"
+        }
+    ],
+    "require": {
+        "symfony/console": "*",
+        "symfony/yaml": "*",
+        "aws/aws-sdk-php": "^3.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src"
+        }
+    },
+    "bin": [
+        "src/stackformation.php"
+    ]
 }
