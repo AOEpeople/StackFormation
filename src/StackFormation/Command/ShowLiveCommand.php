@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command;
 
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -54,7 +55,7 @@ class ShowLiveCommand extends AbstractCommand
 
         $sections = ['tags', 'parameters', 'resources', 'outputs'];
         $section = array_filter(array_map('trim', explode(',', $input->getArgument('section'))));
-        if($section) {
+        if ($section) {
             $sections = array_intersect($sections, $section);
         }
 
@@ -83,8 +84,8 @@ class ShowLiveCommand extends AbstractCommand
                 }
                 $output->writeln('');
                 $output->writeln("=== " . strtoupper($section) . " ===");
-                $table = new \Symfony\Component\Console\Helper\Table($output);
-                $table->setHeaders(array('Key', 'Value'))
+                $table = new Table($output);
+                $table->setHeaders(['Key', 'Value'])
                     ->setRows($rows)
                     ->render();
             }

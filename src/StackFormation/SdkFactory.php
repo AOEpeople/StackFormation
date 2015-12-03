@@ -2,13 +2,16 @@
 
 namespace StackFormation;
 
+use Aws\Sdk;
+
 class SdkFactory
 {
     static $sdk;
 
-    static $clients=[];
+    static $clients = [];
 
-    public static function getSdk() {
+    public static function getSdk()
+    {
         if (is_null(self::$sdk)) {
             $region = getenv('AWS_DEFAULT_REGION');
             if (empty($region)) {
@@ -24,32 +27,39 @@ class SdkFactory
                 }
             }
 
-            self::$sdk = new \Aws\Sdk([
-                'region' => $region,
-                'version' => 'latest'
-            ]);
+            self::$sdk = new Sdk(
+                [
+                    'region'  => $region,
+                    'version' => 'latest',
+                ]
+            );
         }
+
         return self::$sdk;
     }
 
     /**
      * @param string $client
+     * @param array  $args
+     *
      * @return \Aws\AwsClientInterface
      * @throws \Exception
      */
-    public static function getClient($client, array $args = []) {
+    public static function getClient($client, array $args = [])
+    {
         $key = $client . serialize($args);
         if (!isset(self::$clients[$key])) {
             self::$clients[$key] = self::getSdk()->createClient($client, $args);
         }
+
         return self::$clients[$key];
     }
 
     /**
      * @return \Aws\CloudFormation\CloudFormationClient
      */
-    public static function getCfnClient() {
+    public static function getCfnClient()
+    {
         return self::getClient('CloudFormation');
     }
-
 }

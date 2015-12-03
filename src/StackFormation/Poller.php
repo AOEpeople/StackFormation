@@ -5,7 +5,8 @@ namespace StackFormation;
 class Poller
 {
 
-    public static function poll($callback, $pollInterval=10, $maxPolls=50) {
+    public static function poll($callback, $pollInterval = 10, $maxPolls = 50)
+    {
         $first = true;
         do {
             if ($maxPolls-- < 0) {
@@ -18,8 +19,6 @@ class Poller
             }
 
             $result = $callback();
-
         } while (!$result);
     }
-
 }

@@ -2,21 +2,21 @@
 
 namespace StackFormation;
 
+class CommandRegistry
+{
 
-class CommandRegistry {
-
-    public static function getCommands() {
+    public static function getCommands()
+    {
         return [
-            new \StackFormation\Command\DeployCommand(),
-            new \StackFormation\Command\ListCommand(),
-            new \StackFormation\Command\ObserveCommand(),
-            new \StackFormation\Command\DeleteCommand(),
-            new \StackFormation\Command\ShowLocalCommand(),
-            new \StackFormation\Command\ShowTemplateCommand(),
-            new \StackFormation\Command\ShowLiveCommand(),
-            new \StackFormation\Command\TemplateDiffCommand(),
-            new \StackFormation\Command\UpdateRoute53AliasCommand()
+            new Command\DeployCommand(),
+            new Command\ListCommand(),
+            new Command\ObserveCommand(),
+            new Command\DeleteCommand(),
+            new Command\ShowLocalCommand(),
+            new Command\ShowTemplateCommand(),
+            new Command\ShowLiveCommand(),
+            new Command\TemplateDiffCommand(),
+            new Command\UpdateRoute53AliasCommand(),
         ];
     }
-
 }

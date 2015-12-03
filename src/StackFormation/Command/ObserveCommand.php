@@ -29,7 +29,7 @@ class ObserveCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
+
         return $this->stackManager->observeStackActivity($stack, $output);
     }
-
 }

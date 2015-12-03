@@ -37,5 +37,4 @@ class DeployCommand extends AbstractCommand
         $output->writeln("Run this if you want to observe the stack creation/update:");
         $output->writeln("{$GLOBALS['argv'][0]} stack:observe $effectiveStackName");
     }
-
 }

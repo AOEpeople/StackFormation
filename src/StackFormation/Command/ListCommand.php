@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command;
 
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -19,17 +20,15 @@ class ListCommand extends AbstractCommand
     {
         $stacks = $this->stackManager->getStacksFromApi();
 
-        $rows=[];
-        foreach($stacks as $stackName => $details) {
+        $rows = [];
+        foreach ($stacks as $stackName => $details) {
             $rows[] = [$stackName, $details['Status']];
         }
 
-        $table = new \Symfony\Component\Console\Helper\Table($output);
+        $table = new Table($output);
         $table
-            ->setHeaders(array('Name', 'Status'))
-            ->setRows($rows)
-        ;
+            ->setHeaders(['Name', 'Status'])
+            ->setRows($rows);
         $table->render();
     }
-
 }

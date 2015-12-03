@@ -47,5 +47,4 @@ class TemplateDiffCommand extends AbstractCommand
         unlink($file_live);
         unlink($file_local);
     }
-
 }

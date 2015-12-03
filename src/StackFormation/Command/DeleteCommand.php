@@ -60,5 +60,4 @@ class DeleteCommand extends AbstractCommand
             $output->writeln("Triggered deletion of stack '$stack'.");
         }
     }
-
 }

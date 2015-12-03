@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command;
 
+use StackFormation\Poller;
 use StackFormation\Route53Manager;
 use StackFormation\StackManager;
 use Symfony\Component\Console\Input\InputArgument;
@@ -57,17 +58,23 @@ class UpdateRoute53AliasCommand extends AbstractCommand
         $output->writeln("Polling (Change Id: $changeId)");
 
         $result = '';
-        \StackFormation\Poller::poll(function() use ($changeId, $output, &$result) {
-            $result = $this->route53Manager->getChange($changeId);
-            $output->write('.');
-            return ($result != 'PENDING');
-        }, 5, 20);
+        Poller::poll(
+            function () use ($changeId, $output, &$result) {
+                $result = $this->route53Manager->getChange($changeId);
+                $output->write('.');
+
+                return ($result != 'PENDING');
+            },
+            5,
+            20
+        );
 
         $output->writeln("\nCompleted. Status: $result");
 
         if ($result != 'INSYNC') {
             return 1; // exit code
         }
-    }
 
+        return 0; // exit code
+    }
 }

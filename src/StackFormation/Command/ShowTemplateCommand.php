@@ -32,5 +32,4 @@ class ShowTemplateCommand extends AbstractCommand
         $output->writeln("Stack '$stack':");
         $output->writeln($this->stackManager->getPreprocessedTemplate($stack));
     }
-
 }

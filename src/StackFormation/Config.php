@@ -28,31 +28,42 @@ class Config
         if (!$this->stackExists($stack)) {
             throw new \Exception("Stack '$stack' not found.");
         }
+
         return $this->conf['stacks'][$stack];
     }
 
-    public function getStacknames() {
+    public function getStacknames()
+    {
         return array_keys($this->conf['stacks']);
     }
 
-    public function getEffectiveStackName($stackName) {
+    public function getEffectiveStackName($stackName)
+    {
         $stackConfig = $this->getStackConfig($stackName);
         if (!empty($stackConfig['stackname'])) {
             $stackName = $stackConfig['stackname'];
         }
+
         return $this->resolvePlaceholders($stackName);
     }
 
-    public function resolvePlaceholders($string) {
-        return preg_replace_callback('/\{env:(.*)\}/', function($matches) {
-            if (!getenv($matches[1])) {
-                throw new \Exception("Environment variable '{$matches[1]}' not found");
-            }
-            return getenv($matches[1]);
-        }, $string);
+    public function resolvePlaceholders($string)
+    {
+        return preg_replace_callback(
+            '/\{env:(.*)\}/',
+            function ($matches) {
+                if (!getenv($matches[1])) {
+                    throw new \Exception("Environment variable '{$matches[1]}' not found");
+                }
+
+                return getenv($matches[1]);
+            },
+            $string
+        );
     }
 
-    public function getStackTags($stackName) {
+    public function getStackTags($stackName)
+    {
         $tags = [];
         $stackConfig = $this->getStackConfig($stackName);
         if (isset($stackConfig['tags'])) {
@@ -60,10 +71,12 @@ class Config
                 $tags[] = ['Key' => $key, 'Value' => $this->resolvePlaceholders($value)];
             }
         }
+
         return $tags;
     }
 
-    public function getStackLabels() {
+    public function getStackLabels()
+    {
         $labels = [];
         foreach ($this->getStacknames() as $stackname) {
             try {
@@ -77,7 +90,7 @@ class Config
             }
             $labels[] = $label;
         }
+
         return $labels;
     }
-
 }

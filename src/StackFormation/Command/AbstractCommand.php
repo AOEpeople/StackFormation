@@ -2,8 +2,10 @@
 
 namespace StackFormation\Command;
 
+use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Helper;
 use StackFormation\StackManager;
+use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;
@@ -35,15 +37,17 @@ abstract class AbstractCommand extends Command
             $question->setErrorMessage('Stack %s is invalid.');
 
             $stack = $helper->ask($input, $output, $question);
-            $output->writeln('Selected Stack: '.$stack);
+            $output->writeln('Selected Stack: ' . $stack);
 
             list($stackName) = explode(' ', $stack);
             $input->setArgument('stack', $stackName);
         }
+
         return $stack;
     }
 
-    public function interact_askForLiveStack(InputInterface $input, OutputInterface $output, $multiple=false, $resolveWildcard=false) {
+    public function interact_askForLiveStack(InputInterface $input, OutputInterface $output, $multiple = false, $resolveWildcard = false)
+    {
         $stack = $input->getArgument('stack');
         $choices = null;
         if (empty($stack)) {
@@ -55,7 +59,7 @@ abstract class AbstractCommand extends Command
             $question->setErrorMessage('Stack %s is invalid.');
 
             $stack = $helper->ask($input, $output, $question);
-            $output->writeln('Selected Stack: '.$stack);
+            $output->writeln('Selected Stack: ' . $stack);
 
             if ($multiple) {
                 $input->setArgument('stack', [$stack]);
@@ -93,29 +97,34 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
-    protected function extractMessage(\Aws\CloudFormation\Exception\CloudFormationException $exception) {
+    protected function extractMessage(CloudFormationException $exception)
+    {
         $message = (string)$exception->getResponse()->getBody();
         $xml = simplexml_load_string($message);
         if ($xml !== false && $xml->Error->Message) {
             return $xml->Error->Message;
         }
+
         return $exception->getMessage();
     }
 
-    public function run(InputInterface $input, OutputInterface $output) {
+    public function run(InputInterface $input, OutputInterface $output)
+    {
         try {
             return parent::run($input, $output);
-        } catch (\Aws\CloudFormation\Exception\CloudFormationException $exception) {
+        } catch (CloudFormationException $exception) {
             $message = $this->extractMessage($exception);
             if (strpos($message, 'No updates are to be performed.') !== false) {
                 $output->writeln('No updates are to be performed.');
+
+                return 0; // exit code
             } else {
-                $formatter = new \Symfony\Component\Console\Helper\FormatterHelper();
+                $formatter = new FormatterHelper();
                 $formattedBlock = $formatter->formatBlock(['[CloudFormationException]', '', $message], 'error', true);
                 $output->writeln("\n\n$formattedBlock\n\n");
+
                 return 1; // exit code
             }
         }
     }
-
 }

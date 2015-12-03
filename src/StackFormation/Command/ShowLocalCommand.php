@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command;
 
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,12 +34,10 @@ class ShowLocalCommand extends AbstractCommand
 
         $parameters = $this->stackManager->getParametersFromConfig($stack);
 
-        $table = new \Symfony\Component\Console\Helper\Table($output);
+        $table = new Table($output);
         $table
-            ->setHeaders(array('Key', 'Value'))
-            ->setRows($parameters)
-        ;
+            ->setHeaders(['Key', 'Value'])
+            ->setRows($parameters);
         $table->render();
     }
-
 }
