@@ -6,9 +6,8 @@ use Aws\Sdk;
 
 class SdkFactory
 {
-    static $sdk;
-
-    static $clients = [];
+    private static $sdk;
+    private static $clients = [];
 
     public static function getSdk()
     {
