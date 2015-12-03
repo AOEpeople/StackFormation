@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<ruleset name="AOE-PSR2">
+    <rule ref="PSR2">
+        <!-- Handle line length in a different rule -->
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="200"/>
+            <property name="absoluteLineLimit" value=""/>
+        </properties>
+    </rule>
+
+    <!-- Enforce short array syntax -->
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+</ruleset>

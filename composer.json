@@ -21,6 +21,9 @@
         "symfony/yaml": "^3.0.0",
         "aws/aws-sdk-php": "^3.8"
     },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^2.4"
+    },
     "autoload": {
         "psr-4": {
             "StackFormation\\": "src/StackFormation/"
