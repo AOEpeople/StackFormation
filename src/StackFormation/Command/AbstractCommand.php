@@ -4,7 +4,6 @@ namespace StackFormation\Command;
 
 use StackFormation\Helper;
 use StackFormation\StackManager;
-use StackFormation\Config;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;
@@ -18,15 +17,9 @@ abstract class AbstractCommand extends Command
      */
     protected $stackManager;
 
-    /**
-     * @var Config
-     */
-    protected $config;
-
     public function __construct($name = null)
     {
         $this->stackManager = new StackManager();
-        $this->config = new Config();
 
         parent::__construct($name);
     }
@@ -37,7 +30,7 @@ abstract class AbstractCommand extends Command
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a stack', $this->config->getStackLabels());
+            $question = new ChoiceQuestion('Please select a stack', $this->stackManager->getConfig()->getStackLabels());
 
             $question->setErrorMessage('Stack %s is invalid.');
 
