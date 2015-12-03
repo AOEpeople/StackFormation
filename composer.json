@@ -17,13 +17,13 @@
         }
     ],
     "require": {
-        "symfony/console": "*",
-        "symfony/yaml": "*",
+        "symfony/console": "^3.0.0",
+        "symfony/yaml": "^3.0.0",
         "aws/aws-sdk-php": "^3.8"
     },
     "autoload": {
         "psr-4": {
-            "": "src"
+            "StackFormation\\": "src/"
         }
     },
     "bin": [
