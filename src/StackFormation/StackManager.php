@@ -12,11 +12,6 @@ class StackManager
 
     protected $config;
     
-    public function __construct()
-    {
-        $this->config = new Config();
-    }
-
     /**
      * @return \Aws\CloudFormation\CloudFormationClient
      */
@@ -171,7 +166,7 @@ class StackManager
     }
 
     public function getPreprocessedTemplate($stackName) {
-        $stackConfig = $this->config->getStackConfig($stackName);
+        $stackConfig = $this->getConfig()->getStackConfig($stackName);
 
         $template = $stackConfig['template'];
         if (empty($template)) {
@@ -202,7 +197,7 @@ class StackManager
             throw new \InvalidArgumentException("Invalid value for onFailure parameter");
         }
 
-        $effectiveStackName = $this->config->getEffectiveStackName($stackName);
+        $effectiveStackName = $this->getConfig()->getEffectiveStackName($stackName);
 
         $arguments = [
             'Capabilities' => ['CAPABILITY_IAM'],
@@ -217,7 +212,7 @@ class StackManager
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
             $this->getCfnClient()->updateStack($arguments);
         } else {
-            $arguments['Tags'] = $this->config->getStackTags($stackName);
+            $arguments['Tags'] = $this->getConfig()->getStackTags($stackName);
             $arguments['OnFailure'] = $onFailure;
             $this->getCfnClient()->createStack($arguments);
         }
@@ -367,7 +362,7 @@ class StackManager
 
     public function getParametersFromConfig($stackName) {
 
-        $stackConfig = $this->config->getStackConfig($stackName);
+        $stackConfig = $this->getConfig()->getStackConfig($stackName);
 
         $parameters = [];
 
@@ -386,6 +381,9 @@ class StackManager
     }
 
     public function getConfig() {
+        if (is_null($this->config)) {
+            $this->config = new Config();
+        }
         return $this->config;
     }
 
