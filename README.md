@@ -2,7 +2,9 @@
 
 **Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor**
 
-Author: [Fabrizio Branca](https://twitter.com/fbrnc)
+Author: 
+ - [Fabrizio Branca](https://twitter.com/fbrnc)
+
 Contributors:
  - [Lee Saferite](https://github.com/LeeSaferite)
 
