@@ -33,6 +33,7 @@ stacks:
 - Resource lookup: `resource:<stack>:<logicalResource>` -> physical Id of that resource
 - Parameter lookup: `parameter:<stack>:<logicalResource>` -> parameter value (note that some parameters will not be shown if they're 'no_echo')
 - Environment variable lookup: `env:<var>` -> value of environment variable 'var'
+- Stack/global variable lookup: `var:<var>` -> value variable 'var'
 
 Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
 one stacks to the input paramaters needed in another stack that sits on top of the first one without manually 
@@ -49,6 +50,21 @@ stacks:
         parameters:
             build: 's3://{output:stack1:bucketName}/{env:BUILD}/build.tar.gz'
             db: '{output:stack1-db:DatabaseRds}'
+```
+
+Variables (global/local, nested into other placeholders)
+```
+vars:
+    KeyPair: 'mykeypair'
+    
+stacks:
+    mystack:
+        vars:
+            ParentStack: 'MyParentStack'
+        parameters:
+            KeyPair: '{var:mykeypair}'
+            Database: '{output:{var:ParentStack}:DatabaseRds}'
+        [...]
 ```
 
 ### Effective stackname

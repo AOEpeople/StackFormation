@@ -393,8 +393,22 @@ class StackManager
         return array_reverse($events, true);
     }
 
-    public function resolvePlaceholders($string)
+    public function resolvePlaceholders($string, array $vars=[])
     {
+        $originalString = $string;
+
+        // {var:...}
+        $string = preg_replace_callback(
+            '/\{var:(.*?)\}/',
+            function ($matches) use ($vars) {
+                if (!isset($vars[$matches[1]])) {
+                    throw new \Exception("Variable '{$matches[1]}' not found");
+                }
+
+                return $vars[$matches[1]];
+            },
+            $string
+        );
 
         // {env:...}
         $string = preg_replace_callback(
@@ -436,6 +450,11 @@ class StackManager
             $string
         );
 
+        // recursively continue until everything is replaced
+        if ($string != $originalString) {
+            $string = $this->resolvePlaceholders($string, $vars);
+        }
+
         return $string;
     }
 
@@ -443,6 +462,8 @@ class StackManager
     {
 
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
+
+        $vars = $this->getConfig()->getStackVars($stackName);
 
         $parameters = [];
 
@@ -452,7 +473,7 @@ class StackManager
                 if (is_null($parameterValue)) {
                     $tmp['UsePreviousValue'] = true;
                 } else {
-                    $tmp['ParameterValue'] = $this->resolvePlaceholders($parameterValue);
+                    $tmp['ParameterValue'] = $this->resolvePlaceholders($parameterValue, $vars);
                 }
                 $parameters[] = $tmp;
             }

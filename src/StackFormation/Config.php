@@ -23,6 +23,18 @@ class Config
         return isset($this->conf['stacks'][$stack]);
     }
 
+    public function getGlobalVars()
+    {
+        return isset($this->conf['vars']) ? $this->conf['vars'] : [];
+    }
+
+    public function getStackVars($stack)
+    {
+        $stackConfig = $this->getStackConfig($stack);
+        $localVars = isset($stackConfig['vars']) ? $stackConfig['vars'] : [];
+        return array_merge($this->getGlobalVars(), $localVars);
+    }
+
     public function getStackConfig($stack)
     {
         if (!$this->stackExists($stack)) {
