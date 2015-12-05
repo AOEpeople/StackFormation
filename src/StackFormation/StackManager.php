@@ -110,11 +110,7 @@ class StackManager
     public function getTags($stackName, $key = null)
     {
         if (!isset($this->tagsCache[$stackName])) {
-            $res = $this->getCfnClient()->describeStacks(
-                [
-                    'StackName' => $stackName,
-                ]
-            );
+            $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
             $outputs = [];
             $res = $res->search('Stacks[0].Tags');
             if (is_array($res)) {
@@ -264,8 +260,8 @@ class StackManager
 
         $arguments = [
             'Capabilities' => ['CAPABILITY_IAM'],
-            'StackName'    => $effectiveStackName,
-            'Parameters'   => $this->getParametersFromConfig($stackName),
+            'StackName' => $effectiveStackName,
+            'Parameters' => $this->getParametersFromConfig($stackName),
             'TemplateBody' => $this->getPreprocessedTemplate($stackName),
         ];
 
@@ -285,7 +281,8 @@ class StackManager
         $stackName,
         OutputInterface $output,
         $pollInterval = 10
-    ) {
+    )
+    {
 
         $returnValue = 0;
         $printedEvents = [];
@@ -383,18 +380,14 @@ class StackManager
 
     public function describeStackEvents($stackName)
     {
-        $res = $this->getCfnClient()->describeStackEvents(
-            [
-                'StackName' => $stackName,
-            ]
-        );
+        $res = $this->getCfnClient()->describeStackEvents(['StackName' => $stackName]);
         $events = [];
         foreach ($res->search('StackEvents[]') as $event) {
             $events[$event['EventId']] = [
-                'Timestamp'            => (string)$event['Timestamp'],
-                'Status'               => $event['ResourceStatus'],
-                'ResourceType'         => $event['ResourceType'],
-                'LogicalResourceId'    => $event['LogicalResourceId'],
+                'Timestamp' => (string)$event['Timestamp'],
+                'Status' => $event['ResourceStatus'],
+                'ResourceType' => $event['ResourceType'],
+                'LogicalResourceId' => $event['LogicalResourceId'],
                 'ResourceStatusReason' => isset($event['ResourceStatusReason']) ? $event['ResourceStatusReason'] : '',
             ];
         }
@@ -402,8 +395,10 @@ class StackManager
         return array_reverse($events, true);
     }
 
-    public function resolvePlaceholders($string, array $vars=[])
+    public function resolvePlaceholders($string, $stackName=null)
     {
+        $vars = $stackName ? $this->getConfig()->getStackVars($stackName) : $this->getConfig()->getGlobalVars();
+
         $originalString = $string;
 
         // {var:...}
@@ -461,18 +456,16 @@ class StackManager
 
         // recursively continue until everything is replaced
         if ($string != $originalString) {
-            $string = $this->resolvePlaceholders($string, $vars);
+            $string = $this->resolvePlaceholders($string, $stackName);
         }
 
         return $string;
     }
 
-    public function getParametersFromConfig($stackName, $resolvePlaceholders=true)
+    public function getParametersFromConfig($stackName, $resolvePlaceholders = true)
     {
 
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
-
-        $vars = $this->getConfig()->getStackVars($stackName);
 
         $parameters = [];
 
@@ -482,7 +475,7 @@ class StackManager
                 if (is_null($parameterValue)) {
                     $tmp['UsePreviousValue'] = true;
                 } else {
-                    $tmp['ParameterValue'] = $resolvePlaceholders ? $this->resolvePlaceholders($parameterValue, $vars) : $parameterValue;
+                    $tmp['ParameterValue'] = $resolvePlaceholders ? $this->resolvePlaceholders($parameterValue, $stackName) : $parameterValue;
                 }
                 $parameters[] = $tmp;
             }

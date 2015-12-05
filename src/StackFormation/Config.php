@@ -20,6 +20,9 @@ class Config
 
     public function stackExists($stack)
     {
+        if (!is_string($stack)) {
+            throw new \InvalidArgumentException('Invalid stack name');
+        }
         return isset($this->conf['stacks'][$stack]);
     }
 
@@ -30,6 +33,9 @@ class Config
 
     public function getStackVars($stack)
     {
+        if (!is_string($stack)) {
+            throw new \InvalidArgumentException('Invalid stack name');
+        }
         $stackConfig = $this->getStackConfig($stack);
         $localVars = isset($stackConfig['vars']) ? $stackConfig['vars'] : [];
         return array_merge($this->getGlobalVars(), $localVars);
@@ -37,6 +43,9 @@ class Config
 
     public function getStackConfig($stack)
     {
+        if (!is_string($stack)) {
+            throw new \InvalidArgumentException('Invalid stack name');
+        }
         if (!$this->stackExists($stack)) {
             throw new \Exception("Stack '$stack' not found.");
         }
@@ -56,31 +65,21 @@ class Config
             $stackName = $stackConfig['stackname'];
         }
 
-        return $this->resolvePlaceholders($stackName);
+        $stackManager = new StackManager();
+        return $stackManager->resolvePlaceholders($stackName); // without the stackname parameter obviously...
     }
 
-    public function resolvePlaceholders($string)
-    {
-        return preg_replace_callback(
-            '/\{env:(.*)\}/',
-            function ($matches) {
-                if (!getenv($matches[1])) {
-                    throw new \Exception("Environment variable '{$matches[1]}' not found");
-                }
-
-                return getenv($matches[1]);
-            },
-            $string
-        );
-    }
-
-    public function getStackTags($stackName)
+    public function getStackTags($stackName, $resolvePlaceholders = true)
     {
         $tags = [];
         $stackConfig = $this->getStackConfig($stackName);
+        $stackManager = new StackManager();
         if (isset($stackConfig['tags'])) {
             foreach ($stackConfig['tags'] as $key => $value) {
-                $tags[] = ['Key' => $key, 'Value' => $this->resolvePlaceholders($value, $this->getStackVars($stackName))];
+                $tags[] = [
+                    'Key' => $key,
+                    'Value' => $resolvePlaceholders ? $stackManager->resolvePlaceholders($value, $stackName) : $value
+                ];
             }
         }
 
@@ -94,7 +93,7 @@ class Config
             try {
                 $effectiveStackName = $this->getEffectiveStackName($stackname);
             } catch (\Exception $e) {
-                $effectiveStackName = '[Missing env var]';
+                $effectiveStackName = '[Missing env var] Error: ' . $e->getMessage();
             }
             $label = $stackname;
             if ($effectiveStackName != $stackname) {

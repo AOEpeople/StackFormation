@@ -41,10 +41,18 @@ class ShowParametersCommand extends AbstractCommand
         $output->writeln("Stack '$stack':");
         $parameters = $this->stackManager->getParametersFromConfig($stack, !$unresolved);
 
+        $output->writeln('== PARAMETERS ==');
         $table = new Table($output);
         $table
             ->setHeaders(['Key', 'Value'])
             ->setRows($parameters);
+        $table->render();
+
+        $output->writeln('== TAGS ==');
+        $table = new Table($output);
+        $table
+            ->setHeaders(['Key', 'Value'])
+            ->setRows($this->stackManager->getConfig()->getStackTags($stack, !$unresolved));
         $table->render();
     }
 }
