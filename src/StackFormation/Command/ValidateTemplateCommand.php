@@ -2,18 +2,19 @@
 
 namespace StackFormation\Command;
 
+use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ShowTemplateCommand extends AbstractCommand
+class ValidateTemplateCommand extends AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:template')
-            ->setDescription('Preview preprocessed local template')
+            ->setName('stack:validate')
+            ->setDescription('Validate template')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
@@ -29,6 +30,12 @@ class ShowTemplateCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
-        $output->writeln($this->stackManager->getPreprocessedTemplate($stack));
+        $this->stackManager->validateTemplate($stack);
+        // will throw an exception if there's a problem
+
+        $formatter = new FormatterHelper();
+        $formattedBlock = $formatter->formatBlock(['No validation errors found.'], 'info', true);
+
+        $output->writeln("\n\n$formattedBlock\n\n");
     }
 }

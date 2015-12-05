@@ -17,6 +17,7 @@ class CommandRegistry
             new Command\ShowParametersCommand(),
             new Command\ShowLiveCommand(),
             new Command\TemplateDiffCommand(),
+            new Command\ValidateTemplateCommand(),
             new Command\UpdateRoute53AliasCommand(),
         ];
     }

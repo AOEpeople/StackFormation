@@ -213,6 +213,15 @@ class StackManager
         );
     }
 
+    public function validateTemplate($stackName)
+    {
+        $res = $this->getCfnClient()->validateTemplate([
+            'TemplateBody' => $this->getPreprocessedTemplate($stackName)
+        ]);
+
+        // will throw an exception if there's a problem
+    }
+
     public function getPreprocessedTemplate($stackName)
     {
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
