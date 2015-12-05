@@ -80,7 +80,7 @@ class Config
         $stackConfig = $this->getStackConfig($stackName);
         if (isset($stackConfig['tags'])) {
             foreach ($stackConfig['tags'] as $key => $value) {
-                $tags[] = ['Key' => $key, 'Value' => $this->resolvePlaceholders($value)];
+                $tags[] = ['Key' => $key, 'Value' => $this->resolvePlaceholders($value, $this->getStackVars($stackName))];
             }
         }
 

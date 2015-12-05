@@ -458,7 +458,7 @@ class StackManager
         return $string;
     }
 
-    public function getParametersFromConfig($stackName)
+    public function getParametersFromConfig($stackName, $resolvePlaceholders=true)
     {
 
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
@@ -473,7 +473,7 @@ class StackManager
                 if (is_null($parameterValue)) {
                     $tmp['UsePreviousValue'] = true;
                 } else {
-                    $tmp['ParameterValue'] = $this->resolvePlaceholders($parameterValue, $vars);
+                    $tmp['ParameterValue'] = $resolvePlaceholders ? $this->resolvePlaceholders($parameterValue, $vars) : $parameterValue;
                 }
                 $parameters[] = $tmp;
             }

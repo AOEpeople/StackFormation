@@ -14,6 +14,7 @@ class CommandRegistry
             new Command\DeleteCommand(),
             new Command\ShowLocalCommand(),
             new Command\ShowTemplateCommand(),
+            new Command\ShowParametersCommand(),
             new Command\ShowLiveCommand(),
             new Command\TemplateDiffCommand(),
             new Command\UpdateRoute53AliasCommand(),
