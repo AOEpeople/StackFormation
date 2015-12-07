@@ -4,6 +4,7 @@ namespace StackFormation\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DeployCommand extends AbstractCommand
@@ -18,6 +19,12 @@ class DeployCommand extends AbstractCommand
                 'stack',
                 InputArgument::REQUIRED,
                 'Stack'
+            )
+            ->addOption(
+                'observe',
+                'o',
+                InputOption::VALUE_NONE,
+                'Observe stack after'
             );
     }
 
@@ -34,7 +41,12 @@ class DeployCommand extends AbstractCommand
         $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
 
         $output->writeln("Triggered deployment of stack '$effectiveStackName'.");
-        $output->writeln("Run this if you want to observe the stack creation/update:");
-        $output->writeln("{$GLOBALS['argv'][0]} stack:observe $effectiveStackName");
+
+        if ($input->getOption('observe')) {
+            $this->stackManager->observeStackActivity($effectiveStackName, $output);
+        } else {
+            $output->writeln("\n-> Run this to observe the stack creation/update:");
+            $output->writeln("{$GLOBALS['argv'][0]} stack:observe $effectiveStackName\n");
+        }
     }
 }
