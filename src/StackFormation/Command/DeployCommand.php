@@ -43,7 +43,7 @@ class DeployCommand extends AbstractCommand
         $output->writeln("Triggered deployment of stack '$effectiveStackName'.");
 
         if ($input->getOption('observe')) {
-            $this->stackManager->observeStackActivity($effectiveStackName, $output);
+            return $this->stackManager->observeStackActivity($effectiveStackName, $output);
         } else {
             $output->writeln("\n-> Run this to observe the stack creation/update:");
             $output->writeln("{$GLOBALS['argv'][0]} stack:observe $effectiveStackName\n");
