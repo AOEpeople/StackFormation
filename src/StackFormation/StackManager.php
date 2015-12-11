@@ -246,7 +246,6 @@ class StackManager
      * Update stack
      *
      * @param string $stackName
-     * @param string $onFailure
      * @throws \Exception
      */
     public function deployStack($stackName)
