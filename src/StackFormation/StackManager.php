@@ -247,23 +247,29 @@ class StackManager
      *
      * @param string $stackName
      * @param string $onFailure
-     *
      * @throws \Exception
      */
-    public function deployStack($stackName, $onFailure = 'ROLLBACK')
+    public function deployStack($stackName)
     {
-        if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
-            throw new \InvalidArgumentException("Invalid value for onFailure parameter");
+        $stackConfig = $this->getConfig()->getStackConfig($stackName);
+
+        if (isset($stackConfig['profile'])) {
+            $profileManager = new \AwsInspector\ProfileManager();
+            $profileManager->loadProfile($stackConfig['profile']);
+            echo "Loading Profile: " . $stackConfig['profile'] . "\n";
         }
 
         $effectiveStackName = $this->getConfig()->getEffectiveStackName($stackName);
 
         $arguments = [
-            'Capabilities' => ['CAPABILITY_IAM'],
             'StackName' => $effectiveStackName,
             'Parameters' => $this->getParametersFromConfig($stackName),
             'TemplateBody' => $this->getPreprocessedTemplate($stackName),
         ];
+
+        if (isset($stackConfig['Capabilities'])) {
+            $arguments['Capabilities'] = explode(',', $stackConfig['Capabilities']);
+        }
 
         $stackStatus = $this->getStackStatus($effectiveStackName);
         if (strpos($stackName, 'IN_PROGRESS') !== false) {
@@ -272,6 +278,12 @@ class StackManager
             $this->getCfnClient()->updateStack($arguments);
         } else {
             $arguments['Tags'] = $this->getConfig()->getStackTags($stackName);
+
+            $onFailure = isset($stackConfig['OnFailure']) ? $stackConfig['OnFailure'] : 'DO_NOTHING';
+            if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
+                throw new \InvalidArgumentException("Invalid value for onFailure parameter");
+            }
+
             $arguments['OnFailure'] = $onFailure;
             $this->getCfnClient()->createStack($arguments);
         }

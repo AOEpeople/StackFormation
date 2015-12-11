@@ -36,7 +36,7 @@ class DeployCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
-        $this->stackManager->deployStack($stack, 'DO_NOTHING'); // TODO: expose to option
+        $this->stackManager->deployStack($stack);
 
         $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
 
