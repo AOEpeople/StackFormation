@@ -44,7 +44,7 @@ class Preprocessor
     public function injectFilecontent($jsonString, $basePath)
     {
         return preg_replace_callback(
-            '/(\s*)(.*){\s*"Fn::FileContent(TrimLines)?"\s*:\s*"(.+?)"\s*}/',
+            '/(\s*)(.*){\s*"Fn::FileContent(TrimLines|Minify)?"\s*:\s*"(.+?)"\s*}/',
             function (array $matches) use ($basePath) {
                 $file = $basePath . '/' . end($matches);
                 if (!is_file($file)) {
@@ -53,6 +53,12 @@ class Preprocessor
 
                 $fileContent = file_get_contents($file);
                 $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
+                if ($matches[3] == 'Minify') {
+                    $ext = pathinfo($file, PATHINFO_EXTENSION);
+                    if($ext === 'js') {
+                        $fileContent = \JShrink\Minifier::minify($fileContent, ['flaggedComments' => false]);
+                    }
+                }
                 $lines = explode("\n", $fileContent);
                 foreach ($lines as $key => &$line) {
                     if ($matches[3] == 'TrimLines') {
