@@ -36,11 +36,7 @@ class StackManager
     public function getParameters($stackName, $key = null)
     {
         if (!isset($this->parametersCache[$stackName])) {
-            $res = $this->getCfnClient()->describeStacks(
-                [
-                    'StackName' => $stackName,
-                ]
-            );
+            $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
             $parameters = [];
             $res = $res->search('Stacks[0].Parameters');
             if (is_array($res)) {
@@ -73,11 +69,7 @@ class StackManager
     public function getOutputs($stackName, $key = null)
     {
         if (!isset($this->outputsCache[$stackName])) {
-            $res = $this->getCfnClient()->describeStacks(
-                [
-                    'StackName' => $stackName,
-                ]
-            );
+            $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
             $outputs = [];
             $res = $res->search('Stacks[0].Outputs');
             if (is_array($res)) {
@@ -144,11 +136,7 @@ class StackManager
     {
         if (!isset($this->resourcesCache[$stackName])) {
 
-            $res = $this->getCfnClient()->describeStackResources(
-                [
-                    'StackName' => $stackName,
-                ]
-            );
+            $res = $this->getCfnClient()->describeStackResources(['StackName' => $stackName]);
             $resources = [];
             foreach ($res->search('StackResources[]') as $resource) {
                 $resources[$resource['LogicalResourceId']] = $resource['PhysicalResourceId'];
@@ -202,11 +190,7 @@ class StackManager
 
     public function deleteStack($stackName)
     {
-        $this->getCfnClient()->deleteStack(
-            [
-                'StackName' => $stackName,
-            ]
-        );
+        $this->getCfnClient()->deleteStack(['StackName' => $stackName]);
     }
 
     public function validateTemplate($stackName)
@@ -288,11 +272,7 @@ class StackManager
         }
     }
 
-    public function observeStackActivity(
-        $stackName,
-        OutputInterface $output,
-        $pollInterval = 10
-    )
+    public function observeStackActivity($stackName, OutputInterface $output, $pollInterval = 10)
     {
 
         $returnValue = 0;
@@ -406,7 +386,7 @@ class StackManager
         return array_reverse($events, true);
     }
 
-    public function resolvePlaceholders($string, $stackName=null)
+    public function resolvePlaceholders($string, $stackName = null)
     {
         $vars = $stackName ? $this->getConfig()->getStackVars($stackName) : $this->getConfig()->getGlobalVars();
 
