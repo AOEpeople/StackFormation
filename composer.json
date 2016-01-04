@@ -19,6 +19,7 @@
     "require": {
         "symfony/console": "^3.0.0",
         "symfony/yaml": "^3.0.0",
+        "symfony/config": "^3.0.0",
         "aws/aws-sdk-php": "^3.8",
         "tedivm/jshrink": "^1.1"
     },
