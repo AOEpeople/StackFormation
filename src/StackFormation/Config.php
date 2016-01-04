@@ -2,20 +2,55 @@
 
 namespace StackFormation;
 
+use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Yaml\Parser;
+
 
 class Config
 {
 
     protected $conf;
 
-    public function __construct($file = 'stacks.yml')
+    public function __construct()
     {
-        if (!is_file($file)) {
-            throw new \Exception("File '$file' not found.");
+        $files = $this->findAllConfigurationFiles();
+        if (count($files) == 0) {
+            throw new \Exception("Could not find any stacks.yml configuration files");
         }
-        $yaml = new Parser();
-        $this->conf = $yaml->parse(file_get_contents($file));
+        $processor = new Processor();
+        $yamlParser = new Parser();
+
+        $config = [];
+        foreach ($files as $file) {
+            $basePath = dirname(realpath($file));
+            $tmp = $yamlParser->parse(file_get_contents($file));
+            if (isset($tmp['stacks']) && is_array($tmp['stacks'])) {
+                foreach ($tmp['stacks'] as &$stackConfig) {
+                    $realPathFile = realpath($basePath . '/' . $stackConfig['template']);
+                    if ($realPathFile === false) {
+                        throw new \Exception('Could not find template file ' . $stackConfig['template']);
+                    }
+                    $stackConfig['template'] = $realPathFile;
+                }
+            }
+            $config[] = $tmp;
+        }
+
+        $this->conf = $processor->processConfiguration(
+            new ConfigTreeBuilder(),
+            $config
+        );
+    }
+
+    protected function findAllConfigurationFiles()
+    {
+        $files = array_merge(
+            glob('stacks/*/stacks.yml'),
+            // glob('stacks.*.yml'),
+            ['stacks.yml']
+        );
+        return $files;
     }
 
     public function stackExists($stack)
@@ -60,11 +95,6 @@ class Config
 
     public function getEffectiveStackName($stackName)
     {
-        $stackConfig = $this->getStackConfig($stackName);
-        if (!empty($stackConfig['stackname'])) {
-            $stackName = $stackConfig['stackname'];
-        }
-
         $stackManager = new StackManager();
         return $stackManager->resolvePlaceholders($stackName); // without the stackname parameter obviously...
     }
