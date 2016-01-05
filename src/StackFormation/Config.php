@@ -46,9 +46,10 @@ class Config
     protected function findAllConfigurationFiles()
     {
         $files = array_merge(
+            glob('stacks/*/*/stacks.yml'),
             glob('stacks/*/stacks.yml'),
-            // glob('stacks.*.yml'),
-            ['stacks.yml']
+            glob('stacks/stacks.yml'),
+            glob('stacks.yml')
         );
         return $files;
     }
