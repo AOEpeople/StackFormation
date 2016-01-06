@@ -27,11 +27,15 @@ class Config
             $tmp = $yamlParser->parse(file_get_contents($file));
             if (isset($tmp['stacks']) && is_array($tmp['stacks'])) {
                 foreach ($tmp['stacks'] as &$stackConfig) {
-                    $realPathFile = realpath($basePath . '/' . $stackConfig['template']);
-                    if ($realPathFile === false) {
-                        throw new \Exception('Could not find template file ' . $stackConfig['template']);
+                    $templates = is_array($stackConfig['template']) ? $stackConfig['template'] : [$stackConfig['template']];
+                    unset($stackConfig['template']);
+                    foreach($templates as $template) {
+                        $realPathFile = realpath($basePath . '/' . $template);
+                        if ($realPathFile === false) {
+                            throw new \Exception('Could not find template file ' . $template);
+                        }
+                        $stackConfig['template'][] = $realPathFile;
                     }
-                    $stackConfig['template'] = $realPathFile;
                 }
             }
             $config[] = $tmp;

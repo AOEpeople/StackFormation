@@ -206,17 +206,20 @@ class StackManager
     {
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
 
-        $template = $stackConfig['template'];
-        if (empty($template)) {
-            throw new \Exception('No template found');
+        if (empty($stackConfig['template']) || !is_array($stackConfig['template'])) {
+            throw new \Exception('No template(s) found');
         }
 
-        if (!is_file($template)) {
-            throw new \Exception("Template file '$template' not found.");
-        }
         $preProcessor = new Preprocessor();
 
-        return $preProcessor->process($template);
+        $templateContents = [];
+        foreach ($stackConfig['template'] as $template) {
+            $templateContents[$template] = $preProcessor->process($template);
+        }
+
+        $templateMerger = new TemplateMerger();
+        $description = !empty($stackConfig['description']) ? $stackConfig['description'] : 'Merged Template';
+        return $templateMerger->merge($templateContents, $description);
     }
 
     public function getTemplate($stackName)

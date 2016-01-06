@@ -8,7 +8,7 @@ class Preprocessor
     public function process($filepath)
     {
         if (!is_file($filepath)) {
-            throw new \Exception('File not found');
+            throw new \Exception("File '$filepath' not found");
         }
         $json = file_get_contents($filepath);
 
