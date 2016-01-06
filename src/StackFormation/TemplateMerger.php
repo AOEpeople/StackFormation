@@ -25,7 +25,7 @@ class TemplateMerger
             'Metadata'
         ];
 
-        foreach ($templates as $template) {
+        foreach ($templates as $file => $template) {
             $array = json_decode($template, true);
             if ($array['AWSTemplateFormatVersion'] != '2010-09-09') {
                 throw new \Exception('Invalid AWSTemplateFormatVersion');
@@ -34,7 +34,7 @@ class TemplateMerger
                 if (isset($array[$topLevelKey])) {
                     foreach ($array[$topLevelKey] as $key => $value) {
                         if (isset($mergedTemplate[$topLevelKey][$key])) {
-                            throw new \Exception("Duplicate key '$key' found in '$topLevelKey'");
+                            throw new \Exception("Duplicate key '$key' found in '$topLevelKey' in file '$file'");
                         }
                         $mergedTemplate[$topLevelKey][$key] = $value;
                     }
