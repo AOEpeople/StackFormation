@@ -17,12 +17,12 @@ class TemplateMerger
         ];
 
         $topLevelKeys = [
-            // 'Metadata', -> skip
             'Parameters',
             'Mappings',
             'Conditions',
             'Resources',
-            'Outputs'
+            'Outputs',
+            'Metadata'
         ];
 
         foreach ($templates as $template) {
