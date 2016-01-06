@@ -8,23 +8,68 @@ Author:
 Contributors:
  - [Lee Saferite](https://github.com/LeeSaferite)
 
-### Stack Configuration
+### Quickstart
 
 Create a `stacks.yml` in your current directory
 
 ```
 stacks:
-    my-stack:
-        template: templates/my-stack.template
-        parameters:
-            foo: 42
-            bar: 43
-    my-second-stack:
-        template: templates/my-stack.template
-        parameters:
-            foo: 42
-            bar: 43
+  - stackname: my-stack
+    template: templates/my-stack.template
+    parameters:
+      foo: 42
+      bar: 43
+  - stackname: my-second-stack
+    template: templates/my-stack.template
+    parameters:
+      foo: 42
+      bar: 43
 ```
+
+### Structuring your stacks
+
+Structure your stacks including all templates and other files (e.g. userdata) in "modules".
+StackFormation will load all stack.yml files from following locations:
+- `stacks/*/*/stacks.yml`
+- `stacks/*/stacks.yml`
+- `stacks/stacks.yml`
+- `stacks.yml`
+
+So it's suggested to create a directory structure like this one:
+```
+stacks/
+  stack1/
+    userdata/
+      provisioning.sh
+    stacks.yml
+    my.template
+  stack2/
+    stacks.yml
+  ...
+```
+
+All `stacks.yml` files will be merged together.
+
+### Using composer
+
+You can pull in StackFormation modules via composer. Look at the [cfn-lambdahelper](https://github.com/AOEpeople/cfn-lambdahelper) 
+for an example. A custom composer installer (configured as `require` dependency) will take care of putting all the
+module files in your `stacks/` directory. This way you can have project specific and generic modules next to each other.
+
+Please note that a "StackFormation module" will probably not come with a `stacks.yml` file since this (and especially the 
+stack parameter configuration) is project specific. 
+
+You will need to create the stack configuration for the parts you want to use. A good place would be `stacks/stacks.yml` 
+where you reference the imported module.
+
+Example:
+```
+stacks:
+  - stackname: 'lambdacfnhelpers-stack'
+    template: 'cfn-lambdahelper/lambda_cfn_helpers.template'
+    Capabilities: CAPABILITY_IAM
+```
+
 
 ### Parameter Values
 
@@ -42,43 +87,78 @@ managing the input values.
 Example
 ```
 stacks:
-    stack1-db:
-        template: templates/stack1.template
-        [...]
-    stack2-app:
-        template: templates/stack2.template
-        parameters:
-            build: 's3://{output:stack1:bucketName}/{env:BUILD}/build.tar.gz'
-            db: '{output:stack1-db:DatabaseRds}'
+  - stackname: stack1-db
+    template: templates/stack1.template
+    [...]
+  - stackname: stack2-app
+    template: templates/stack2.template
+    parameters:
+      build: 's3://{output:stack1:bucketName}/{env:BUILD}/build.tar.gz'
+      db: '{output:stack1-db:DatabaseRds}'
 ```
 
 Variables (global/local, nested into other placeholders)
 ```
 vars:
-    KeyPair: 'mykeypair'
+  KeyPair: 'mykeypair'
     
 stacks:
-    mystack:
-        vars:
-            ParentStack: 'MyParentStack'
-        parameters:
-            KeyPair: '{var:mykeypair}'
-            Database: '{output:{var:ParentStack}:DatabaseRds}'
-        [...]
+  - stackname: mystack
+    vars:
+      ParentStack: 'MyParentStack'
+    parameters:
+      KeyPair: '{var:mykeypair}'
+      Database: '{output:{var:ParentStack}:DatabaseRds}'
+    [...]
 ```
 
 ### Effective stackname
 
-You can provide an effective stackname that can be different from the key in the `stacks.yml` file. You can use this to 
-include an environment variable in the stackname.
+You can include environment variable in your stackname (which is very handy for automation via Jenkins).
+In this case your effective stackname (e.g. `build-5`) will be different from the configured stackname (e.g. `build-{env:BUILD_NUMBER}`)
 
 Example
 ```
 stacks:
-    build-x:
-        stackname: 'build-{env:BUILD_NUMBER}'
-        template: templates/deploy_build.template
+  - stackname: 'build-{env:BUILD_NUMBER}'
+    template: templates/deploy_build.template
 ```
+
+### Relative file paths
+
+Please note that all files paths in the `template` section of a `stacks.yml` are relative to the current `stacks.yml` file
+and all files included via `Fn::FileContent`/ `Fn:FileContentTrimLines` or `Fn:FileContentMinify` are relative to the 
+CloudFormation template file.
+
+Example:
+```
+stacks/
+  stack1/
+    userdata/
+      provisioning.sh
+    stacks.yml
+    my.template
+```
+
+stacks.yml:
+```
+stacks:
+  - stackname: test
+    template: my.template
+```
+
+my.template
+```
+{ [...]
+  "Ec2Instance": {
+    "Type": "AWS::AutoScaling::LaunchConfiguration",
+    "Properties": {
+      "UserData": {"Fn::Base64": {"Fn::FileContent": "userdata/provisioning.sh"}}
+    }
+  }
+}
+```
+
 
 ### AWS SDK
 
@@ -101,6 +181,12 @@ Usage Example:
     "UserData": {"Fn::Base64": {"Fn::FileContent":"../scripts/setup.sh"}},
     [...]
 ```
+
+### Functions `Fn:FileContentTrimLines` and `Fn:FileContentMinify`
+
+These functions are similar to `Fn::FileContent` but additional they trim whitespace or minify the code.
+This comes in handy when deploying Lambda function where the content can't be larger than 2048kb if you 
+want to directly embed the source code via CloudFormation (instead of deploying a zip file).
 
 ### Inject Parameters
 
