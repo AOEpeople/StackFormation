@@ -159,6 +159,28 @@ my.template
 }
 ```
 
+### Template merging
+
+StackForation allows you to configure more than one template:
+
+```
+stacks:
+  - stackname: iam
+    template:
+      - iam_role_jenkins.template
+      - iam_user_inspector.template
+    description: 'IAM users and roles'
+```
+
+The template files cannot have duplicate keys in any of the top level attributes. StackFormation will then merge them into 
+a single CloudFormation template and deploy this one instead. This feature helps you to structure your template logically
+without having to deploy and manage them separatly. Also with this you can choose which template to include in case you're
+pulling in a StackFormation module like https://github.com/AOEpeople/cfn-lambdahelper.
+
+You can always inspect the final merged and preprocessed template:
+```
+bin/stackformation.php stack:template iam
+```
 
 ### AWS SDK
 
