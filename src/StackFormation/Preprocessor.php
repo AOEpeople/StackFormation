@@ -94,7 +94,6 @@ class Preprocessor
                 }
 
                 $fileContent = file_get_contents($file);
-                $fileContent = preg_replace('/\#\!.*/', '', $fileContent);
                 $fileContent = trim($fileContent);
 
                 return $fileContent;
