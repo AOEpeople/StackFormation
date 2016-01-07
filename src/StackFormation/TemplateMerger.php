@@ -11,6 +11,10 @@ class TemplateMerger
             throw new \InvalidArgumentException('No templates given');
         }
 
+        if (count($templates) == 1) {
+            return end($templates);
+        }
+
         $mergedTemplate = [
             'AWSTemplateFormatVersion' => '2010-09-09',
             'Description' => $description
