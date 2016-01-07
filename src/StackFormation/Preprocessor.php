@@ -44,7 +44,7 @@ class Preprocessor
     public function injectFilecontent($jsonString, $basePath)
     {
         return preg_replace_callback(
-            '/(\s*)(.*){\s*"Fn::FileContent(TrimLines|Minify)?"\s*:\s*"(.+?)"\s*}/',
+            '/(\s*)(.*){\s*"Fn::FileContent(Unpretty|TrimLines|Minify)?"\s*:\s*"(.+?)"\s*}/',
             function (array $matches) use ($basePath) {
                 $file = $basePath . '/' . end($matches);
                 if (!is_file($file)) {
@@ -69,8 +69,11 @@ class Preprocessor
                     }
                     $line .= "\n";
                 }
-
-                $result = ' {"Fn::Join": ["", ' . json_encode(array_values($lines), JSON_PRETTY_PRINT) . ']}';
+                if ($matches[3] == 'Unpretty') {
+                    $result = ' {"Fn::Join": ["", ' . json_encode(array_values($lines)) . ']}';
+                } else {
+                    $result = ' {"Fn::Join": ["", ' . json_encode(array_values($lines), JSON_PRETTY_PRINT) . ']}';
+                }
                 $whitespace = trim($matches[1], "\n");
                 $result = str_replace("\n", "\n" . $whitespace, $result);
 
