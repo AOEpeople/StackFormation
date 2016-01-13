@@ -33,6 +33,7 @@ class ConfigTreeBuilder implements ConfigurationInterface
                         ->scalarNode('OnFailure')->end()
                         ->scalarNode('Capabilities')->end()
                         ->scalarNode('basepath')->end() // will be automatically set to the current stacks.yml file's dir
+                        ->scalarNode('stackPolicy')->end()
                     ->end()
                 ->end()
             ->end();

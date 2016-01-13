@@ -261,6 +261,13 @@ class StackManager
             $arguments['Capabilities'] = explode(',', $stackConfig['Capabilities']);
         }
 
+        if (isset($stackConfig['stackPolicy'])) {
+            if (!is_file($stackConfig['stackPolicy'])) {
+                throw new \Exception('Stack policy "' . $stackConfig['stackPolicy'] . '" not found', 1452687982);
+            }
+            $arguments['StackPolicyBody'] = file_get_contents($stackConfig['stackPolicy']);
+        }
+
         $stackStatus = $this->getStackStatus($effectiveStackName);
         if (strpos($stackName, 'IN_PROGRESS') !== false) {
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
