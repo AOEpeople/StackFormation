@@ -257,6 +257,8 @@ class StackManager
             $this->executeScripts($stackConfig['before'], $stackConfig['basepath'], $stackName);
         }
 
+        exit;
+
         if (isset($stackConfig['Capabilities'])) {
             $arguments['Capabilities'] = explode(',', $stackConfig['Capabilities']);
         }
@@ -284,12 +286,12 @@ class StackManager
         $cwd = getcwd();
         chdir($path);
 
-        foreach ($scripts as $script) {
+        foreach ($scripts as &$script) {
             $script = $this->resolvePlaceholders($script, $stackName);
-            passthru($script, $returnVar);
-            if ($returnVar !== 0) {
-                throw new \Exception('Error executing command');
-            }
+        }
+        passthru(implode("\n", $scripts), $returnVar);
+        if ($returnVar !== 0) {
+            throw new \Exception('Error executing commands');
         }
         chdir($cwd);
     }

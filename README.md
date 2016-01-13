@@ -186,20 +186,40 @@ bin/stackformation.php stack:template iam
 
 You can run shell commands before the CloudFormation is being deployed.
 The commands will be executed in the directory where the stacks.yml file lives. 
-(Please note that every command is executed in a separate process. That means that you can't pass variables from one command to another 
-and you'll always end up in the same directory, unless you define everything as a single multi-line command.)
 
 Example:
 ```
 stacks:
-  - stackname: 'magento-env-int-vpc'
-    template: gateway.template
+  - stackname: 'my-lambda-function'
+    template: lambda.template
     Capabilities: CAPABILITY_IAM
     before:
-    - cd function && npm install aws-sdk
-    - cd function && zip -r nat_gateway.zip nat_gateway.js node_modules/
-    - aws s3 cp function/nat_gateway.zip s3://bc-builds/lambda/nat_gateway.zip
+    - cd function 
+    - npm install aws-sdk
+    - zip -r nat_gateway.zip nat_gateway.js node_modules/
+    - aws s3 cp nat_gateway.zip s3://mybucket/lambda/nat_gateway.zip
 ```    
+
+and you can even use placeholders:
+```
+stacks:
+  - stackname: 'my-lambda-function'
+    template: lambda.template
+    Capabilities: CAPABILITY_IAM
+    vars:
+      bucket: mybucket
+      key: 'lambda/nat_gateway.zip'
+    parameters:
+      # these are the input parameters passed to the cfn template that match the upload location in the custom script below
+      S3Bucket: '{var:bucket}'
+      S3Key: '{var:key}'
+    before:
+    - cd function
+    - npm install aws-sdk
+    - zip -r nat_gateway.zip nat_gateway.js node_modules/
+    - aws s3 cp nat_gateway.zip s3://{var:bucket}/{var:key}
+
+```
 
 ### AWS SDK
 
