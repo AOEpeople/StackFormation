@@ -254,7 +254,7 @@ class StackManager
         ];
 
         if (isset($stackConfig['before']) && is_array($stackConfig['before']) && count($stackConfig['before']) > 0) {
-            $this->executeScripts($stackConfig['before'], $stackConfig['basepath']);
+            $this->executeScripts($stackConfig['before'], $stackConfig['basepath'], $stackName);
         }
 
         if (isset($stackConfig['Capabilities'])) {
@@ -279,11 +279,13 @@ class StackManager
         }
     }
 
-    protected function executeScripts(array $scripts, $path)
+    protected function executeScripts(array $scripts, $path, $stackName=NULL)
     {
         $cwd = getcwd();
         chdir($path);
+
         foreach ($scripts as $script) {
+            $script = $this->resolvePlaceholders($script, $stackName);
             passthru($script, $returnVar);
             if ($returnVar !== 0) {
                 throw new \Exception('Error executing command');
