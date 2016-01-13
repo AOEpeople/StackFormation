@@ -286,7 +286,7 @@ class StackManager
         }
     }
 
-    protected function executeScripts(array $scripts, $path, $stackName = NULL)
+    protected function executeScripts(array $scripts, $path, $stackName = null)
     {
         $cwd = getcwd();
         chdir($path);
