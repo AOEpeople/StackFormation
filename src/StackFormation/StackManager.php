@@ -257,8 +257,6 @@ class StackManager
             $this->executeScripts($stackConfig['before'], $stackConfig['basepath'], $stackName);
         }
 
-        exit;
-
         if (isset($stackConfig['Capabilities'])) {
             $arguments['Capabilities'] = explode(',', $stackConfig['Capabilities']);
         }
