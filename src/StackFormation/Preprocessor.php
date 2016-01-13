@@ -55,7 +55,7 @@ class Preprocessor
                 $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
                 if ($matches[3] == 'Minify') {
                     $ext = pathinfo($file, PATHINFO_EXTENSION);
-                    if($ext === 'js') {
+                    if ($ext === 'js') {
                         $fileContent = \JShrink\Minifier::minify($fileContent, ['flaggedComments' => false]);
                     }
                 }
