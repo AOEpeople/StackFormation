@@ -502,7 +502,22 @@ class StackManager
                 } else {
                     $tmp['ParameterValue'] = $resolvePlaceholders ? $this->resolvePlaceholders($parameterValue, $stackName) : $parameterValue;
                 }
-                $parameters[] = $tmp;
+                if (strpos($tmp['ParameterKey'], '*') !== false) {
+                    $count = 0;
+                    foreach(array_keys($stackConfig['template']) as $key) {
+                        if (!is_int($key)) {
+                            $count++;
+                            $newParameter = $tmp;
+                            $newParameter['ParameterKey'] = str_replace('*', $key, $tmp['ParameterKey']);
+                            $parameters[] = $newParameter;
+                        }
+                    }
+                    if ($count == 0) {
+                        throw new \Exception('Found placeholder \'*\' in parameter key but the templates don\'t use prefixes');
+                    }
+                } else {
+                    $parameters[] = $tmp;
+                }
             }
         }
 

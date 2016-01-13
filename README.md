@@ -194,9 +194,30 @@ stacks:
     template:
       ZoneA: az.template
       ZoneB: az.template
-      ZoneC: az.template
     parameters:
       ZoneAVpc: MyVPC
+      ZoneAPublicSubnetCidrBlock: '10.0.0.0/24'
+      ZoneAPrivateSubnetCidrBlock: '10.0.10.0/24'
+      ZoneAAZ: 'eu-west-1a'
+      ZoneBVpc: MyVPC
+      ZoneBAPublicSubnetCidrBlock: '10.0.1.0/24'
+      ZoneBPrivateSubnetCidrBlock: '10.0.11.0/24'
+      ZoneBAZ: 'eu-west-1b'
+      [...]
+```
+
+If you have a parameter that needs to be passed to all templates you can prefix it with '*' (make sure you add quotes around that key 
+since JSON will consider this a reference instead) and StackFormation will replace '*' with each prefix used in the `template:` section.
+
+```
+stacks:
+  - stackname: vpc-subnets
+    template:
+      ZoneA: az.template
+      ZoneB: az.template
+    parameters:
+      '*Vpc': MyVPC # Will automatically be expanded to 'ZoneAVpc: MyVPC' and 'ZoneBVpc: MyVPC'
+      '*Igw': MyInternetGateway
       ZoneAPublicSubnetCidrBlock: '10.0.0.0/24'
       ZoneAPrivateSubnetCidrBlock: '10.0.10.0/24'
       ZoneAAZ: 'eu-west-1a'
