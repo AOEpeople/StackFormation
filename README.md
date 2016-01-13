@@ -7,6 +7,7 @@ Author:
 
 Contributors:
  - [Lee Saferite](https://github.com/LeeSaferite)
+ - [Julian Kleinhans](https://github.com/kj187)
 
 ### Quickstart
 
