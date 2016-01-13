@@ -29,7 +29,37 @@ class TemplateMerger
             'Metadata'
         ];
 
-        foreach ($templates as $file => $template) {
+        foreach ($templates as $key => $template) {
+            $prefix = '';
+
+            if (!is_int($key)) {
+                $prefix = $key;
+
+                // Update all { "Ref": "..." }
+                $template = preg_replace_callback('/\{\s*"Ref"\s*:\s*"([a-zA-Z0-9:]+?)"\s*\}/', function ($matches) use ($prefix) {
+                    return '{"Ref":"' . $prefix . $matches[1] . '"}';
+                }, $template);
+
+                // Update all { "DependsOn": "..." }
+                $template = preg_replace_callback('/\"DependsOn"\s*:\s*"([a-zA-Z0-9:]+?)"/', function ($matches) use ($prefix) {
+                    return '"DependsOn":"' . $prefix . $matches[1] . '"';
+                }, $template);
+
+                // Update all { "DependsOn": ["...", "...", ...] }
+                $template = preg_replace_callback('/\"DependsOn"\s*:\s*\[(.*)\]/s', function ($matches) use ($prefix) {
+                    $dependencies = $matches[1];
+                    $dependencies = preg_replace_callback('/"([a-zA-Z0-9:]+?)"/', function ($matches) use ($prefix) {
+                        return '"'.$prefix.$matches[1].'"';
+                    }, $dependencies);
+                    return '"DependsOn":[' . $dependencies . ']';
+                }, $template);
+
+                //  Update all "Fn::GetAtt": ["...", "..."] }
+                $template = preg_replace_callback('/\"Fn::GetAtt"\s*:\s*\[s*"([a-zA-Z0-9:]+?)"/', function ($matches) use ($prefix) {
+                    return '"Fn::GetAtt": ["' . $prefix . $matches[1] . '"';
+                }, $template);
+            }
+
             $array = json_decode($template, true);
             if ($array['AWSTemplateFormatVersion'] != '2010-09-09') {
                 throw new \Exception('Invalid AWSTemplateFormatVersion');
@@ -37,10 +67,11 @@ class TemplateMerger
             foreach ($topLevelKeys as $topLevelKey) {
                 if (isset($array[$topLevelKey])) {
                     foreach ($array[$topLevelKey] as $key => $value) {
-                        if (isset($mergedTemplate[$topLevelKey][$key])) {
-                            throw new \Exception("Duplicate key '$key' found in '$topLevelKey' in file '$file'");
+                        $newKey = $prefix.$key;
+                        if (isset($mergedTemplate[$topLevelKey][$newKey])) {
+                            throw new \Exception("Duplicate key '$newKey' found in '$topLevelKey'");
                         }
-                        $mergedTemplate[$topLevelKey][$key] = $value;
+                        $mergedTemplate[$topLevelKey][$newKey] = $value;
                     }
                 }
             }

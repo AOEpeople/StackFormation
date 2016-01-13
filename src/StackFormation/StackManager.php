@@ -213,8 +213,8 @@ class StackManager
         $preProcessor = new Preprocessor();
 
         $templateContents = [];
-        foreach ($stackConfig['template'] as $template) {
-            $templateContents[$template] = $preProcessor->process($template);
+        foreach ($stackConfig['template'] as $key => $template) {
+            $templateContents[$key] = $preProcessor->process($template);
         }
 
         $templateMerger = new TemplateMerger();
@@ -233,9 +233,10 @@ class StackManager
      * Update stack
      *
      * @param string $stackName
+     * @param bool $dryRun
      * @throws \Exception
      */
-    public function deployStack($stackName)
+    public function deployStack($stackName, $dryRun=false)
     {
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
 
@@ -272,7 +273,9 @@ class StackManager
         if (strpos($stackName, 'IN_PROGRESS') !== false) {
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
-            $this->getCfnClient()->updateStack($arguments);
+            if (!$dryRun) {
+                $this->getCfnClient()->updateStack($arguments);
+            }
         } else {
             $arguments['Tags'] = $this->getConfig()->getStackTags($stackName);
 
@@ -282,7 +285,9 @@ class StackManager
             }
 
             $arguments['OnFailure'] = $onFailure;
-            $this->getCfnClient()->createStack($arguments);
+            if (!$dryRun) {
+                $this->getCfnClient()->createStack($arguments);
+            }
         }
     }
 

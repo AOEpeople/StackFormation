@@ -162,7 +162,7 @@ my.template
 
 ### Template merging
 
-StackForation allows you to configure more than one template:
+StackFormation allows you to configure more than one template:
 
 ```
 stacks:
@@ -181,6 +181,30 @@ pulling in a StackFormation module like https://github.com/AOEpeople/cfn-lambdah
 You can always inspect the final merged and preprocessed template:
 ```
 bin/stackformation.php stack:template iam
+```
+
+### Prefixed template merging
+
+If you list your templates with attributes instead of a plain list, the attribute keys will be used to prefix every element of that template.
+This way you can you the same template with different input parameters instead of duplicating resources. This comes in handy for VPC setups.
+
+```
+stacks:
+  - stackname: vpc-subnets
+    template:
+      ZoneA: az.template
+      ZoneB: az.template
+      ZoneC: az.template
+    parameters:
+      ZoneAVpc: MyVPC
+      ZoneAPublicSubnetCidrBlock: '10.0.0.0/24'
+      ZoneAPrivateSubnetCidrBlock: '10.0.10.0/24'
+      ZoneAAZ: 'eu-west-1a'
+      ZoneBVpc: MyVPC
+      ZoneBAPublicSubnetCidrBlock: '10.0.1.0/24'
+      ZoneBPrivateSubnetCidrBlock: '10.0.11.0/24'
+      ZoneBAZ: 'eu-west-1b'
+      [...]
 ```
 
 ### `before`

@@ -3,7 +3,6 @@
 namespace StackFormation;
 
 use Symfony\Component\Config\Definition\Processor;
-use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Yaml\Parser;
 
 class Config
