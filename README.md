@@ -182,6 +182,25 @@ You can always inspect the final merged and preprocessed template:
 bin/stackformation.php stack:template iam
 ```
 
+### `before`
+
+You can run shell commands before the CloudFormation is being deployed.
+The commands will be executed in the directory where the stacks.yml file lives. 
+(Please note that every command is executed in a separate process. That means that you can't pass variables from one command to another 
+and you'll always end up in the same directory, unless you define everything as a single multi-line command.)
+
+Example:
+```
+stacks:
+  - stackname: 'magento-env-int-vpc'
+    template: gateway.template
+    Capabilities: CAPABILITY_IAM
+    before:
+    - cd function && npm install aws-sdk
+    - cd function && zip -r nat_gateway.zip nat_gateway.js node_modules/
+    - aws s3 cp function/nat_gateway.zip s3://bc-builds/lambda/nat_gateway.zip
+```    
+
 ### AWS SDK
 
 StackFormation uses the AWS SDK for PHP. You should configure your keys in env vars:
@@ -264,4 +283,12 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $stackmanager = new \StackFormation\StackManager();
 $stackmanager->deployStack('my-stack');
+```
+
+### Misc
+
+Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the stacks.yml
+
+```
+cat my.template | jq '.Parameters | keys' | sed 's/",/: \'\'/g' | sed 's/"//g'
 ```

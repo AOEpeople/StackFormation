@@ -253,6 +253,10 @@ class StackManager
             'TemplateBody' => $this->getPreprocessedTemplate($stackName),
         ];
 
+        if (isset($stackConfig['before']) && is_array($stackConfig['before']) && count($stackConfig['before']) > 0) {
+            $this->executeScripts($stackConfig['before'], $stackConfig['basepath']);
+        }
+
         if (isset($stackConfig['Capabilities'])) {
             $arguments['Capabilities'] = explode(',', $stackConfig['Capabilities']);
         }
@@ -273,6 +277,19 @@ class StackManager
             $arguments['OnFailure'] = $onFailure;
             $this->getCfnClient()->createStack($arguments);
         }
+    }
+
+    protected function executeScripts(array $scripts, $path)
+    {
+        $cwd = getcwd();
+        chdir($path);
+        foreach ($scripts as $script) {
+            passthru($script, $returnVar);
+            if ($returnVar !== 0) {
+                throw new \Exception('Error executing command');
+            }
+        }
+        chdir($cwd);
     }
 
     public function observeStackActivity($stackName, OutputInterface $output, $pollInterval = 10)

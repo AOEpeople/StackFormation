@@ -25,12 +25,14 @@ class ConfigTreeBuilder implements ConfigurationInterface
                         ->variableNode('parameters')->end()
                         ->variableNode('tags')->end()
                         ->variableNode('vars')->end()
+                        ->variableNode('before')->end()
                         ->variableNode('template')->end()
                         ->scalarNode('stackname')->end()
                         ->scalarNode('profile')->end()
                         ->scalarNode('description')->end()
                         ->scalarNode('OnFailure')->end()
                         ->scalarNode('Capabilities')->end()
+                        ->scalarNode('basepath')->end() // will be automatically set to the current stacks.yml file's dir
                     ->end()
                 ->end()
             ->end();

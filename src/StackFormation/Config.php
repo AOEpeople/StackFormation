@@ -27,6 +27,7 @@ class Config
             $tmp = $yamlParser->parse(file_get_contents($file));
             if (isset($tmp['stacks']) && is_array($tmp['stacks'])) {
                 foreach ($tmp['stacks'] as &$stackConfig) {
+                    $stackConfig['basepath'] = $basePath;
                     $stackConfig['template'] = (array)$stackConfig['template'];
                     foreach($stackConfig['template'] as &$template) {
                         $realPathFile = realpath($basePath . '/' . $template);
