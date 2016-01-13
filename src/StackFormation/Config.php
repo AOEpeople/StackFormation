@@ -36,11 +36,13 @@ class Config
                         $template = $realPathFile;
                     }
 
-                    $realPathFile = realpath($basePath . '/' . $stackConfig['stackPolicy']);
-                    if ($realPathFile === false) {
-                        throw new \Exception('Could not find stack policy file ' . $template, 1452679777);
+                    if (isset($stackConfig['stackPolicy'])) {
+                        $realPathFile = realpath($basePath . '/' . $stackConfig['stackPolicy']);
+                        if ($realPathFile === false) {
+                            throw new \Exception('Could not find stack policy file ' . $template, 1452679777);
+                        }
+                        $stackConfig['stackPolicy'] = $realPathFile;
                     }
-                    $stackConfig['stackPolicy'] = $realPathFile;
                 }
             }
             $config[] = $tmp;
