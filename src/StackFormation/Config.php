@@ -6,7 +6,6 @@ use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Yaml\Parser;
 
-
 class Config
 {
 
@@ -29,7 +28,7 @@ class Config
                 foreach ($tmp['stacks'] as &$stackConfig) {
                     $stackConfig['basepath'] = $basePath;
                     $stackConfig['template'] = (array)$stackConfig['template'];
-                    foreach($stackConfig['template'] as &$template) {
+                    foreach ($stackConfig['template'] as &$template) {
                         $realPathFile = realpath($basePath . '/' . $template);
                         if ($realPathFile === false) {
                             throw new \Exception('Could not find template file ' . $template);
