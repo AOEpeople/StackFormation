@@ -413,6 +413,7 @@ class StackManager
                 'Status' => $event['ResourceStatus'],
                 'ResourceType' => $event['ResourceType'],
                 'LogicalResourceId' => $event['LogicalResourceId'],
+                'ResourceStatus' => $event['ResourceStatus'],
                 'ResourceStatusReason' => isset($event['ResourceStatusReason']) ? $event['ResourceStatusReason'] : '',
             ];
         }

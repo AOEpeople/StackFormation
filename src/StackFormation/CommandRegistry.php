@@ -19,6 +19,7 @@ class CommandRegistry
             new Command\TemplateDiffCommand(),
             new Command\ValidateTemplateCommand(),
             new Command\UpdateRoute53AliasCommand(),
+            new Command\TimelineCommand()
         ];
     }
 }
