@@ -236,7 +236,7 @@ class StackManager
      * @param bool $dryRun
      * @throws \Exception
      */
-    public function deployStack($stackName, $dryRun=false)
+    public function deployStack($stackName, $dryRun = false)
     {
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
 
@@ -505,7 +505,7 @@ class StackManager
                 }
                 if (strpos($tmp['ParameterKey'], '*') !== false) {
                     $count = 0;
-                    foreach(array_keys($stackConfig['template']) as $key) {
+                    foreach (array_keys($stackConfig['template']) as $key) {
                         if (!is_int($key)) {
                             $count++;
                             $newParameter = $tmp;

@@ -47,7 +47,9 @@ class TimelineCommand extends AbstractCommand
             if (isset($itemsByGroup[$groupId])) {
                 $lastItem = end($itemsByGroup[$groupId]);
                 $lastKey = key($itemsByGroup[$groupId]);
-                if ($lastItem['status'] == $status) { continue; }
+                if ($lastItem['status'] == $status) {
+                    continue;
+                }
                 $itemsByGroup[$groupId][$lastKey]['end'] = $event["Timestamp"];
             }
             $tmp = [
@@ -58,10 +60,18 @@ class TimelineCommand extends AbstractCommand
                 'content' => '&nbsp;',
                 'status' => $status
             ];
-            if (!preg_match('/_IN_PROGRESS$/', $status)) { $tmp['type'] = 'point'; }
-            if (preg_match('/_IN_PROGRESS$/', $status)) { $tmp['className'] .= ' in_progress'; }
-            if (preg_match('/_COMPLETE$/', $status)) { $tmp['className'] .= ' complete'; }
-            if (preg_match('/_FAILED$/', $status)) { $tmp['className'] .= ' failed'; }
+            if (!preg_match('/_IN_PROGRESS$/', $status)) {
+                $tmp['type'] = 'point';
+            }
+            if (preg_match('/_IN_PROGRESS$/', $status)) {
+                $tmp['className'] .= ' in_progress';
+            }
+            if (preg_match('/_COMPLETE$/', $status)) {
+                $tmp['className'] .= ' complete';
+            }
+            if (preg_match('/_FAILED$/', $status)) {
+                $tmp['className'] .= ' failed';
+            }
             $itemsByGroup[$groupId][] = $tmp;
         }
 
