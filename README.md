@@ -51,6 +51,36 @@ stacks/
 
 All `stacks.yml` files will be merged together.
 
+### Using stack policies
+
+To prevent stack resources from being unintentionally updated or deleted during a stack update you can use [stack policies](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html).
+Stack policies apply only during stack updates and should be used only as a fail-safe mechanism to prevent accidental 
+updates to certain stack resources.
+
+It's suggested to create a stack_policies directory below the corresponding stack directory:
+```
+stacks/
+  stack1/
+    stack_policies/
+    stacks.yml
+    ...
+  stack2/
+    stack_policies/
+    stacks.yml
+    ...
+  ...
+```
+
+You have to tell StackFormation where it could find the stack policy. 
+
+Example:
+```
+stacks:
+  - stackname: 'my-stack'
+    template: 'templates/my-stack.template'
+    stackPolicy: 'stack_policies/my-stack.json'
+```
+
 ### Using composer
 
 You can pull in StackFormation modules via composer. Look at the [cfn-lambdahelper](https://github.com/AOEpeople/cfn-lambdahelper) 
