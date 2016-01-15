@@ -74,9 +74,9 @@ class TimelineCommand extends AbstractCommand
         <html>
         <head>
             <title>AWS CloudFormation Stack Event Visualization</title>
-            <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.js"></script>
-            <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.css" rel="stylesheet" type="text/css" />
+            <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+            <script src="//cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.js"></script>
+            <link href="//cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.css" rel="stylesheet" type="text/css" />
             <style>
                 body, html { font-family: arial, sans-serif; font-size: 11pt; }
                 #visualization { box-sizing: border-box; width: 100%; height: 300px; }
