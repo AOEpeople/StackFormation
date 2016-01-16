@@ -53,7 +53,7 @@ class TimelineCommand extends AbstractCommand
                 $itemsByGroup[$groupId][$lastKey]['end'] = $event["Timestamp"];
             }
             $tmp = [
-                'className' => strtolower($status),
+                'className' => strtolower($status) . ' ' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '-', $event["ResourceType"])),
                 // 'id'=> $event["EventId"],
                 'group' => $groupId,
                 'start' => $event["Timestamp"],
@@ -84,9 +84,9 @@ class TimelineCommand extends AbstractCommand
         <html>
         <head>
             <title>AWS CloudFormation Stack Event Visualization</title>
-            <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
-            <script src="//cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.js"></script>
-            <link href="//cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.css" rel="stylesheet" type="text/css" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.js"></script>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.12.0/vis.min.css" rel="stylesheet" type="text/css" />
             <style>
                 body, html { font-family: arial, sans-serif; font-size: 11pt; }
                 #visualization { box-sizing: border-box; width: 100%; height: 300px; }
@@ -96,6 +96,15 @@ class TimelineCommand extends AbstractCommand
                 .vis-item.complete { border-color: green; border-width: 8px; border-radius: 8px; }
                 em { font-size: smaller; }
                 .vis-labelset .vis-label { background-color: #eee; }
+                .vis-item.aws--cloudformation--waitcondition.in_progress {
+                    background: repeating-linear-gradient(
+                      to right,
+                      #f6ba52,
+                      #f6ba52 10px,
+                      #ffd180 10px,
+                      #ffd180 20px
+                    );
+                }
             </style>
         </head>
         <body>
