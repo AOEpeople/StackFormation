@@ -15,7 +15,7 @@ class ShowLiveCommand extends AbstractCommand
     {
         $this
             ->setName('stack:show-live')
-            ->setDescription('Show parameters and outputs from live stacks')
+            ->setDescription('Show parameters, resources and outputs from live stacks')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
