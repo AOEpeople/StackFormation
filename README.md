@@ -105,11 +105,12 @@ stacks:
 ### Parameter Values
 
 - Empty value: keep previous value (when updating existing stack)
-- Output lookup: `output:<stack>:<output>` -> output value
-- Resource lookup: `resource:<stack>:<logicalResource>` -> physical Id of that resource
-- Parameter lookup: `parameter:<stack>:<logicalResource>` -> parameter value (note that some parameters will not be shown if they're 'no_echo')
-- Environment variable lookup: `env:<var>` -> value of environment variable 'var'
-- Stack/global variable lookup: `var:<var>` -> value variable 'var'
+- Output lookup: `{output:<stack>:<output>}` -> output value
+- Resource lookup: `{resource:<stack>:<logicalResource>}` -> physical Id of that resource
+- Parameter lookup: `{parameter:<stack>:<logicalResource>}` -> parameter value (note that some parameters will not be shown if they're 'no_echo')
+- Environment variable lookup: `{env:<var>}` -> value of environment variable 'var'
+- Stack/global variable lookup: `{var:<var>}` -> value variable 'var'
+- Current timestamp: `{tstamp}` -> e.g. '1453151115'
 
 Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
 one stacks to the input paramaters needed in another stack that sits on top of the first one without manually 
