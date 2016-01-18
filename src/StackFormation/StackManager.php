@@ -441,17 +441,11 @@ class StackManager
         );
 
         // {var:...}
-        $string = preg_replace_callback(
-            '/\{tstamp}/',
-            function ($matches) use ($vars) {
-                static $time;
-                if (!isset($time)) {
-                    $time = time();
-                }
-                return $time;
-            },
-            $string
-        );
+        static $time;
+        if (!isset($time)) {
+            $time = time();
+        }
+        $string = preg_replace('/\{tstamp}/', $time, $string);
 
         // {env:...}
         $string = preg_replace_callback(
