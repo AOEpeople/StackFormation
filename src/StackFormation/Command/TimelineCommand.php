@@ -50,6 +50,11 @@ class TimelineCommand extends AbstractCommand
                 if ($lastItem['status'] == $status) {
                     continue;
                 }
+                $duration = strtotime($event["Timestamp"]) - strtotime($itemsByGroup[$groupId][$lastKey]['start']);
+                if ($duration > 15) {
+                    $content = floor($duration / 60) . ':' . sprintf("%02d", (int)$duration % 60);
+                    $itemsByGroup[$groupId][$lastKey]['content'] = $content;
+                }
                 $itemsByGroup[$groupId][$lastKey]['end'] = $event["Timestamp"];
             }
             $tmp = [
