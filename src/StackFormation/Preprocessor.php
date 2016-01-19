@@ -43,7 +43,7 @@ class Preprocessor
 
     public function injectFilecontent($jsonString, $basePath)
     {
-        return preg_replace_callback(
+        $jsonString = preg_replace_callback(
             '/(\s*)(.*){\s*"Fn::FileContent(Unpretty|TrimLines|Minify)?"\s*:\s*"(.+?)"\s*}/',
             function (array $matches) use ($basePath) {
                 $file = $basePath . '/' . end($matches);
@@ -59,6 +59,15 @@ class Preprocessor
                         $fileContent = \JShrink\Minifier::minify($fileContent, ['flaggedComments' => false]);
                     }
                 }
+
+                $fileContent = preg_replace_callback(
+                    '/###JSON###(.+?)######/',
+                    function (array $m) {
+                        return "###JSON###" . base64_encode($m[1]) . "######";
+                    },
+                    $fileContent
+                );
+
                 $lines = explode("\n", $fileContent);
                 foreach ($lines as $key => &$line) {
                     if ($matches[3] == 'TrimLines') {
@@ -69,11 +78,13 @@ class Preprocessor
                     }
                     $line .= "\n";
                 }
+
                 if ($matches[3] == 'Unpretty') {
                     $result = ' {"Fn::Join": ["", ' . json_encode(array_values($lines)) . ']}';
                 } else {
                     $result = ' {"Fn::Join": ["", ' . json_encode(array_values($lines), JSON_PRETTY_PRINT) . ']}';
                 }
+
                 $whitespace = trim($matches[1], "\n");
                 $result = str_replace("\n", "\n" . $whitespace, $result);
 
@@ -81,6 +92,16 @@ class Preprocessor
             },
             $jsonString
         );
+
+        $jsonString = preg_replace_callback(
+            '/###JSON###(.+?)######/',
+            function (array $m) {
+                return '", ' . base64_decode($m[1]) . ', "';
+            },
+            $jsonString
+        );
+
+        return $jsonString;
     }
 
     public function injectInclude($string, $basePath)
