@@ -495,7 +495,7 @@ class StackManager
         return $string;
     }
 
-    public function getParametersFromConfig($stackName, $resolvePlaceholders = true)
+    public function getParametersFromConfig($stackName, $resolvePlaceholders=true, $flatten=true)
     {
 
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
@@ -527,6 +527,15 @@ class StackManager
                     $parameters[] = $tmp;
                 }
             }
+        }
+
+
+        if ($flatten) {
+            $tmp = [];
+            foreach ($parameters as $parameter) {
+                $tmp[$parameter['ParameterKey']] = $parameter['ParameterValue'];
+            }
+            return $tmp;
         }
 
         return $parameters;

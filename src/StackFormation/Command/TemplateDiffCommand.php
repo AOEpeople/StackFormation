@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command;
 
+use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,7 +14,7 @@ class TemplateDiffCommand extends AbstractCommand
     {
         $this
             ->setName('stack:diff')
-            ->setDescription('Compare the local copy with the current live stack')
+            ->setDescription('Compare the local template and input parameters with the current live stack')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
@@ -31,20 +32,65 @@ class TemplateDiffCommand extends AbstractCommand
         $stack = $input->getArgument('stack');
 
         $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
-        $live = trim($this->stackManager->getTemplate($effectiveStackName));
-        $file_live = tempnam(sys_get_temp_dir(), 'sfn_live_');
-        file_put_contents($file_live, $live);
 
-        $local = trim($this->stackManager->getPreprocessedTemplate($stack));
-        $file_local = tempnam(sys_get_temp_dir(), 'sfn_local_');
-        file_put_contents($file_local, $local);
+        $parameters_live = $this->stackManager->getParameters($effectiveStackName);
+        $parameters_local = $this->stackManager->getParametersFromConfig($effectiveStackName, true, true);
+
+        ksort($parameters_live);
+        ksort($parameters_local);
+
+
+
+        $formatter = new FormatterHelper();
+        $output->writeln("\n" . $formatter->formatBlock(['Parameters:'], 'error', true) . "\n");
+
+        $returnVar = $this->printDiff(
+            $this->arrayToString($parameters_live),
+            $this->arrayToString($parameters_local)
+        );
+        if ($returnVar == 0) {
+            $output->writeln('No changes'."\n");
+        }
+
+        $formatter = new FormatterHelper();
+        $output->writeln("\n" . $formatter->formatBlock(['Template:'], 'error', true) . "\n");
+        $returnVar = $this->printDiff(
+            trim($this->stackManager->getTemplate($effectiveStackName)),
+            trim($this->stackManager->getPreprocessedTemplate($stack))
+        );
+        if ($returnVar == 0) {
+            $output->writeln('No changes'."\n");
+        }
+    }
+
+    protected function arrayToString(array $a)
+    {
+        $lines = [];
+        foreach ($a as $key => $value) {
+            $lines[] = "$key: $value";
+        }
+        return implode("\n", $lines);
+    }
+
+    protected function printDiff($stringA, $stringB)
+    {
+        if ($stringA === $stringB) {
+            return 0; // that's what diff would return
+        }
+
+        $fileA = tempnam(sys_get_temp_dir(), 'sfn_a_');
+        file_put_contents($fileA, $stringA);
+
+        $fileB = tempnam(sys_get_temp_dir(), 'sfn_b_');
+        file_put_contents($fileB, $stringB);
 
         $command = is_file('/usr/bin/colordiff') ? 'colordiff' : 'diff';
-        $command .= " -u $file_live $file_local";
+        $command .= " -u $fileA $fileB";
 
-        passthru($command);
+        passthru($command, $returnVar);
 
-        unlink($file_live);
-        unlink($file_local);
+        unlink($fileA);
+        unlink($fileB);
+        return $returnVar;
     }
 }
