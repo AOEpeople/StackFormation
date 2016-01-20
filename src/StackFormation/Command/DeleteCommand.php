@@ -37,7 +37,6 @@ class DeleteCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
         $this->interactAskForLiveStack($input, $output, true, true);
 
         if (!$input->getOption('force')) {
