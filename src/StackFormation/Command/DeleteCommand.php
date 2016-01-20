@@ -37,6 +37,8 @@ class DeleteCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
+        $stack = $input->getArgument('stack');
+        var_dump($stack);
         $this->interactAskForLiveStack($input, $output, true, true);
 
         if (!$input->getOption('force')) {
@@ -47,10 +49,12 @@ class DeleteCommand extends AbstractCommand
                 throw new \Exception('Operation aborted');
             }
         }
+        var_dump($stack);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        var_dump($stack);
         $stacks = $input->getArgument('stack');
         if (count($stacks) == 0) {
             $output->writeln("No stacks deleted.");

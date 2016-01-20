@@ -27,4 +27,9 @@ class Helper
 
         return $found;
     }
+
+    public function isValidArn($arn)
+    {
+        return preg_match('/a-zA-Z][-a-zA-Z0-9]*|arn:[-a-zA-Z0-9:/._+]*/', $arn);
+    }
 }
