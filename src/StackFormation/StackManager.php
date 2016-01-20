@@ -157,7 +157,7 @@ class StackManager
     /**
      * @return array
      */
-    public function getStacksFromApi()
+    public function getStacksFromApi($fresh=false)
     {
         $that = $this;
         return StaticCache::get('stacks-from-api', function() use ($that) {
@@ -188,7 +188,7 @@ class StackManager
             }
 
             return $stacks;
-        });
+        }, $fresh);
     }
 
     public function deleteStack($stackName)
@@ -398,7 +398,7 @@ class StackManager
 
     public function getStackStatus($stackName)
     {
-        $stacksFromApi = $this->getStacksFromApi();
+        $stacksFromApi = $this->getStacksFromApi(true);
         if (isset($stacksFromApi[$stackName])) {
             return $stacksFromApi[$stackName]['Status'];
         }

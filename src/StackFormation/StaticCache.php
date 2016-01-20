@@ -28,9 +28,9 @@ class StaticCache
      * @return mixed
      * @throws \Exception
      */
-    public static function get($key, callable $callback = null)
+    public static function get($key, callable $callback = null, $fresh=false)
     {
-        if (!self::has($key)) {
+        if ($fresh || !self::has($key)) {
             if (!is_null($callback)) {
                 self::set($key, $callback());
             } else {
