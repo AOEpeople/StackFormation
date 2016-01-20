@@ -123,6 +123,10 @@ abstract class AbstractCommand extends Command
                 $formattedBlock = $formatter->formatBlock(['[CloudFormationException]', '', $message], 'error', true);
                 $output->writeln("\n\n$formattedBlock\n\n");
 
+                if ($output->isVerbose()) {
+                    $output->writeln($exception->getTraceAsString());
+                }
+
                 return 1; // exit code
             }
         }
