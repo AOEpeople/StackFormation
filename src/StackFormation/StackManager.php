@@ -159,33 +159,36 @@ class StackManager
      */
     public function getStacksFromApi()
     {
-        $res = $this->getCfnClient()->listStacks(
-            [
-                'StackStatusFilter' => [
-                    'CREATE_IN_PROGRESS',
-                    'CREATE_FAILED',
-                    'CREATE_COMPLETE',
-                    'ROLLBACK_IN_PROGRESS',
-                    'ROLLBACK_FAILED',
-                    'ROLLBACK_COMPLETE',
-                    'DELETE_IN_PROGRESS',
-                    'DELETE_FAILED',
-                    'UPDATE_IN_PROGRESS',
-                    'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-                    'UPDATE_COMPLETE',
-                    'UPDATE_ROLLBACK_IN_PROGRESS',
-                    'UPDATE_ROLLBACK_FAILED',
-                    'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
-                    'UPDATE_ROLLBACK_COMPLETE',
-                ],
-            ]
-        );
-        $stacks = [];
-        foreach ($res->search('StackSummaries[]') as $stack) {
-            $stacks[$stack['StackName']] = ['Status' => $stack['StackStatus']];
-        }
+        $that = $this;
+        return StaticCache::get('stacks-from-api', function() use ($that) {
+            $res = $that->getCfnClient()->listStacks(
+                [
+                    'StackStatusFilter' => [
+                        'CREATE_IN_PROGRESS',
+                        'CREATE_FAILED',
+                        'CREATE_COMPLETE',
+                        'ROLLBACK_IN_PROGRESS',
+                        'ROLLBACK_FAILED',
+                        'ROLLBACK_COMPLETE',
+                        'DELETE_IN_PROGRESS',
+                        'DELETE_FAILED',
+                        'UPDATE_IN_PROGRESS',
+                        'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
+                        'UPDATE_COMPLETE',
+                        'UPDATE_ROLLBACK_IN_PROGRESS',
+                        'UPDATE_ROLLBACK_FAILED',
+                        'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
+                        'UPDATE_ROLLBACK_COMPLETE',
+                    ],
+                ]
+            );
+            $stacks = [];
+            foreach ($res->search('StackSummaries[]') as $stack) {
+                $stacks[$stack['StackName']] = ['Status' => $stack['StackStatus']];
+            }
 
-        return $stacks;
+            return $stacks;
+        });
     }
 
     public function deleteStack($stackName)
