@@ -16,15 +16,20 @@ class Helper
         return preg_match('/^' . $regex . '$/is', $haystack);
     }
 
-    public function find($wildcardPattern, $choices)
+    public function find($wildcardPatterns, $choices)
     {
+        if (!is_array($wildcardPatterns)) {
+            $wildcardPatterns = [$wildcardPatterns];
+        }
         $found = [];
         foreach ($choices as $choice) {
-            if ($this->matchWildcard($wildcardPattern, $choice)) {
-                $found[] = $choice;
+            foreach ($wildcardPatterns as $wildcardPattern) {
+                if ($this->matchWildcard($wildcardPattern, $choice)) {
+                    $found[] = $choice;
+                }
             }
         }
-
+        $found = array_unique($found);
         return $found;
     }
 

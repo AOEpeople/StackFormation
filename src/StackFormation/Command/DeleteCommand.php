@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command;
 
+use StackFormation\Helper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -37,26 +38,52 @@ class DeleteCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output, true, true);
+        $this->interactAskForLiveStack($input, $output);
 
         if (!$input->getOption('force')) {
-            $stacks = "\n - " . implode("\n - ", $input->getArgument('stack'));
+            $stacks = $this->getResolvedStacks($input);
+            $stacks = "\n - " . implode("\n - ", $stacks) . "\n";
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion("Are you sure you want to delete following stacks? $stacks [y/N] ", false);
             if (!$helper->ask($input, $output, $question)) {
                 throw new \Exception('Operation aborted');
             }
+            $input->setOption('force', true);
         }
+    }
+
+    protected function getResolvedStacks(InputInterface $input)
+    {
+        $helper = new Helper();
+        $stacks = $helper->find(
+            (array)$input->getArgument('stack'),
+            $this->getRemoteStacks()
+        );
+
+        $except = $input->getOption('except');
+        if (!empty($except)) {
+            if (($key = array_search($except, $stacks)) !== false) {
+                unset($stacks[$key]);
+            }
+        }
+
+        return $stacks;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stacks = $input->getArgument('stack');
+        if (!$input->getOption('force')) {
+            throw new \Exception('Operation aborted (use --force)');
+        }
+
+        $stacks = $this->getResolvedStacks($input);
+
         if (count($stacks) == 0) {
             $output->writeln("No stacks deleted.");
         }
+
         foreach ($stacks as $stack) {
-            $this->stackManager->deleteStack($stack);
+            // $this->stackManager->deleteStack($stack);
             $output->writeln("Triggered deletion of stack '$stack'.");
         }
     }

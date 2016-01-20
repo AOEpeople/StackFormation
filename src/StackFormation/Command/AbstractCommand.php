@@ -46,12 +46,17 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
-    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $multiple = false, $resolveWildcard = false)
+    protected function getRemoteStacks()
+    {
+        return array_keys($this->stackManager->getStacksFromApi());
+    }
+
+    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
         $choices = null;
         if (empty($stack)) {
-            $choices = array_keys($this->stackManager->getStacksFromApi());
+            $choices = $this->getRemoteStacks();
 
             $helper = $this->getHelper('question');
             $question = new ChoiceQuestion('Please select a stack', $choices);
@@ -61,39 +66,8 @@ abstract class AbstractCommand extends Command
             $stack = $helper->ask($input, $output, $question);
             $output->writeln('Selected Stack: ' . $stack);
 
-            if ($multiple) {
-                $input->setArgument('stack', [$stack]);
-            } else {
-                $input->setArgument('stack', $stack);
-            }
+            $input->setArgument('stack', $stack);
         }
-
-        if ($multiple && $resolveWildcard) {
-            if (is_null($choices)) {
-                $choices = array_keys($this->stackManager->getStacksFromApi());
-            }
-            $helper = new Helper();
-            $resolvedStacks = [];
-            $stacks = $input->getArgument('stack');
-            foreach ($stacks as $stack) {
-                $resolvedStacks = array_merge($resolvedStacks, $helper->find($stack, $choices));
-            }
-            $resolvedStacks = array_unique($resolvedStacks);
-            $input->setArgument('stack', $resolvedStacks);
-        }
-
-        if ($multiple) {
-            $except = $input->getOption('except');
-            if (!empty($except)) {
-                $stacks = $input->getArgument('stack');
-                if (($key = array_search($except, $stacks)) !== false) {
-                    $output->writeln('Excluding stack: ' . $stacks[$key]);
-                    unset($stacks[$key]);
-                }
-                $input->setArgument('stack', $stacks);
-            }
-        }
-
         return $stack;
     }
 
