@@ -495,7 +495,7 @@ class StackManager
         return $string;
     }
 
-    public function getParametersFromConfig($stackName, $resolvePlaceholders=true, $flatten=true)
+    public function getParametersFromConfig($stackName, $resolvePlaceholders=true, $flatten=false)
     {
 
         $stackConfig = $this->getConfig()->getStackConfig($stackName);
