@@ -157,10 +157,10 @@ class StackManager
     /**
      * @return array
      */
-    public function getStacksFromApi($fresh=false)
+    public function getStacksFromApi($fresh = false)
     {
         $that = $this;
-        return StaticCache::get('stacks-from-api', function() use ($that) {
+        return StaticCache::get('stacks-from-api', function () use ($that) {
             $res = $that->getCfnClient()->listStacks(
                 [
                     'StackStatusFilter' => [
@@ -498,7 +498,7 @@ class StackManager
         return $string;
     }
 
-    public function getParametersFromConfig($stackName, $resolvePlaceholders=true, $flatten=false)
+    public function getParametersFromConfig($stackName, $resolvePlaceholders = true, $flatten = false)
     {
 
         $stackConfig = $this->getConfig()->getStackConfig($stackName);

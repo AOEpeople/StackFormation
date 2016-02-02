@@ -28,7 +28,7 @@ class TemplateMerger
         // If we have no description and this is a single template, use the single template's description
         if (empty($description) && count($templates) === 1) {
             $template = reset($templates);
-            if(!empty($template['Description'])) {
+            if (!empty($template['Description'])) {
                 $description = $template['Description'];
             }
         }

@@ -18,7 +18,7 @@ namespace StackFormation;
 class StaticCache
 {
 
-    static $cache = array();
+    protected static $cache = [];
 
     /**
      * Get (and generate)
@@ -28,7 +28,7 @@ class StaticCache
      * @return mixed
      * @throws \Exception
      */
-    public static function get($key, callable $callback = null, $fresh=false)
+    public static function get($key, callable $callback = null, $fresh = false)
     {
         if ($fresh || !self::has($key)) {
             if (!is_null($callback)) {
