@@ -54,7 +54,6 @@ abstract class AbstractCommand extends Command
     public function interactAskForLiveStack(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
-        $choices = null;
         if (empty($stack)) {
             $choices = $this->getRemoteStacks();
 
@@ -68,6 +67,7 @@ abstract class AbstractCommand extends Command
 
             $input->setArgument('stack', $stack);
         }
+
         return $stack;
     }
 
