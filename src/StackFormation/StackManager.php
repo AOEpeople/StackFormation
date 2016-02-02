@@ -221,7 +221,7 @@ class StackManager
         }
 
         $templateMerger = new TemplateMerger();
-        $description = !empty($stackConfig['description']) ? $stackConfig['description'] : 'Merged Template';
+        $description = !empty($stackConfig['description']) ? $stackConfig['description'] : null;
         return $templateMerger->merge($templateContents, $description);
     }
 

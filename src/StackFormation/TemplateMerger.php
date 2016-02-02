@@ -5,19 +5,15 @@ namespace StackFormation;
 class TemplateMerger
 {
 
-    public function merge(array $templates, $description)
+    public function merge(array $templates, $description = null)
     {
         if (count($templates) == 0) {
             throw new \InvalidArgumentException('No templates given');
         }
 
-        if (count($templates) == 1) {
-            return end($templates);
-        }
-
         $mergedTemplate = [
             'AWSTemplateFormatVersion' => '2010-09-09',
-            'Description' => $description
+            'Description'              => 'Merged Template',
         ];
 
         $topLevelKeys = [
@@ -26,8 +22,16 @@ class TemplateMerger
             'Conditions',
             'Resources',
             'Outputs',
-            'Metadata'
+            'Metadata',
         ];
+
+        // If we have no description and this is a single template, use the single template's description
+        if (empty($description) && count($templates) === 1) {
+            $template = reset($templates);
+            if(!empty($template['Description'])) {
+                $description = $template['Description'];
+            }
+        }
 
         foreach ($templates as $key => $template) {
             $prefix = '';
@@ -76,6 +80,12 @@ class TemplateMerger
                 }
             }
         }
+
+        // If a description override is specified use it
+        if (!empty($description)) {
+            $mergedTemplate['Description'] = trim($description);
+        }
+
         return json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
