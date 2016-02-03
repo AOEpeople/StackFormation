@@ -111,6 +111,9 @@ class TemplateMerger
         if (strlen($json) > 51200) { // that's the maximum allowed size of a CloudFormation template
             $json = json_encode($mergedTemplate, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
+        if (strlen($json) > 51200) {
+            throw new \Exception('Template too big. (Must be smaller than 51200 bytes)');
+        }
         return $json;
     }
 }
