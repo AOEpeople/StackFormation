@@ -107,6 +107,10 @@ class TemplateMerger
             $mergedTemplate['Description'] = trim($description);
         }
 
-        return json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $json = json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (strlen($json) > 51200) { // that's the maximum allowed size of a CloudFormation template
+            $json = json_encode($mergedTemplate, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+        return $json;
     }
 }
