@@ -86,6 +86,9 @@ class TemplateMerger
             }
 
             $array = json_decode($template, true);
+            if (!is_array($array)) {
+                throw new \Exception('Error decoding file ' . $key);
+            }
             if ($array['AWSTemplateFormatVersion'] != '2010-09-09') {
                 throw new \Exception('Invalid AWSTemplateFormatVersion');
             }
