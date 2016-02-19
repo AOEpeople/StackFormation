@@ -50,7 +50,9 @@ class StackManager
             if (!isset($this->parametersCache[$stackName][$key])) {
                 throw new \Exception("Key '$key' not found");
             }
-
+            if ($this->parametersCache[$stackName][$key] == '****') {
+                throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
+            }
             return $this->parametersCache[$stackName][$key];
         }
 
@@ -83,7 +85,9 @@ class StackManager
             if (!isset($this->outputsCache[$stackName][$key])) {
                 throw new \Exception("Key '$key' not found");
             }
-
+            if ($this->outputsCache[$stackName][$key] == '****') {
+                throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
+            }
             return $this->outputsCache[$stackName][$key];
         }
 
