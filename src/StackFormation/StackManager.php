@@ -436,7 +436,7 @@ class StackManager
 
         // {var:...}
         $string = preg_replace_callback(
-            '/\{var:(.*?)\}/',
+            '/\{var:([^:\}]+?)\}/',
             function ($matches) use ($vars) {
                 if (!isset($vars[$matches[1]])) {
                     throw new \Exception("Variable '{$matches[1]}' not found");
