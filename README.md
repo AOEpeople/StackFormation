@@ -109,6 +109,7 @@ stacks:
 - Resource lookup: `{resource:<stack>:<logicalResource>}` -> physical Id of that resource
 - Parameter lookup: `{parameter:<stack>:<logicalResource>}` -> parameter value (note that some parameters will not be shown if they're 'no_echo')
 - Environment variable lookup: `{env:<var>}` -> value of environment variable 'var'
+- Environment variable lookup with default value fallback: `{env:<var>:<defaultValue>}` -> value of environment variable 'var' falling back to 'defaultValue' if env var is not set
 - Stack/global variable lookup: `{var:<var>}` -> value variable 'var'
 - Current timestamp: `{tstamp}` -> e.g. '1453151115'
 

@@ -452,10 +452,23 @@ class StackManager
 
         // {env:...}
         $string = preg_replace_callback(
-            '/\{env:(.*?)\}/',
+            '/\{env:([^:\}]+?)\}/',
             function ($matches) {
                 if (!getenv($matches[1])) {
                     throw new \Exception("Environment variable '{$matches[1]}' not found");
+                }
+
+                return getenv($matches[1]);
+            },
+            $string
+        );
+
+        // {env:...:...} (with default value if env var is not set)
+        $string = preg_replace_callback(
+            '/\{env:(.*?):(.*?)\}/',
+            function ($matches) {
+                if (!getenv($matches[1])) {
+                    return $matches[2];
                 }
 
                 return getenv($matches[1]);
