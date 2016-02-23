@@ -57,6 +57,10 @@ class Preprocessor
                     $ext = pathinfo($file, PATHINFO_EXTENSION);
                     if ($ext === 'js') {
                         $fileContent = \JShrink\Minifier::minify($fileContent, ['flaggedComments' => false]);
+                        $size = strlen($fileContent);
+                        if ($size > 2048) {
+                            throw new \Exception("Minified file is still larger than 2048 bytes ($size)");
+                        }
                     }
                 }
 
