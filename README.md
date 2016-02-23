@@ -383,6 +383,14 @@ Example:
 [...]
 ```
 
+### Inject raw JSON
+
+```
+###JSON###
+{ "hello": "world" }
+######
+```
+
 ### Commands
 
 - stack:list
