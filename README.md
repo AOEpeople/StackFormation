@@ -391,13 +391,6 @@ Example:
 ######
 ```
 
-### Commands
-
-- stack:list
-- stack:deploy
-- stack:delete
-- stack:observe
-
 ### PHP 
 
 Deploy a stack programmatically
