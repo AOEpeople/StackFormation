@@ -347,8 +347,12 @@ class StackManager
         chdir($cwd);
     }
 
-    public function observeStackActivity($stackName, OutputInterface $output, $pollInterval = 10)
+    public function observeStackActivity($stackName, OutputInterface $output, $pollInterval = 10, $deleteOnSignal=false)
     {
+        if ($deleteOnSignal) {
+            $terminator = new Terminator($stackName, $this, $output);
+            $terminator->setupSignalHandler();
+        }
 
         $returnValue = 0;
         $printedEvents = [];

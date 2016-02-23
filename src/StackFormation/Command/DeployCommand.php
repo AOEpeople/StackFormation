@@ -27,6 +27,12 @@ class DeployCommand extends AbstractCommand
                 'Observe stack after'
             )
             ->addOption(
+                'deleteOnTerminate',
+                null,
+                InputOption::VALUE_NONE,
+                'Delete current stack if StackFormation received SIGTERM (e.g. Jenkins job abort) or SIGINT (e.g. CTRL+C)'
+            )
+            ->addOption(
                 'dryrun',
                 'd',
                 InputOption::VALUE_NONE,
@@ -47,16 +53,23 @@ class DeployCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dryRun = $input->getOption('dryrun');
         $stack = $input->getArgument('stack');
+        $dryRun = $input->getOption('dryrun');
+        $deleteOnTerminate = $input->getOption('deleteOnTerminate');
+        $observe = $input->getOption('observe');
+
+        if ($deleteOnTerminate && !$observe) {
+            throw new \Exception('--deleteOnTerminate can only be used with --observe');
+        }
+
         $this->stackManager->deployStack($stack, $dryRun);
 
         if (!$dryRun) {
             $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
             $output->writeln("Triggered deployment of stack '$effectiveStackName'.");
 
-            if ($input->getOption('observe')) {
-                return $this->stackManager->observeStackActivity($effectiveStackName, $output);
+            if ($observe) {
+                return $this->stackManager->observeStackActivity($effectiveStackName, $output, 10, $deleteOnTerminate);
             } else {
                 $output->writeln("\n-> Run this to observe the stack creation/update:");
                 $output->writeln("{$GLOBALS['argv'][0]} stack:observe $effectiveStackName\n");

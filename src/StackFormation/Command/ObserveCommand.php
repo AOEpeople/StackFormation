@@ -4,6 +4,7 @@ namespace StackFormation\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ObserveCommand extends AbstractCommand
@@ -18,6 +19,12 @@ class ObserveCommand extends AbstractCommand
                 'stack',
                 InputArgument::REQUIRED,
                 'Stack'
+            )
+            ->addOption(
+                'deleteOnTerminate',
+                null,
+                InputOption::VALUE_NONE,
+                'Delete current stack if StackFormation received SIGTERM (e.g. Jenkins job abort) or SIGINT (e.g. CTRL+C)'
             );
     }
 
@@ -29,7 +36,8 @@ class ObserveCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
+        $deleteOnTerminate = $input->getOption('deleteOnTerminate');
 
-        return $this->stackManager->observeStackActivity($stack, $output);
+        return $this->stackManager->observeStackActivity($stack, $output, 10, $deleteOnTerminate);
     }
 }

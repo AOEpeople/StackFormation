@@ -54,20 +54,20 @@ class Preprocessor
                 $fileContent = file_get_contents($file);
                 $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
                 $ext = pathinfo($file, PATHINFO_EXTENSION);
-                if ($matches[3] == 'Minify') {
-                    if ($ext === 'js') {
+
+                if ($ext === 'js') {
+                    if ($matches[3] == 'Minify') {
                         $fileContent = \JShrink\Minifier::minify($fileContent, ['flaggedComments' => false]);
                     } else {
                         throw new \Exception('Fn::FileContentMinify is only supported for *.js files');
                     }
-                }
 
-                $size = strlen($fileContent);
-                if ($size > 2048) {
-                    // this is assumuning your uploading an inline JS file to AWS Lambda
-                    throw new \Exception("JS file is larger than 2048 bytes (actual size: $size)");
+                    $size = strlen($fileContent);
+                    if ($size > 2048) {
+                        // this is assuming your uploading an inline JS file to AWS Lambda
+                        throw new \Exception("JS file is larger than 2048 bytes (actual size: $size bytes)");
+                    }
                 }
-
 
                 $fileContent = preg_replace_callback(
                     '/###JSON###(.+?)######/',
