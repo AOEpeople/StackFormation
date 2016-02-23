@@ -16,7 +16,7 @@ class Helper
         return preg_match('/^' . $regex . '$/is', $haystack);
     }
 
-    public function find($wildcardPatterns, $choices)
+    public function find($wildcardPatterns, array $choices)
     {
         if (!is_array($wildcardPatterns)) {
             $wildcardPatterns = [$wildcardPatterns];

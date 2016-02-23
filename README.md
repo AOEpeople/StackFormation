@@ -145,6 +145,23 @@ stacks:
     [...]
 ```
 
+### Wildcards
+
+When referencing a stack in `{output:<stack>:<output>}`, `{resource:<stack>:<logicalResource>}`, or `{parameter:<stack>:<logicalResource>}` you can use a wildcard
+to specify a stack. In this case StackFormation looks up all live stacks and finds a stack matching the pattern. If there's no stack or more than a single stack 
+matching the pattern StackFormation will throw an exception.
+This feature is helpful when you know there's always only a single stack of one type that has a placeholder in it's stackname:
+
+Example: 
+Stackname: `deployment-{env:BUILD_NUMBER}`
+In stacks.yml: 
+```
+stacks:
+  - stackname: mystack
+    parameters:
+      Elb: '{output:deployment-*:Elb}'
+```
+
 ### Effective stackname
 
 You can include environment variable in your stackname (which is very handy for automation via Jenkins).

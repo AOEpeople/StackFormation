@@ -35,6 +35,8 @@ class StackManager
      */
     public function getParameters($stackName, $key = null)
     {
+        $stackName = $this->resolveWildcard($stackName);
+
         if (!isset($this->parametersCache[$stackName])) {
             $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
             $parameters = [];
@@ -70,6 +72,8 @@ class StackManager
      */
     public function getOutputs($stackName, $key = null)
     {
+        $stackName = $this->resolveWildcard($stackName);
+
         if (!isset($this->outputsCache[$stackName])) {
             $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
             $outputs = [];
@@ -105,6 +109,8 @@ class StackManager
      */
     public function getTags($stackName, $key = null)
     {
+        $stackName = $this->resolveWildcard($stackName);
+
         if (!isset($this->tagsCache[$stackName])) {
             $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
             $outputs = [];
@@ -138,6 +144,8 @@ class StackManager
      */
     public function getResources($stackName, $LogicalResourceId = null)
     {
+        $stackName = $this->resolveWildcard($stackName);
+
         if (!isset($this->resourcesCache[$stackName])) {
 
             $res = $this->getCfnClient()->describeStackResources(['StackName' => $stackName]);
@@ -156,6 +164,30 @@ class StackManager
         }
 
         return $this->resourcesCache[$stackName];
+    }
+
+    /**
+     * Resolve wildcard
+     *
+     * @param $stackName
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function resolveWildcard($stackName)
+    {
+        if (strpos($stackName, '*') === false) {
+            return $stackName;
+        }
+
+        $helper = new \StackFormation\Helper();
+        $stacks = $helper->find($stackName, array_keys($this->getStacksFromApi()));
+
+        if (count($stacks) == 0) {
+            throw new \Exception("No matching stack found for '$stackName'");
+        } elseif (count($stacks) > 1) {
+            throw new \Exception("Found more than one matching stack for '$stackName'.");
+        }
+        return end($stacks);
     }
 
     /**
@@ -231,6 +263,8 @@ class StackManager
 
     public function getTemplate($stackName)
     {
+        $stackName = $this->resolveWildcard($stackName);
+
         $res = $this->getCfnClient()->getTemplate(['StackName' => $stackName]);
 
         return $res->get("TemplateBody");
