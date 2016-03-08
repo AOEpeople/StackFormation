@@ -36,9 +36,6 @@ class TemplateDiffCommand extends AbstractCommand
         $parameters_live = $this->stackManager->getParameters($effectiveStackName);
         $parameters_local = $this->stackManager->getParametersFromConfig($effectiveStackName, true, true);
 
-        ksort($parameters_live);
-        ksort($parameters_local);
-
 
 
         $formatter = new FormatterHelper();
@@ -65,6 +62,7 @@ class TemplateDiffCommand extends AbstractCommand
 
     protected function arrayToString(array $a)
     {
+        ksort($a);
         $lines = [];
         foreach ($a as $key => $value) {
             $lines[] = "$key: $value";
