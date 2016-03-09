@@ -46,23 +46,37 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
-    protected function getRemoteStacks()
+    protected function getRemoteStacks($statusFilter='/.*/')
     {
-        return array_keys($this->stackManager->getStacksFromApi());
+        $stacks = [];
+        foreach ($this->stackManager->getStacksFromApi() as $stackName => $info) {
+            if (preg_match($statusFilter, $info['Status'])) {
+                $stacks[] = $stackName;
+            }
+        }
+        return $stacks;
     }
 
-    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output)
+    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $remoteStackFilter='/.*/')
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
-            $choices = $this->getRemoteStacks();
+            $choices = $this->getRemoteStacks($remoteStackFilter);
 
-            $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a stack', $choices);
+            if (count($choices) == 0) {
+                throw new \Exception('No valid stacks found.');
+            }
+            if (count($choices) == 1) {
+                $stack = end($choices);
+            } else {
 
-            $question->setErrorMessage('Stack %s is invalid.');
+                $helper = $this->getHelper('question');
+                $question = new ChoiceQuestion('Please select a stack', $choices);
 
-            $stack = $helper->ask($input, $output, $question);
+                $question->setErrorMessage('Stack %s is invalid.');
+
+                $stack = $helper->ask($input, $output, $question);
+            }
             $output->writeln('Selected Stack: ' . $stack);
 
             $input->setArgument('stack', $stack);
