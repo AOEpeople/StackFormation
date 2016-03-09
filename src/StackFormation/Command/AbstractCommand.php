@@ -46,11 +46,16 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
+    protected function getRemoteStacks($nameFilter='/.*/', $statusFilter='/.*/')
+    {
+        return array_keys($this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter));
+    }
+
     public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter='/.*/', $statusFilter='/.*/')
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
-            $choices = array_keys($this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter));
+            $choices = $this->getRemoteStacks($nameFilter, $statusFilter);
 
             if (count($choices) == 0) {
                 throw new \Exception('No valid stacks found.');
@@ -107,5 +112,42 @@ abstract class AbstractCommand extends Command
                 return 1; // exit code
             }
         }
+    }
+
+    protected function arrayToString(array $a)
+    {
+        ksort($a);
+        $lines = [];
+        foreach ($a as $key => $value) {
+            $lines[] = "$key: $value";
+        }
+        return implode("\n", $lines);
+    }
+
+    protected function printDiff($stringA, $stringB)
+    {
+        if ($stringA === $stringB) {
+            return 0; // that's what diff would return
+        }
+
+        $fileA = tempnam(sys_get_temp_dir(), 'sfn_a_');
+        file_put_contents($fileA, $stringA);
+
+        $fileB = tempnam(sys_get_temp_dir(), 'sfn_b_');
+        file_put_contents($fileB, $stringB);
+
+        $command = is_file('/usr/bin/colordiff') ? 'colordiff' : 'diff';
+        $command .= " -u $fileA $fileB";
+
+        passthru($command, $returnVar);
+
+        unlink($fileA);
+        unlink($fileB);
+        return $returnVar;
+    }
+
+    protected function normalizeJson($json)
+    {
+        return json_encode(json_decode($json, true), JSON_PRETTY_PRINT);
     }
 }

@@ -56,16 +56,14 @@ class CompareAllCommand extends AbstractCommand
                     }
                     $template_live = trim($this->stackManager->getTemplate($effectiveStackName));
                     $template_local = trim($this->stackManager->getPreprocessedTemplate($localStack));
+
+                    $template_live = $this->normalizeJson($template_live);
+                    $template_local = $this->normalizeJson($template_local);
+
                     if ($template_live === $template_local) {
                         $tmp['template'] = "<fg=green>equal</>";
                     } else {
-                        $template_live_minified = \JShrink\Minifier::minify($template_live, ['flaggedComments' => false]);
-                        $template_local_minified = \JShrink\Minifier::minify($template_local, ['flaggedComments' => false]);
-                        if ($template_live_minified === $template_local_minified) {
-                            $tmp['template'] = "<fg=green>equal (after minify)</>";
-                        } else {
-                            $tmp['template'] = "<fg=red>different</>";
-                        }
+                        $tmp['template'] = "<fg=red>different</>";
                     }
                 } catch (CloudFormationException $e) {
                     $tmp['parameters'] = 'live does not exist';
@@ -108,16 +106,6 @@ class CompareAllCommand extends AbstractCommand
             unset($b[$passWordKeyInB]);
         }
         return $this->arrayToString($a) == $this->arrayToString($b);
-    }
-
-    protected function arrayToString(array $a)
-    {
-        ksort($a);
-        $lines = [];
-        foreach ($a as $key => $value) {
-            $lines[] = "$key: $value";
-        }
-        return implode("\n", $lines);
     }
 
 }

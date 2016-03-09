@@ -5,6 +5,7 @@ namespace StackFormation\Command;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class TemplateDiffCommand extends AbstractCommand
@@ -51,44 +52,20 @@ class TemplateDiffCommand extends AbstractCommand
 
         $formatter = new FormatterHelper();
         $output->writeln("\n" . $formatter->formatBlock(['Template:'], 'error', true) . "\n");
+
+        $template_live = trim($this->stackManager->getTemplate($effectiveStackName));
+        $template_local = trim($this->stackManager->getPreprocessedTemplate($stack));
+
+        $template_live = $this->normalizeJson($template_live);
+        $template_local = $this->normalizeJson($template_local);
+
         $returnVar = $this->printDiff(
-            trim($this->stackManager->getTemplate($effectiveStackName)),
-            trim($this->stackManager->getPreprocessedTemplate($stack))
+            $template_live,
+            $template_local
         );
         if ($returnVar == 0) {
             $output->writeln('No changes'."\n");
         }
     }
 
-    protected function arrayToString(array $a)
-    {
-        ksort($a);
-        $lines = [];
-        foreach ($a as $key => $value) {
-            $lines[] = "$key: $value";
-        }
-        return implode("\n", $lines);
-    }
-
-    protected function printDiff($stringA, $stringB)
-    {
-        if ($stringA === $stringB) {
-            return 0; // that's what diff would return
-        }
-
-        $fileA = tempnam(sys_get_temp_dir(), 'sfn_a_');
-        file_put_contents($fileA, $stringA);
-
-        $fileB = tempnam(sys_get_temp_dir(), 'sfn_b_');
-        file_put_contents($fileB, $stringB);
-
-        $command = is_file('/usr/bin/colordiff') ? 'colordiff' : 'diff';
-        $command .= " -u $fileA $fileB";
-
-        passthru($command, $returnVar);
-
-        unlink($fileA);
-        unlink($fileB);
-        return $returnVar;
-    }
 }

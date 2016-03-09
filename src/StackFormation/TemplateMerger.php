@@ -12,8 +12,7 @@ class TemplateMerger
         }
 
         $mergedTemplate = [
-            'AWSTemplateFormatVersion' => '2010-09-09',
-            'Description'              => 'Merged Template',
+            'AWSTemplateFormatVersion' => '2010-09-09'
         ];
 
         $topLevelKeys = [
@@ -92,6 +91,9 @@ class TemplateMerger
             if ($array['AWSTemplateFormatVersion'] != '2010-09-09') {
                 throw new \Exception('Invalid AWSTemplateFormatVersion');
             }
+            if (!empty($array['Description'])) {
+                $mergedTemplate['Description'] = $array['Description'];
+            }
             foreach ($topLevelKeys as $topLevelKey) {
                 if (isset($array[$topLevelKey])) {
                     foreach ($array[$topLevelKey] as $key => $value) {
@@ -108,6 +110,9 @@ class TemplateMerger
         // If a description override is specified use it
         if (!empty($description)) {
             $mergedTemplate['Description'] = trim($description);
+        }
+        if (empty($mergedTemplate['Description'])) {
+            $mergedTemplate['Description'] = 'Merged Template';
         }
 
         $json = json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
