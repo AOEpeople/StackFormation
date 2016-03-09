@@ -145,4 +145,10 @@ class Config
 
         return $labels;
     }
+
+    public function convertStacknameIntoRegex($stackName)
+    {
+        $regex = '/^'.preg_replace('/\{[^\}]+?\}/', '(.*)', $stackName) .'$/';
+        return $regex;
+    }
 }

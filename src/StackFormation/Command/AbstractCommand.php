@@ -46,22 +46,11 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
-    protected function getRemoteStacks($statusFilter='/.*/')
-    {
-        $stacks = [];
-        foreach ($this->stackManager->getStacksFromApi() as $stackName => $info) {
-            if (preg_match($statusFilter, $info['Status'])) {
-                $stacks[] = $stackName;
-            }
-        }
-        return $stacks;
-    }
-
-    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $remoteStackFilter='/.*/')
+    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter='/.*/', $statusFilter='/.*/')
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
-            $choices = $this->getRemoteStacks($remoteStackFilter);
+            $choices = array_keys($this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter));
 
             if (count($choices) == 0) {
                 throw new \Exception('No valid stacks found.');

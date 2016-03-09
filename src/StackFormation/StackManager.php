@@ -193,10 +193,10 @@ class StackManager
     /**
      * @return array
      */
-    public function getStacksFromApi($fresh = false)
+    public function getStacksFromApi($fresh = false, $nameFilter='/.*/', $statusFilter='/.*/')
     {
         $that = $this;
-        return StaticCache::get('stacks-from-api', function () use ($that) {
+        $stacks = StaticCache::get('stacks-from-api', function () use ($that) {
             $res = $that->getCfnClient()->listStacks(
                 [
                     'StackStatusFilter' => [
@@ -225,7 +225,18 @@ class StackManager
 
             return $stacks;
         }, $fresh);
+
+        foreach ($stacks as $key => $info) {
+            if (!preg_match($statusFilter, $info['Status'])) {
+                unset($stacks[$key]);
+            } elseif (!preg_match($nameFilter, $key)) {
+                unset($stacks[$key]);
+            }
+        }
+
+        return $stacks;
     }
+
 
     public function deleteStack($stackName)
     {

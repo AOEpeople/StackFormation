@@ -44,7 +44,7 @@ class CompareAllCommand extends AbstractCommand
                 try {
                     $parameters_live = $this->stackManager->getParameters($effectiveStackName);
                     $parameters_local = $this->stackManager->getParametersFromConfig($effectiveStackName, true, true);
-                    if ($this->arrayToString($parameters_live) === $this->arrayToString($parameters_local)) {
+                    if ($this->compareParameters($parameters_live, $parameters_local)) {
                         $tmp['parameters'] = "<fg=green>equal</>";
                     } else {
                         $tmp['parameters'] = "<fg=red>different</>";
@@ -87,11 +87,27 @@ class CompareAllCommand extends AbstractCommand
         $table->setRows($data);
         $table->render();
 
-        $output->writeln("\n-> Run this to show a diff for a specific stack:");
-        $output->writeln("{$GLOBALS['argv'][0]} stack:diff <stackName>\n");
+        $output->writeln('');
+        $output->writeln("-> Run this to show a diff for a specific stack:");
+        $output->writeln("{$GLOBALS['argv'][0]} stack:diff <stackName>");
+        $output->writeln('');
+        $output->writeln("-> Run this to update a live stack:");
+        $output->writeln("{$GLOBALS['argv'][0]} stack:deploy -o <stackName>");
+        $output->writeln('');
+    }
 
-        $output->writeln("\n-> Run this to update a live stack:");
-        $output->writeln("{$GLOBALS['argv'][0]} stack:deploy -o <stackName>\n");
+    protected function compareParameters(array $a, array $b)
+    {
+        // skip password fields
+        while (($passWordKeyInA = array_search('****', $a)) !== false) {
+            unset($a[$passWordKeyInA]);
+            unset($b[$passWordKeyInA]);
+        }
+        while (($passWordKeyInB = array_search('****', $b)) !== false) {
+            unset($a[$passWordKeyInB]);
+            unset($b[$passWordKeyInB]);
+        }
+        return $this->arrayToString($a) == $this->arrayToString($b);
     }
 
     protected function arrayToString(array $a)

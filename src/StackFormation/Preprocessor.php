@@ -55,11 +55,13 @@ class Preprocessor
                 $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
                 $ext = pathinfo($file, PATHINFO_EXTENSION);
 
+                if ($matches[3] == 'Minify' && $ext != 'js') {
+                    throw new \Exception('Fn::FileContentMinify is only supported for *.js files. (File: ' . $file . ')');
+                }
+
                 if ($ext === 'js') {
                     if ($matches[3] == 'Minify') {
                         $fileContent = \JShrink\Minifier::minify($fileContent, ['flaggedComments' => false]);
-                    } else {
-                        throw new \Exception('Fn::FileContentMinify is only supported for *.js files');
                     }
 
                     $size = strlen($fileContent);
