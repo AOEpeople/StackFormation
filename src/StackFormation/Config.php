@@ -38,7 +38,7 @@ class Config
                     if (isset($stackConfig['stackPolicy'])) {
                         $realPathFile = realpath($basePath . '/' . $stackConfig['stackPolicy']);
                         if ($realPathFile === false) {
-                            throw new \Exception('Could not find stack policy file ' . $template, 1452679777);
+                            throw new \Exception('Could not find stack policy '.$stackConfig['stackPolicy'].' referenced in file ' . $template, 1452679777);
                         }
                         $stackConfig['stackPolicy'] = $realPathFile;
                     }
