@@ -23,7 +23,7 @@ class ShowTemplateCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForConfigStack($input, $output);
+        $this->interactAskForTemplate($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

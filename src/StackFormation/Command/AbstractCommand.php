@@ -27,31 +27,31 @@ abstract class AbstractCommand extends Command
     }
 
 
-    protected function interactAskForConfigStack(InputInterface $input, OutputInterface $output)
+    protected function interactAskForTemplate(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        if (empty($stack)) {
+        $template = $input->getArgument('template');
+        if (empty($template)) {
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a stack', $this->stackManager->getConfig()->getStackLabels());
+            $question = new ChoiceQuestion('Please select a template', $this->stackManager->getConfig()->getStackLabels());
 
-            $question->setErrorMessage('Stack %s is invalid.');
+            $question->setErrorMessage('Template %s is invalid.');
 
-            $stack = $helper->ask($input, $output, $question);
-            $output->writeln('Selected Stack: ' . $stack);
+            $template = $helper->ask($input, $output, $question);
+            $output->writeln('Selected Template: ' . $template);
 
-            list($stackName) = explode(' ', $stack);
-            $input->setArgument('stack', $stackName);
+            list($stackName) = explode(' ', $template);
+            $input->setArgument('template', $stackName);
         }
 
-        return $stack;
+        return $template;
     }
 
-    protected function getRemoteStacks($nameFilter='/.*/', $statusFilter='/.*/')
+    protected function getRemoteStacks($nameFilter=null, $statusFilter=null)
     {
         return array_keys($this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter));
     }
 
-    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter='/.*/', $statusFilter='/.*/')
+    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {

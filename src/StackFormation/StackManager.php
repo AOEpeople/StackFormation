@@ -193,7 +193,7 @@ class StackManager
     /**
      * @return array
      */
-    public function getStacksFromApi($fresh = false, $nameFilter='/.*/', $statusFilter='/.*/')
+    public function getStacksFromApi($fresh = false, $nameFilter=null, $statusFilter=null)
     {
         $that = $this;
         $stacks = StaticCache::get('stacks-from-api', function () use ($that) {
@@ -226,11 +226,29 @@ class StackManager
             return $stacks;
         }, $fresh);
 
-        foreach ($stacks as $key => $info) {
-            if (!preg_match($statusFilter, $info['Status'])) {
-                unset($stacks[$key]);
-            } elseif (!preg_match($nameFilter, $key)) {
-                unset($stacks[$key]);
+        if (is_null($nameFilter)) {
+            if ($filter = getenv('STACKFORMATION_NAME_FILTER')) {
+                $nameFilter = $filter;
+            }
+        }
+
+        ksort($stacks);
+
+        // filter names
+        if (!is_null($nameFilter)) {
+            foreach ($stacks as $key => $info) {
+                if (!preg_match($nameFilter, $key)) {
+                    unset($stacks[$key]);
+                }
+            }
+        }
+
+        // filter status
+        if (!is_null($statusFilter)) {
+            foreach ($stacks as $key => $info) {
+                if (!preg_match($statusFilter, $info['Status'])) {
+                    unset($stacks[$key]);
+                }
             }
         }
 

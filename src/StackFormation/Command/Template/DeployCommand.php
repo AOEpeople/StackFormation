@@ -1,24 +1,24 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Template;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DeployCommand extends AbstractCommand
+class DeployCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:deploy')
-            ->setDescription('Deploy Stack')
+            ->setName('template:deploy')
+            ->setDescription('Deploy template')
             ->addArgument(
-                'stack',
+                'template',
                 InputArgument::REQUIRED,
-                'Stack'
+                'Template'
             )
             ->addOption(
                 'observe',
@@ -48,12 +48,12 @@ class DeployCommand extends AbstractCommand
             $formattedBlock = $formatter->formatBlock(['Dry Run!'], 'error', true);
             $output->writeln("\n$formattedBlock\n");
         }
-        $this->interactAskForConfigStack($input, $output);
+        $this->interactAskForTemplate($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $stack = $input->getArgument('template');
         $dryRun = $input->getOption('dryrun');
         $deleteOnTerminate = $input->getOption('deleteOnTerminate');
         $observe = $input->getOption('observe');

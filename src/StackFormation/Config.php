@@ -101,7 +101,9 @@ class Config
 
     public function getStacknames()
     {
-        return array_keys($this->conf['stacks']);
+        $stacks = array_keys($this->conf['stacks']);
+        sort($stacks);
+        return $stacks;
     }
 
     public function getEffectiveStackName($stackName)
