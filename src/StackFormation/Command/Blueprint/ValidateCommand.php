@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command\Template;
+namespace StackFormation\Command\Blueprint;
 
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,8 +13,8 @@ class ValidateCommand extends \StackFormation\Command\AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('template:validate')
-            ->setDescription('Validate template')
+            ->setName('blueprint:validate')
+            ->setDescription('Validate a blueprint\'s template')
             ->addArgument(
                 'template',
                 InputArgument::REQUIRED,
@@ -24,7 +24,7 @@ class ValidateCommand extends \StackFormation\Command\AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForTemplate($input, $output);
+        $this->interactAskForBlueprint($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

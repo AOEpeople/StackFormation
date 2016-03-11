@@ -26,24 +26,23 @@ abstract class AbstractCommand extends Command
         parent::__construct($name);
     }
 
-
-    protected function interactAskForTemplate(InputInterface $input, OutputInterface $output)
+    protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)
     {
-        $template = $input->getArgument('template');
-        if (empty($template)) {
+        $blueprint = $input->getArgument('blueprint');
+        if (empty($blueprint)) {
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a template', $this->stackManager->getConfig()->getStackLabels());
+            $question = new ChoiceQuestion('Please select a blueprint', $this->stackManager->getConfig()->getStackLabels());
 
-            $question->setErrorMessage('Template %s is invalid.');
+            $question->setErrorMessage('Blueprint %s is invalid.');
 
-            $template = $helper->ask($input, $output, $question);
-            $output->writeln('Selected Template: ' . $template);
+            $blueprint = $helper->ask($input, $output, $question);
+            $output->writeln('Selected blueprint: ' . $blueprint);
 
-            list($stackName) = explode(' ', $template);
-            $input->setArgument('template', $stackName);
+            list($stackName) = explode(' ', $blueprint);
+            $input->setArgument('blueprint', $stackName);
         }
 
-        return $template;
+        return $blueprint;
     }
 
     protected function getRemoteStacks($nameFilter=null, $statusFilter=null)

@@ -1,34 +1,34 @@
 <?php
 
-namespace StackFormation\Command\Template\Show;
+namespace StackFormation\Command\Blueprint\Show;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BodyCommand extends \StackFormation\Command\AbstractCommand
+class TemplateCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('template:show:body')
-            ->setDescription('Preview preprocessed template body')
+            ->setName('blueprint:show:template')
+            ->setDescription('Preview preprocessed template')
             ->addArgument(
-                'template',
+                'blueprint',
                 InputArgument::REQUIRED,
-                'Template'
+                'Blueprint'
             );
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForTemplate($input, $output);
+        $this->interactAskForBlueprint($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $template = $input->getArgument('template');
-        $output->writeln($this->stackManager->getPreprocessedTemplate($template));
+        $blueprint = $input->getArgument('blueprint');
+        $output->writeln($this->stackManager->getPreprocessedTemplate($blueprint));
     }
 }

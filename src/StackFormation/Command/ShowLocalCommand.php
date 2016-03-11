@@ -24,7 +24,7 @@ class ShowLocalCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForTemplate($input, $output);
+        $this->interactAskForBlueprint($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

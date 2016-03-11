@@ -13,9 +13,11 @@ class CommandRegistry
             new Command\Stack\DeleteCommand(),
             new Command\Stack\Show\OutputsCommand(),
             new Command\Stack\Show\ParametersCommand(),
-            new Command\Template\DeployCommand(),
-            new Command\Template\ValidateCommand(),
-            new Command\Template\Show\BodyCommand()
+
+            new Command\Blueprint\DeployCommand(),
+            new Command\Blueprint\ValidateCommand(),
+            new Command\Blueprint\Show\TemplateCommand(),
+            new Command\Blueprint\Show\ParametersCommand()
             //new Command\DeployCommand(),
             //new Command\ListCommand(),
             //new Command\ObserveCommand(),

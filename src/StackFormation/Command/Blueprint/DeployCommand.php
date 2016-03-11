@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command\Template;
+namespace StackFormation\Command\Blueprint;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,12 +13,12 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('template:deploy')
-            ->setDescription('Deploy template')
+            ->setName('blueprint:deploy')
+            ->setDescription('Deploy blueprint')
             ->addArgument(
-                'template',
+                'blueprint',
                 InputArgument::REQUIRED,
-                'Template'
+                'Blueprint'
             )
             ->addOption(
                 'observe',
@@ -48,12 +48,12 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             $formattedBlock = $formatter->formatBlock(['Dry Run!'], 'error', true);
             $output->writeln("\n$formattedBlock\n");
         }
-        $this->interactAskForTemplate($input, $output);
+        $this->interactAskForBlueprint($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('template');
+        $blueprint = $input->getArgument('blueprint');
         $dryRun = $input->getOption('dryrun');
         $deleteOnTerminate = $input->getOption('deleteOnTerminate');
         $observe = $input->getOption('observe');
@@ -62,10 +62,10 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             throw new \Exception('--deleteOnTerminate can only be used with --observe');
         }
 
-        $this->stackManager->deployStack($stack, $dryRun);
+        $this->stackManager->deployStack($blueprint, $dryRun);
 
         if (!$dryRun) {
-            $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
+            $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
             $output->writeln("Triggered deployment of stack '$effectiveStackName'.");
 
             if ($observe) {

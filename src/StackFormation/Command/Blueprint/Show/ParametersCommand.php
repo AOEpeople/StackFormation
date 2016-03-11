@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Blueprint\Show;
 
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -8,18 +8,18 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ShowParametersCommand extends AbstractCommand
+class ParametersCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:parameters')
-            ->setDescription('Preview parameters')
+            ->setName('blueprint:show:parameters')
+            ->setDescription('Preview parameters and tags')
             ->addArgument(
-                'stack',
+                'blueprint',
                 InputArgument::REQUIRED,
-                'Stack'
+                'Blueprint'
             )
             ->addOption(
                 'unresolved',
@@ -31,15 +31,15 @@ class ShowParametersCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForTemplate($input, $output);
+        $this->interactAskForBlueprint($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $blueprint = $input->getArgument('blueprint');
         $unresolved = $input->getOption('unresolved');
-        $output->writeln("Stack '$stack':");
-        $parameters = $this->stackManager->getParametersFromConfig($stack, !$unresolved);
+        $output->writeln("Stack '$blueprint':");
+        $parameters = $this->stackManager->getParametersFromConfig($blueprint, !$unresolved);
 
         $output->writeln('== PARAMETERS ==');
         $table = new Table($output);
@@ -52,7 +52,7 @@ class ShowParametersCommand extends AbstractCommand
         $table = new Table($output);
         $table
             ->setHeaders(['Key', 'Value'])
-            ->setRows($this->stackManager->getConfig()->getStackTags($stack, !$unresolved));
+            ->setRows($this->stackManager->getConfig()->getStackTags($blueprint, !$unresolved));
         $table->render();
     }
 }
