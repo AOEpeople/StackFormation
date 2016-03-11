@@ -1,23 +1,23 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Template\Show;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ShowTemplateCommand extends AbstractCommand
+class BodyCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:template')
-            ->setDescription('Preview preprocessed local template')
+            ->setName('template:show:body')
+            ->setDescription('Preview preprocessed template body')
             ->addArgument(
-                'stack',
+                'template',
                 InputArgument::REQUIRED,
-                'Stack'
+                'Template'
             );
     }
 
@@ -28,7 +28,7 @@ class ShowTemplateCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        $output->writeln($this->stackManager->getPreprocessedTemplate($stack));
+        $template = $input->getArgument('template');
+        $output->writeln($this->stackManager->getPreprocessedTemplate($template));
     }
 }

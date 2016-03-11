@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Stack;
 
 use StackFormation\Helper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class DeleteCommand extends AbstractCommand
+class DeleteCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()

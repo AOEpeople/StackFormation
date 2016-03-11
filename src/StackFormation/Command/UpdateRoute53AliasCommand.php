@@ -71,10 +71,6 @@ class UpdateRoute53AliasCommand extends AbstractCommand
 
         $output->writeln("\nCompleted. Status: $result");
 
-        if ($result != 'INSYNC') {
-            return 1; // exit code
-        }
-
-        return 0; // exit code
+        return ($result != 'INSYNC') ? 1 : 0; // exit code
     }
 }

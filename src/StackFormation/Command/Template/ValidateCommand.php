@@ -1,24 +1,24 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Template;
 
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ValidateTemplateCommand extends AbstractCommand
+class ValidateCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:validate')
+            ->setName('template:validate')
             ->setDescription('Validate template')
             ->addArgument(
-                'stack',
+                'template',
                 InputArgument::REQUIRED,
-                'Stack'
+                'Template'
             );
     }
 
@@ -29,8 +29,8 @@ class ValidateTemplateCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        $this->stackManager->validateTemplate($stack);
+        $template = $input->getArgument('template');
+        $this->stackManager->validateTemplate($template);
         // will throw an exception if there's a problem
 
         $formatter = new FormatterHelper();
