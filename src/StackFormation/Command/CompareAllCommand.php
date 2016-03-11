@@ -68,6 +68,9 @@ class CompareAllCommand extends AbstractCommand
                 } catch (CloudFormationException $e) {
                     $tmp['parameters'] = 'live does not exist';
                     $tmp['template'] = 'live does not exist';
+                } catch (\Exception $e) {
+                    $tmp['parameters'] = 'EXCEPTION';
+                    $tmp['template'] = 'EXCEPTION';
                 }
             } else {
                 $tmp['parameters'] = '';
