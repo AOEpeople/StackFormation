@@ -11,7 +11,7 @@ Contributors:
 
 ### Quickstart
 
-Create a `stacks.yml` in your current directory
+Create a `blueprints.yml` in your current directory
 
 ```
 stacks:
@@ -31,25 +31,25 @@ stacks:
 
 Structure your stacks including all templates and other files (e.g. userdata) in "modules".
 StackFormation will load all stack.yml files from following locations:
-- `stacks/*/*/stacks.yml`
-- `stacks/*/stacks.yml`
-- `stacks/stacks.yml`
-- `stacks.yml`
+- `blueprints/*/*/blueprints.yml`
+- `blueprints/*/blueprints.yml`
+- `blueprints/blueprints.yml`
+- `blueprints.yml`
 
 So it's suggested to create a directory structure like this one:
 ```
-stacks/
+blueprints/
   stack1/
     userdata/
       provisioning.sh
-    stacks.yml
+    blueprints.yml
     my.template
   stack2/
-    stacks.yml
+    blueprints.yml
   ...
 ```
 
-All `stacks.yml` files will be merged together.
+All `blueprints.yml` files will be merged together.
 
 ### Using stack policies
 
@@ -59,14 +59,14 @@ updates to certain stack resources.
 
 It's suggested to create a stack_policies directory below the corresponding stack directory:
 ```
-stacks/
+blueprints/
   stack1/
     stack_policies/
-    stacks.yml
+    blueprints.yml
     ...
   stack2/
     stack_policies/
-    stacks.yml
+    blueprints.yml
     ...
   ...
 ```
@@ -85,12 +85,12 @@ stacks:
 
 You can pull in StackFormation modules via composer. Look at the [cfn-lambdahelper](https://github.com/AOEpeople/cfn-lambdahelper) 
 for an example. A custom composer installer (configured as `require` dependency) will take care of putting all the
-module files in your `stacks/` directory. This way you can have project specific and generic modules next to each other.
+module files in your `blueprints/` directory. This way you can have project specific and generic modules next to each other.
 
-Please note that a "StackFormation module" will probably not come with a `stacks.yml` file since this (and especially the 
+Please note that a "StackFormation module" will probably not come with a `blueprints.yml` file since this (and especially the 
 stack parameter configuration) is project specific. 
 
-You will need to create the stack configuration for the parts you want to use. A good place would be `stacks/stacks.yml` 
+You will need to create the stack configuration for the parts you want to use. A good place would be `blueprints/blueprints.yml` 
 where you reference the imported module.
 
 Example:
@@ -154,7 +154,7 @@ This feature is helpful when you know there's always only a single stack of one 
 
 Example: 
 Stackname: `deployment-{env:BUILD_NUMBER}`
-In stacks.yml: 
+In blueprints.yml: 
 ```
 stacks:
   - stackname: mystack
@@ -176,21 +176,21 @@ stacks:
 
 ### Relative file paths
 
-Please note that all files paths in the `template` section of a `stacks.yml` are relative to the current `stacks.yml` file
+Please note that all files paths in the `template` section of a `blueprints.yml` are relative to the current `blueprints.yml` file
 and all files included via `Fn::FileContent`/ `Fn:FileContentTrimLines` or `Fn:FileContentMinify` are relative to the 
 CloudFormation template file.
 
 Example:
 ```
-stacks/
+blueprints/
   stack1/
     userdata/
       provisioning.sh
-    stacks.yml
+    blueprints.yml
     my.template
 ```
 
-stacks.yml:
+blueprints.yml:
 ```
 stacks:
   - stackname: test
@@ -280,7 +280,7 @@ stacks:
 ### `before`
 
 You can run shell commands before the CloudFormation is being deployed.
-The commands will be executed in the directory where the stacks.yml file lives. 
+The commands will be executed in the directory where the blueprints.yml file lives. 
 
 Example:
 ```
@@ -403,7 +403,7 @@ $stackmanager->deployStack('my-stack');
 
 ### Misc
 
-Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the stacks.yml
+Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the blueprints.yml
 
 ```
 cat my.template | jq '.Parameters | keys' | sed 's/",/: \'\'/g' | sed 's/"//g'

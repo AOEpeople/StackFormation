@@ -14,6 +14,7 @@ class CommandRegistry
             new Command\Stack\TimelineCommand(),
             new Command\Stack\Show\OutputsCommand(),
             new Command\Stack\Show\ParametersCommand(),
+            new Command\Stack\Show\ResourcesCommand(),
 
             new Command\Blueprint\DeployCommand(),
             new Command\Blueprint\DiffCommand(),

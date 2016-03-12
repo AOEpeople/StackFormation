@@ -8,14 +8,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ParametersCommand extends \StackFormation\Command\AbstractCommand
+class ResourcesCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:show:parameters')
-            ->setDescription('Show a live stack\'s parameters')
+            ->setName('stack:show:resources')
+            ->setDescription('Show a live stack\'s resources')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
@@ -32,7 +32,7 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
     {
         $stack = $input->getArgument('stack');
 
-        $data = $this->stackManager->getParameters($stack);
+        $data = $this->stackManager->getResources($stack);
 
         $rows = [];
         foreach ($data as $k => $v) {

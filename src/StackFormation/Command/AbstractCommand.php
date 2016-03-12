@@ -31,7 +31,7 @@ abstract class AbstractCommand extends Command
         $blueprint = $input->getArgument('blueprint');
         if (empty($blueprint)) {
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a blueprint', $this->stackManager->getConfig()->getStackLabels());
+            $question = new ChoiceQuestion('Please select a blueprint', $this->stackManager->getConfig()->getBlueprintLabels());
 
             $question->setErrorMessage('Blueprint %s is invalid.');
 

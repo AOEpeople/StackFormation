@@ -52,7 +52,7 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
         $table = new Table($output);
         $table
             ->setHeaders(['Key', 'Value'])
-            ->setRows($this->stackManager->getConfig()->getStackTags($blueprint, !$unresolved));
+            ->setRows($this->stackManager->getConfig()->getBlueprintTags($blueprint, !$unresolved));
         $table->render();
     }
 }

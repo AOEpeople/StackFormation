@@ -272,7 +272,7 @@ class StackManager
 
     public function getPreprocessedTemplate($stackName)
     {
-        $stackConfig = $this->getConfig()->getStackConfig($stackName);
+        $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
 
         if (empty($stackConfig['template']) || !is_array($stackConfig['template'])) {
             throw new \Exception('No template(s) found');
@@ -308,7 +308,7 @@ class StackManager
      */
     public function deployStack($stackName, $dryRun = false)
     {
-        $stackConfig = $this->getConfig()->getStackConfig($stackName);
+        $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
 
         if (isset($stackConfig['profile'])) {
             $profileManager = new \AwsInspector\ProfileManager();
@@ -347,7 +347,7 @@ class StackManager
                 $this->getCfnClient()->updateStack($arguments);
             }
         } else {
-            $arguments['Tags'] = $this->getConfig()->getStackTags($stackName);
+            $arguments['Tags'] = $this->getConfig()->getBlueprintTags($stackName);
 
             $onFailure = isset($stackConfig['OnFailure']) ? $stackConfig['OnFailure'] : 'DO_NOTHING';
             if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
@@ -497,7 +497,7 @@ class StackManager
 
     public function resolvePlaceholders($string, $stackName = null)
     {
-        $vars = $stackName ? $this->getConfig()->getStackVars($stackName) : $this->getConfig()->getGlobalVars();
+        $vars = $stackName ? $this->getConfig()->getBlueprintVars($stackName) : $this->getConfig()->getGlobalVars();
 
         $originalString = $string;
 
@@ -585,7 +585,7 @@ class StackManager
     public function getParametersFromConfig($stackName, $resolvePlaceholders = true, $flatten = false)
     {
 
-        $stackConfig = $this->getConfig()->getStackConfig($stackName);
+        $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
 
         $parameters = [];
 

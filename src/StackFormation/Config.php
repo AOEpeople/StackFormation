@@ -10,11 +10,13 @@ class Config
 
     protected $conf;
 
+    protected $stackManager;
+
     public function __construct()
     {
         $files = $this->findAllConfigurationFiles();
         if (count($files) == 0) {
-            throw new \Exception("Could not find any stacks.yml configuration files");
+            throw new \Exception("Could not find any blueprints.yml configuration files");
         }
         $processor = new Processor();
         $yamlParser = new Parser();
@@ -23,24 +25,23 @@ class Config
         foreach ($files as $file) {
             $basePath = dirname(realpath($file));
             $tmp = $yamlParser->parse(file_get_contents($file));
-            if (isset($tmp['stacks']) && is_array($tmp['stacks'])) {
-                foreach ($tmp['stacks'] as &$stackConfig) {
-                    $stackConfig['basepath'] = $basePath;
-                    $stackConfig['template'] = (array)$stackConfig['template'];
-                    foreach ($stackConfig['template'] as &$template) {
+            if (isset($tmp['blueprints']) && is_array($tmp['blueprints'])) {
+                foreach ($tmp['blueprints'] as &$blueprintConfig) {
+                    $blueprintConfig['basepath'] = $basePath;
+                    $blueprintConfig['template'] = (array)$blueprintConfig['template'];
+                    foreach ($blueprintConfig['template'] as &$template) {
                         $realPathFile = realpath($basePath . '/' . $template);
                         if ($realPathFile === false) {
                             throw new \Exception('Could not find template file ' . $template);
                         }
                         $template = $realPathFile;
                     }
-
-                    if (isset($stackConfig['stackPolicy'])) {
-                        $realPathFile = realpath($basePath . '/' . $stackConfig['stackPolicy']);
+                    if (isset($blueprintConfig['stackPolicy'])) {
+                        $realPathFile = realpath($basePath . '/' . $blueprintConfig['stackPolicy']);
                         if ($realPathFile === false) {
-                            throw new \Exception('Could not find stack policy '.$stackConfig['stackPolicy'].' referenced in file ' . $template, 1452679777);
+                            throw new \Exception('Could not find stack policy '.$blueprintConfig['stackPolicy'].' referenced in file ' . $template, 1452679777);
                         }
-                        $stackConfig['stackPolicy'] = $realPathFile;
+                        $blueprintConfig['stackPolicy'] = $realPathFile;
                     }
                 }
             }
@@ -56,20 +57,20 @@ class Config
     protected function findAllConfigurationFiles()
     {
         $files = array_merge(
-            glob('stacks/*/*/stacks.yml'),
-            glob('stacks/*/stacks.yml'),
-            glob('stacks/stacks.yml'),
-            glob('stacks.yml')
+            glob('blueprints/*/*/blueprints.yml'),
+            glob('blueprints/*/blueprints.yml'),
+            glob('blueprints/blueprints.yml'),
+            glob('blueprints.yml')
         );
         return $files;
     }
 
-    public function stackExists($stack)
+    public function blueprintExists($blueprint)
     {
-        if (!is_string($stack)) {
-            throw new \InvalidArgumentException('Invalid stack name');
+        if (!is_string($blueprint)) {
+            throw new \InvalidArgumentException('Invalid blueprint name');
         }
-        return isset($this->conf['stacks'][$stack]);
+        return isset($this->conf['blueprints'][$blueprint]);
     }
 
     public function getGlobalVars()
@@ -77,80 +78,83 @@ class Config
         return isset($this->conf['vars']) ? $this->conf['vars'] : [];
     }
 
-    public function getStackVars($stack)
+    public function getBlueprintVars($stack)
     {
         if (!is_string($stack)) {
             throw new \InvalidArgumentException('Invalid stack name');
         }
-        $stackConfig = $this->getStackConfig($stack);
-        $localVars = isset($stackConfig['vars']) ? $stackConfig['vars'] : [];
+        $blueprintConfig = $this->getBlueprintConfig($stack);
+        $localVars = isset($blueprintConfig['vars']) ? $blueprintConfig['vars'] : [];
         return array_merge($this->getGlobalVars(), $localVars);
     }
 
-    public function getStackConfig($stack)
+    public function getBlueprintConfig($stack)
     {
         if (!is_string($stack)) {
             throw new \InvalidArgumentException('Invalid stack name');
         }
-        if (!$this->stackExists($stack)) {
+        if (!$this->blueprintExists($stack)) {
             throw new \Exception("Stack '$stack' not found.");
         }
 
-        return $this->conf['stacks'][$stack];
+        return $this->conf['blueprints'][$stack];
     }
 
-    public function getStacknames()
+    public function getBlueprintNames()
     {
-        $stacks = array_keys($this->conf['stacks']);
-        sort($stacks);
-        return $stacks;
+        $blueprintNames = array_keys($this->conf['blueprints']);
+        sort($blueprintNames);
+        return $blueprintNames;
     }
 
-    public function getEffectiveStackName($stackName)
+    public function getEffectiveStackName($blueprintName)
     {
-        $stackManager = new StackManager();
-        return $stackManager->resolvePlaceholders($stackName); // without the stackname parameter obviously...
+        return $this->getStackManager()->resolvePlaceholders($blueprintName); // without the stackname parameter obviously...
     }
 
-    public function getStackTags($stackName, $resolvePlaceholders = true)
+    protected function getStackManager()
+    {
+        if (is_null($this->stackManager)) {
+            $this->stackManager = new StackManager();
+        }
+        return $this->stackManager;
+    }
+
+    public function getBlueprintTags($blueprintName, $resolvePlaceholders=true)
     {
         $tags = [];
-        $stackConfig = $this->getStackConfig($stackName);
-        $stackManager = new StackManager();
+        $stackConfig = $this->getBlueprintConfig($blueprintName);
         if (isset($stackConfig['tags'])) {
             foreach ($stackConfig['tags'] as $key => $value) {
-                $tags[] = [
-                    'Key' => $key,
-                    'Value' => $resolvePlaceholders ? $stackManager->resolvePlaceholders($value, $stackName) : $value
-                ];
+                if ($resolvePlaceholders) {
+                    $value = $this->getStackManager()->resolvePlaceholders($value, $blueprintName);
+                }
+                $tags[] = ['Key' => $key, 'Value' => $value];
             }
         }
-
         return $tags;
     }
 
-    public function getStackLabels()
+    public function getBlueprintLabels()
     {
         $labels = [];
-        foreach ($this->getStacknames() as $stackname) {
+        foreach ($this->getBlueprintNames() as $blueprintName) {
             try {
-                $effectiveStackName = $this->getEffectiveStackName($stackname);
+                $effectiveStackName = $this->getEffectiveStackName($blueprintName);
             } catch (\Exception $e) {
                 $effectiveStackName = '[Missing env var] Error: ' . $e->getMessage();
             }
-            $label = $stackname;
-            if ($effectiveStackName != $stackname) {
+            $label = $blueprintName;
+            if ($effectiveStackName != $blueprintName) {
                 $label .= " (Effective: $effectiveStackName)";
             }
             $labels[] = $label;
         }
-
         return $labels;
     }
 
-    public function convertStacknameIntoRegex($stackName)
+    public function convertBlueprintNameIntoRegex($blueprintName)
     {
-        $regex = '/^'.preg_replace('/\{[^\}]+?\}/', '(.*)', $stackName) .'$/';
-        return $regex;
+        return '/^'.preg_replace('/\{[^\}]+?\}/', '(.*)', $blueprintName) .'$/';
     }
 }

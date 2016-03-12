@@ -21,7 +21,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $localStacks = $this->stackManager->getConfig()->getStacknames();
+        $localStacks = $this->stackManager->getConfig()->getBlueprintNames();
 
         $data = [];
         foreach ($localStacks as $localStack) {
