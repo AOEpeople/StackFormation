@@ -1,3 +1,5 @@
+<img align="right" style="float: right; height: 200px;" src="doc/images/stackformation_200px.png">
+
 # StackFormation
 
 **Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor**
@@ -14,7 +16,7 @@ Contributors:
 Create a `blueprints.yml` in your current directory
 
 ```
-stacks:
+blueprints:
   - stackname: my-stack
     template: templates/my-stack.template
     parameters:
@@ -27,9 +29,9 @@ stacks:
       bar: 43
 ```
 
-### Structuring your stacks
+### Structuring your blueprints
 
-Structure your stacks including all templates and other files (e.g. userdata) in "modules".
+Structure your blueprints including all templates and other files (e.g. userdata) in "modules".
 StackFormation will load all stack.yml files from following locations:
 - `blueprints/*/*/blueprints.yml`
 - `blueprints/*/blueprints.yml`
@@ -75,7 +77,7 @@ You have to tell StackFormation where it could find the stack policy.
 
 Example:
 ```
-stacks:
+blueprints:
   - stackname: 'my-stack'
     template: 'templates/my-stack.template'
     stackPolicy: 'stack_policies/my-stack.json'
@@ -95,7 +97,7 @@ where you reference the imported module.
 
 Example:
 ```
-stacks:
+blueprints:
   - stackname: 'lambdacfnhelpers-stack'
     template: 'cfn-lambdahelper/lambda_cfn_helpers.template'
     Capabilities: CAPABILITY_IAM
@@ -114,12 +116,12 @@ stacks:
 - Current timestamp: `{tstamp}` -> e.g. '1453151115'
 
 Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
-one stacks to the input paramaters needed in another stack that sits on top of the first one without manually 
+one stack to the input parameters needed in another stack that sits on top of the first one without manually 
 managing the input values.
 
 Example
 ```
-stacks:
+blueprints:
   - stackname: stack1-db
     template: templates/stack1.template
     [...]
@@ -135,7 +137,7 @@ Variables (global/local, nested into other placeholders)
 vars:
   KeyPair: 'mykeypair'
     
-stacks:
+blueprints:
   - stackname: mystack
     vars:
       ParentStack: 'MyParentStack'
@@ -156,7 +158,7 @@ Example:
 Stackname: `deployment-{env:BUILD_NUMBER}`
 In blueprints.yml: 
 ```
-stacks:
+blueprints:
   - stackname: mystack
     parameters:
       Elb: '{output:deployment-*:Elb}'
@@ -169,7 +171,7 @@ In this case your effective stackname (e.g. `build-5`) will be different from th
 
 Example
 ```
-stacks:
+blueprints:
   - stackname: 'build-{env:BUILD_NUMBER}'
     template: templates/deploy_build.template
 ```
@@ -192,7 +194,7 @@ blueprints/
 
 blueprints.yml:
 ```
-stacks:
+blueprints:
   - stackname: test
     template: my.template
 ```
@@ -214,7 +216,7 @@ my.template
 StackFormation allows you to configure more than one template:
 
 ```
-stacks:
+blueprints:
   - stackname: iam
     template:
       - iam_role_jenkins.template
@@ -238,7 +240,7 @@ If you list your templates with attributes instead of a plain list, the attribut
 This way you can you the same template with different input parameters instead of duplicating resources. This comes in handy for VPC setups.
 
 ```
-stacks:
+blueprints:
   - stackname: vpc-subnets
     template:
       ZoneA: az.template
@@ -259,7 +261,7 @@ If you have a parameter that needs to be passed to all templates you can prefix 
 since JSON will consider this a reference instead) and StackFormation will replace '*' with each prefix used in the `template:` section.
 
 ```
-stacks:
+blueprints:
   - stackname: vpc-subnets
     template:
       ZoneA: az.template
@@ -284,7 +286,7 @@ The commands will be executed in the directory where the blueprints.yml file liv
 
 Example:
 ```
-stacks:
+blueprints:
   - stackname: 'my-lambda-function'
     template: lambda.template
     Capabilities: CAPABILITY_IAM
@@ -297,7 +299,7 @@ stacks:
 
 and you can even use placeholders:
 ```
-stacks:
+blueprints:
   - stackname: 'my-lambda-function'
     template: lambda.template
     Capabilities: CAPABILITY_IAM
