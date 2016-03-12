@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Blueprint;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use Symfony\Component\Console\Helper\FormatterHelper;
@@ -9,14 +9,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CompareAllCommand extends AbstractCommand
+class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:compare-all')
-            ->setDescription('Compare all local stacks with the corresponding live stack');
+            ->setName('blueprint:compare-all')
+            ->setDescription('Compare all local blueprints with the corresponding live stack');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -26,14 +26,22 @@ class CompareAllCommand extends AbstractCommand
         $data = [];
         foreach ($localStacks as $localStack) {
             $error = false;
-            $tmp['stackName'] = $localStack;
+
             try {
                 $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($localStack, true);
             } catch (\Exception $e) {
                 $error = true;
                 $effectiveStackName = '[' . $e->getMessage() . ']';
             }
-            $tmp['effectiveStackName'] = $effectiveStackName;
+
+            // skip stacks with dynamic names
+            if ($localStack != $effectiveStackName) {
+                continue;
+            }
+
+            $tmp = [];
+            $tmp['stackName'] = $localStack;
+            //$tmp['effectiveStackName'] = $effectiveStackName;
 
             if (!$error) {
 
@@ -66,8 +74,8 @@ class CompareAllCommand extends AbstractCommand
                         $tmp['template'] = "<fg=red>different</>";
                     }
                 } catch (CloudFormationException $e) {
-                    $tmp['parameters'] = 'live does not exist';
-                    $tmp['template'] = 'live does not exist';
+                    $tmp['parameters'] = 'Stack not found';
+                    $tmp['template'] = 'Stack not found';
                 } catch (\Exception $e) {
                     $tmp['parameters'] = 'EXCEPTION';
                     $tmp['template'] = 'EXCEPTION';
@@ -84,16 +92,16 @@ class CompareAllCommand extends AbstractCommand
         $output->writeln('');
 
         $table = new Table($output);
-        $table->setHeaders(['Stackname', 'Effective Stackname', 'Parameters', 'Template']);
+        $table->setHeaders(['Blueprint / Stack' /*, 'Effective Stackname'*/, 'Parameters', 'Template']);
         $table->setRows($data);
         $table->render();
 
         $output->writeln('');
         $output->writeln("-> Run this to show a diff for a specific stack:");
-        $output->writeln("{$GLOBALS['argv'][0]} stack:diff <stackName>");
+        $output->writeln("{$GLOBALS['argv'][0]} blueprint:diff <stackName>");
         $output->writeln('');
         $output->writeln("-> Run this to update a live stack:");
-        $output->writeln("{$GLOBALS['argv'][0]} stack:deploy -o <stackName>");
+        $output->writeln("{$GLOBALS['argv'][0]} blueprint:deploy -o <stackName>");
         $output->writeln('');
     }
 
