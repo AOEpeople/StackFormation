@@ -1,4 +1,4 @@
-<img align="right" style="float: right; height: 200px;" src="doc/images/stackformation_200px.png">
+<img align="right" style="float: right; height: 200px;" src="doc/img/stackformation_200px.png">
 
 # StackFormation
 
