@@ -16,7 +16,7 @@ class Config
     {
         $files = $this->findAllConfigurationFiles();
         if (count($files) == 0) {
-            throw new \Exception("Could not find any blueprints.yml configuration files");
+            throw new \StackFormation\Exception\NoBlueprintsFoundException("Could not find any blueprints.yml configuration files");
         }
         $processor = new Processor();
         $yamlParser = new Parser();
@@ -54,13 +54,13 @@ class Config
         );
     }
 
-    protected function findAllConfigurationFiles()
+    public static function findAllConfigurationFiles($dirname='blueprints', $filename='blueprints.yml')
     {
         $files = array_merge(
-            glob('blueprints/*/*/blueprints.yml'),
-            glob('blueprints/*/blueprints.yml'),
-            glob('blueprints/blueprints.yml'),
-            glob('blueprints.yml')
+            glob($dirname.'/*/*/'.$filename),
+            glob($dirname.'/*/'.$filename),
+            glob($dirname.'/'.$filename),
+            glob($filename)
         );
         return $files;
     }

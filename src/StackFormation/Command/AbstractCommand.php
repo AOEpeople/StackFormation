@@ -30,8 +30,19 @@ abstract class AbstractCommand extends Command
     {
         $blueprint = $input->getArgument('blueprint');
         if (empty($blueprint)) {
+
+            try {
+                $config = $this->stackManager->getConfig();
+            } catch (\StackFormation\Exception\NoBlueprintsFoundException $e) {
+                if (count(\StackFormation\Config::findAllConfigurationFiles('stacks', 'stacks.yml')) > 0) {
+                    throw new \Exception('Old stacks.yml files detected. Please run blueprint:migrate.');
+                } else {
+                    throw $e;
+                }
+            }
+
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a blueprint', $this->stackManager->getConfig()->getBlueprintLabels());
+            $question = new ChoiceQuestion('Please select a blueprint', $config->getBlueprintLabels());
 
             $question->setErrorMessage('Blueprint %s is invalid.');
 
