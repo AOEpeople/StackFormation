@@ -1,12 +1,12 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Stack;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TimelineCommand extends AbstractCommand
+class TimelineCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()

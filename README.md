@@ -1,3 +1,5 @@
+<img align="right" style="float: right; height: 200px;" src="doc/img/stackformation_200px.png">
+
 # StackFormation
 
 **Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor**
@@ -11,10 +13,10 @@ Contributors:
 
 ### Quickstart
 
-Create a `stacks.yml` in your current directory
+Create a `blueprints.yml` in your current directory
 
 ```
-stacks:
+blueprints:
   - stackname: my-stack
     template: templates/my-stack.template
     parameters:
@@ -27,29 +29,29 @@ stacks:
       bar: 43
 ```
 
-### Structuring your stacks
+### Structuring your blueprints
 
-Structure your stacks including all templates and other files (e.g. userdata) in "modules".
+Structure your blueprints including all templates and other files (e.g. userdata) in "modules".
 StackFormation will load all stack.yml files from following locations:
-- `stacks/*/*/stacks.yml`
-- `stacks/*/stacks.yml`
-- `stacks/stacks.yml`
-- `stacks.yml`
+- `blueprints/*/*/blueprints.yml`
+- `blueprints/*/blueprints.yml`
+- `blueprints/blueprints.yml`
+- `blueprints.yml`
 
 So it's suggested to create a directory structure like this one:
 ```
-stacks/
+blueprints/
   stack1/
     userdata/
       provisioning.sh
-    stacks.yml
+    blueprints.yml
     my.template
   stack2/
-    stacks.yml
+    blueprints.yml
   ...
 ```
 
-All `stacks.yml` files will be merged together.
+All `blueprints.yml` files will be merged together.
 
 ### Using stack policies
 
@@ -59,14 +61,14 @@ updates to certain stack resources.
 
 It's suggested to create a stack_policies directory below the corresponding stack directory:
 ```
-stacks/
+blueprints/
   stack1/
     stack_policies/
-    stacks.yml
+    blueprints.yml
     ...
   stack2/
     stack_policies/
-    stacks.yml
+    blueprints.yml
     ...
   ...
 ```
@@ -75,7 +77,7 @@ You have to tell StackFormation where it could find the stack policy.
 
 Example:
 ```
-stacks:
+blueprints:
   - stackname: 'my-stack'
     template: 'templates/my-stack.template'
     stackPolicy: 'stack_policies/my-stack.json'
@@ -85,17 +87,17 @@ stacks:
 
 You can pull in StackFormation modules via composer. Look at the [cfn-lambdahelper](https://github.com/AOEpeople/cfn-lambdahelper) 
 for an example. A custom composer installer (configured as `require` dependency) will take care of putting all the
-module files in your `stacks/` directory. This way you can have project specific and generic modules next to each other.
+module files in your `blueprints/` directory. This way you can have project specific and generic modules next to each other.
 
-Please note that a "StackFormation module" will probably not come with a `stacks.yml` file since this (and especially the 
+Please note that a "StackFormation module" will probably not come with a `blueprints.yml` file since this (and especially the 
 stack parameter configuration) is project specific. 
 
-You will need to create the stack configuration for the parts you want to use. A good place would be `stacks/stacks.yml` 
+You will need to create the stack configuration for the parts you want to use. A good place would be `blueprints/blueprints.yml` 
 where you reference the imported module.
 
 Example:
 ```
-stacks:
+blueprints:
   - stackname: 'lambdacfnhelpers-stack'
     template: 'cfn-lambdahelper/lambda_cfn_helpers.template'
     Capabilities: CAPABILITY_IAM
@@ -114,12 +116,12 @@ stacks:
 - Current timestamp: `{tstamp}` -> e.g. '1453151115'
 
 Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
-one stacks to the input paramaters needed in another stack that sits on top of the first one without manually 
+one stack to the input parameters needed in another stack that sits on top of the first one without manually 
 managing the input values.
 
 Example
 ```
-stacks:
+blueprints:
   - stackname: stack1-db
     template: templates/stack1.template
     [...]
@@ -135,7 +137,7 @@ Variables (global/local, nested into other placeholders)
 vars:
   KeyPair: 'mykeypair'
     
-stacks:
+blueprints:
   - stackname: mystack
     vars:
       ParentStack: 'MyParentStack'
@@ -154,9 +156,9 @@ This feature is helpful when you know there's always only a single stack of one 
 
 Example: 
 Stackname: `deployment-{env:BUILD_NUMBER}`
-In stacks.yml: 
+In blueprints.yml: 
 ```
-stacks:
+blueprints:
   - stackname: mystack
     parameters:
       Elb: '{output:deployment-*:Elb}'
@@ -169,30 +171,30 @@ In this case your effective stackname (e.g. `build-5`) will be different from th
 
 Example
 ```
-stacks:
+blueprints:
   - stackname: 'build-{env:BUILD_NUMBER}'
     template: templates/deploy_build.template
 ```
 
 ### Relative file paths
 
-Please note that all files paths in the `template` section of a `stacks.yml` are relative to the current `stacks.yml` file
+Please note that all files paths in the `template` section of a `blueprints.yml` are relative to the current `blueprints.yml` file
 and all files included via `Fn::FileContent`/ `Fn:FileContentTrimLines` or `Fn:FileContentMinify` are relative to the 
 CloudFormation template file.
 
 Example:
 ```
-stacks/
+blueprints/
   stack1/
     userdata/
       provisioning.sh
-    stacks.yml
+    blueprints.yml
     my.template
 ```
 
-stacks.yml:
+blueprints.yml:
 ```
-stacks:
+blueprints:
   - stackname: test
     template: my.template
 ```
@@ -214,7 +216,7 @@ my.template
 StackFormation allows you to configure more than one template:
 
 ```
-stacks:
+blueprints:
   - stackname: iam
     template:
       - iam_role_jenkins.template
@@ -238,7 +240,7 @@ If you list your templates with attributes instead of a plain list, the attribut
 This way you can you the same template with different input parameters instead of duplicating resources. This comes in handy for VPC setups.
 
 ```
-stacks:
+blueprints:
   - stackname: vpc-subnets
     template:
       ZoneA: az.template
@@ -259,7 +261,7 @@ If you have a parameter that needs to be passed to all templates you can prefix 
 since JSON will consider this a reference instead) and StackFormation will replace '*' with each prefix used in the `template:` section.
 
 ```
-stacks:
+blueprints:
   - stackname: vpc-subnets
     template:
       ZoneA: az.template
@@ -280,11 +282,11 @@ stacks:
 ### `before`
 
 You can run shell commands before the CloudFormation is being deployed.
-The commands will be executed in the directory where the stacks.yml file lives. 
+The commands will be executed in the directory where the blueprints.yml file lives. 
 
 Example:
 ```
-stacks:
+blueprints:
   - stackname: 'my-lambda-function'
     template: lambda.template
     Capabilities: CAPABILITY_IAM
@@ -297,7 +299,7 @@ stacks:
 
 and you can even use placeholders:
 ```
-stacks:
+blueprints:
   - stackname: 'my-lambda-function'
     template: lambda.template
     Capabilities: CAPABILITY_IAM
@@ -403,7 +405,7 @@ $stackmanager->deployStack('my-stack');
 
 ### Misc
 
-Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the stacks.yml
+Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the blueprints.yml
 
 ```
 cat my.template | jq '.Parameters | keys' | sed 's/",/: \'\'/g' | sed 's/"//g'

@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Blueprint;
 
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -8,35 +8,34 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TemplateDiffCommand extends AbstractCommand
+class DiffCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:diff')
-            ->setDescription('Compare the local template and input parameters with the current live stack')
+            ->setName('blueprint:diff')
+            ->setDescription('Compare a local blueprints template and input parameters with the corresponding live stack')
             ->addArgument(
-                'stack',
+                'blueprint',
                 InputArgument::REQUIRED,
-                'Stack'
+                'Blueprint'
             );
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForConfigStack($input, $output);
+        $this->interactAskForBlueprint($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $blueprint = $input->getArgument('blueprint');
 
-        $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
+        $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
 
         $parameters_live = $this->stackManager->getParameters($effectiveStackName);
         $parameters_local = $this->stackManager->getParametersFromConfig($effectiveStackName, true, true);
-
 
 
         $formatter = new FormatterHelper();
@@ -54,7 +53,7 @@ class TemplateDiffCommand extends AbstractCommand
         $output->writeln("\n" . $formatter->formatBlock(['Template:'], 'error', true) . "\n");
 
         $template_live = trim($this->stackManager->getTemplate($effectiveStackName));
-        $template_local = trim($this->stackManager->getPreprocessedTemplate($stack));
+        $template_local = trim($this->stackManager->getPreprocessedTemplate($blueprint));
 
         $template_live = $this->normalizeJson($template_live);
         $template_local = $this->normalizeJson($template_local);

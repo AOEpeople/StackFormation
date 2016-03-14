@@ -16,7 +16,7 @@ class ConfigTreeBuilder implements ConfigurationInterface
         $rootNode = $treeBuilder->root('root');
         $rootNode
             ->children()
-                ->arrayNode('stacks')
+                ->arrayNode('blueprints')
                 ->useAttributeAsKey('stackname')
                 ->isRequired()
                 ->cannotBeEmpty()
@@ -32,7 +32,7 @@ class ConfigTreeBuilder implements ConfigurationInterface
                         ->scalarNode('description')->end()
                         ->scalarNode('OnFailure')->end()
                         ->scalarNode('Capabilities')->end()
-                        ->scalarNode('basepath')->end() // will be automatically set to the current stacks.yml file's dir
+                        ->scalarNode('basepath')->end() // will be automatically set to the current blueprints.yml file's dir
                         ->scalarNode('stackPolicy')->end()
                     ->end()
                 ->end()

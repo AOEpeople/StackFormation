@@ -1,13 +1,13 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Stack;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ObserveCommand extends AbstractCommand
+class ObserveCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
@@ -30,7 +30,7 @@ class ObserveCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output, '/.*/', '/IN_PROGRESS/');
+        $this->interactAskForLiveStack($input, $output, null, '/IN_PROGRESS/');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

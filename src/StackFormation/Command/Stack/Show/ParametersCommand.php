@@ -1,20 +1,21 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Stack\Show;
 
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ShowLocalCommand extends AbstractCommand
+class ParametersCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:show-local')
-            ->setDescription('Show parameters from local configuration (resolving \'output:*:*\', \'resource:*:*\' and \'env:*\')')
+            ->setName('stack:show:parameters')
+            ->setDescription('Show a live stack\'s parameters')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
@@ -24,20 +25,24 @@ class ShowLocalCommand extends AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForBlueprint($input, $output);
+        $this->interactAskForLiveStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $input->getArgument('stack');
-        $output->writeln("Stack '$stack':");
 
-        $parameters = $this->stackManager->getParametersFromConfig($stack);
+        $data = $this->stackManager->getParameters($stack);
+
+        $rows = [];
+        foreach ($data as $k => $v) {
+            $v = strlen($v) > 100 ? substr($v, 0, 100) . "..." : $v;
+            $rows[] = [$k, $v];
+        }
 
         $table = new Table($output);
-        $table
-            ->setHeaders(['Key', 'Value'])
-            ->setRows($parameters);
-        $table->render();
+        $table->setHeaders(['Key', 'Value'])
+            ->setRows($rows)
+            ->render();
     }
 }

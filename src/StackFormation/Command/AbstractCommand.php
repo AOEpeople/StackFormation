@@ -26,32 +26,42 @@ abstract class AbstractCommand extends Command
         parent::__construct($name);
     }
 
-
-    protected function interactAskForConfigStack(InputInterface $input, OutputInterface $output)
+    protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        if (empty($stack)) {
+        $blueprint = $input->getArgument('blueprint');
+        if (empty($blueprint)) {
+
+            try {
+                $config = $this->stackManager->getConfig();
+            } catch (\StackFormation\Exception\NoBlueprintsFoundException $e) {
+                if (count(\StackFormation\Config::findAllConfigurationFiles('stacks', 'stacks.yml')) > 0) {
+                    throw new \Exception('Old stacks.yml files detected. Please run blueprint:migrate.');
+                } else {
+                    throw $e;
+                }
+            }
+
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a stack', $this->stackManager->getConfig()->getStackLabels());
+            $question = new ChoiceQuestion('Please select a blueprint', $config->getBlueprintLabels());
 
-            $question->setErrorMessage('Stack %s is invalid.');
+            $question->setErrorMessage('Blueprint %s is invalid.');
 
-            $stack = $helper->ask($input, $output, $question);
-            $output->writeln('Selected Stack: ' . $stack);
+            $blueprint = $helper->ask($input, $output, $question);
+            $output->writeln('Selected blueprint: ' . $blueprint);
 
-            list($stackName) = explode(' ', $stack);
-            $input->setArgument('stack', $stackName);
+            list($stackName) = explode(' ', $blueprint);
+            $input->setArgument('blueprint', $stackName);
         }
 
-        return $stack;
+        return $blueprint;
     }
 
-    protected function getRemoteStacks($nameFilter='/.*/', $statusFilter='/.*/')
+    protected function getRemoteStacks($nameFilter=null, $statusFilter=null)
     {
         return array_keys($this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter));
     }
 
-    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter='/.*/', $statusFilter='/.*/')
+    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {

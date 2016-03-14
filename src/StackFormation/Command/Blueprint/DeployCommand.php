@@ -1,24 +1,24 @@
 <?php
 
-namespace StackFormation\Command;
+namespace StackFormation\Command\Blueprint;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DeployCommand extends AbstractCommand
+class DeployCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:deploy')
-            ->setDescription('Deploy Stack')
+            ->setName('blueprint:deploy')
+            ->setDescription('Deploy blueprint')
             ->addArgument(
-                'stack',
+                'blueprint',
                 InputArgument::REQUIRED,
-                'Stack'
+                'Blueprint'
             )
             ->addOption(
                 'observe',
@@ -48,12 +48,12 @@ class DeployCommand extends AbstractCommand
             $formattedBlock = $formatter->formatBlock(['Dry Run!'], 'error', true);
             $output->writeln("\n$formattedBlock\n");
         }
-        $this->interactAskForConfigStack($input, $output);
+        $this->interactAskForBlueprint($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $blueprint = $input->getArgument('blueprint');
         $dryRun = $input->getOption('dryrun');
         $deleteOnTerminate = $input->getOption('deleteOnTerminate');
         $observe = $input->getOption('observe');
@@ -62,10 +62,10 @@ class DeployCommand extends AbstractCommand
             throw new \Exception('--deleteOnTerminate can only be used with --observe');
         }
 
-        $this->stackManager->deployStack($stack, $dryRun);
+        $this->stackManager->deployStack($blueprint, $dryRun);
 
         if (!$dryRun) {
-            $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($stack);
+            $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
             $output->writeln("Triggered deployment of stack '$effectiveStackName'.");
 
             if ($observe) {
