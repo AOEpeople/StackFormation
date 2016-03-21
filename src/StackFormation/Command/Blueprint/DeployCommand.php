@@ -2,10 +2,12 @@
 
 namespace StackFormation\Command\Blueprint;
 
+use Aws\CloudFormation\Exception\CloudFormationException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class DeployCommand extends \StackFormation\Command\AbstractCommand
 {
@@ -62,7 +64,27 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             throw new \Exception('--deleteOnTerminate can only be used with --observe');
         }
 
-        $this->stackManager->deployStack($blueprint, $dryRun);
+        try {
+            $this->stackManager->deployStack($blueprint, $dryRun);
+        } catch (CloudFormationException $exception) {
+            $message = \StackFormation\Helper::extractMessage($exception);
+            if (strpos($message, 'is in CREATE_FAILED state and can not be updated.') !== false) {
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion('Stack is in CREATE_FAILED state. Do you want to delete it first? [Y/n]');
+                $confirmed = $helper->ask($input, $output, $question);
+                if ($confirmed) {
+                    $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
+                    $output->writeln('Deleting failed stack ' . $effectiveStackName);
+                    $this->stackManager->deleteStack($effectiveStackName);
+                    $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
+
+                    $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
+                    $this->stackManager->deployStack($blueprint, $dryRun);
+                }
+            } else {
+                throw $exception;
+            }
+        }
 
         if (!$dryRun) {
             $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);

@@ -2,6 +2,7 @@
 
 namespace StackFormation;
 
+use Aws\CloudFormation\Exception\CloudFormationException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -396,26 +397,38 @@ class StackManager
 
             $output->writeln("-> Polling... (Stack Status: $status)");
 
-            $events = $this->describeStackEvents($stackName);
+            $stackGone = false; // while deleting
+            try {
+                $events = $this->describeStackEvents($stackName);
 
-            $rows = [];
-            foreach ($events as $eventId => $event) {
-                if (!in_array($eventId, $printedEvents)) {
-                    $printedEvents[] = $eventId;
-                    $rows[] = [
-                        // $event['Timestamp'],
-                        $this->decorateStatus($event['Status']),
-                        $event['ResourceType'],
-                        $event['LogicalResourceId'],
-                        wordwrap($event['ResourceStatusReason'], 40, "\n"),
-                    ];
+                $rows = [];
+                foreach ($events as $eventId => $event) {
+                    if (!in_array($eventId, $printedEvents)) {
+                        $printedEvents[] = $eventId;
+                        $rows[] = [
+                            // $event['Timestamp'],
+                            $this->decorateStatus($event['Status']),
+                            $event['ResourceType'],
+                            $event['LogicalResourceId'],
+                            wordwrap($event['ResourceStatusReason'], 40, "\n"),
+                        ];
+                    }
                 }
-            }
 
-            $table = new Table($output);
-            $table->setRows($rows);
-            $table->render();
-        } while (strpos($status, 'IN_PROGRESS') !== false);
+                $table = new Table($output);
+                $table->setRows($rows);
+                $table->render();
+            } catch (CloudFormationException $exception) {
+                $message = \StackFormation\Helper::extractMessage($exception);
+                if ($message == "Stack [$stackName] does not exist") {
+                    $stackGone = true;
+                    $output->writeln("-> Stack gone.");
+                } else {
+                    throw $exception;
+                }
+
+            }
+        } while (!$stackGone && strpos($status, 'IN_PROGRESS') !== false);
 
         $formatter = new FormatterHelper();
         if (strpos($status, 'FAILED') !== false) {

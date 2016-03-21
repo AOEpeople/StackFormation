@@ -3,7 +3,6 @@
 namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
-use StackFormation\Helper;
 use StackFormation\StackManager;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -89,23 +88,13 @@ abstract class AbstractCommand extends Command
         return $stack;
     }
 
-    protected function extractMessage(CloudFormationException $exception)
-    {
-        $message = (string)$exception->getResponse()->getBody();
-        $xml = simplexml_load_string($message);
-        if ($xml !== false && $xml->Error->Message) {
-            return $xml->Error->Message;
-        }
-
-        return $exception->getMessage();
-    }
-
     public function run(InputInterface $input, OutputInterface $output)
     {
         try {
             return parent::run($input, $output);
         } catch (CloudFormationException $exception) {
-            $message = $this->extractMessage($exception);
+            
+            $message = \StackFormation\Helper::extractMessage($exception);
             if (strpos($message, 'No updates are to be performed.') !== false) {
                 $output->writeln('No updates are to be performed.');
 
