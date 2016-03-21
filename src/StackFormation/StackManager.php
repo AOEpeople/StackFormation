@@ -50,7 +50,7 @@ class StackManager
         }
         if (!is_null($key)) {
             if (!isset($this->parametersCache[$stackName][$key])) {
-                throw new \Exception("Key '$key' not found");
+                throw new \Exception("Parameter '$key' not found in stack '$stackName'");
             }
             if ($this->parametersCache[$stackName][$key] == '****') {
                 throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
@@ -87,7 +87,7 @@ class StackManager
         }
         if (!is_null($key)) {
             if (!isset($this->outputsCache[$stackName][$key])) {
-                throw new \Exception("Key '$key' not found");
+                throw new \Exception("Output '$key' not found in stack '$stackName'");
             }
             if ($this->outputsCache[$stackName][$key] == '****') {
                 throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
@@ -124,7 +124,7 @@ class StackManager
         }
         if (!is_null($key)) {
             if (!isset($this->tagsCache[$stackName][$key])) {
-                throw new \Exception("Key '$key' not found");
+                throw new \Exception("Tag '$key' not found in stack '$stackName'");
             }
 
             return $this->tagsCache[$stackName][$key];
