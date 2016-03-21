@@ -22,11 +22,20 @@ class Config
         $yamlParser = new Parser();
 
         $config = [];
+        $stacknames = [];
         foreach ($files as $file) {
             $basePath = dirname(realpath($file));
             $tmp = $yamlParser->parse(file_get_contents($file));
             if (isset($tmp['blueprints']) && is_array($tmp['blueprints'])) {
                 foreach ($tmp['blueprints'] as &$blueprintConfig) {
+
+                    // check for multiple usage of the same stackname
+                    $stackname = $blueprintConfig['stackname'];
+                    if (in_array($stackname, $stacknames)) {
+                        throw new \Exception("Stackname '$stackname' was declared more than once.");
+                    }
+                    $stacknames[] = $stackname;
+
                     $blueprintConfig['basepath'] = $basePath;
                     $blueprintConfig['template'] = (array)$blueprintConfig['template'];
                     foreach ($blueprintConfig['template'] as &$template) {
