@@ -28,7 +28,7 @@ abstract class AbstractCommand extends Command
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)
     {
         $blueprint = $input->getArgument('blueprint');
-        if (empty($blueprint)) {
+        if (empty($blueprint) || strpos($blueprint, '*') !== false || strpos($blueprint, '?') !== false) {
 
             try {
                 $config = $this->stackManager->getConfig();
@@ -40,12 +40,19 @@ abstract class AbstractCommand extends Command
                 }
             }
 
-            $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion('Please select a blueprint', $config->getBlueprintLabels());
+            $choices = $config->getBlueprintLabels($blueprint ? $blueprint : null);
+            if (count($choices) == 0) {
+                throw new \Exception('No matching blueprints found');
+            } elseif (count($choices) == 1) {
+                $blueprint = end($choices);
+            } else {
+                $helper = $this->getHelper('question');
+                $question = new ChoiceQuestion('Please select a blueprint', $choices);
 
-            $question->setErrorMessage('Blueprint %s is invalid.');
+                $question->setErrorMessage('Blueprint %s is invalid.');
 
-            $blueprint = $helper->ask($input, $output, $question);
+                $blueprint = $helper->ask($input, $output, $question);
+            }
             $output->writeln('Selected blueprint: ' . $blueprint);
 
             list($stackName) = explode(' ', $blueprint);

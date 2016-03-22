@@ -144,7 +144,7 @@ class Config
         return $tags;
     }
 
-    public function getBlueprintLabels()
+    public function getBlueprintLabels($filter=null)
     {
         $labels = [];
         foreach ($this->getBlueprintNames() as $blueprintName) {
@@ -154,8 +154,13 @@ class Config
                 $effectiveStackName = '[Missing env var] Error: ' . $e->getMessage();
             }
             $label = $blueprintName;
+
+            if (!is_null($filter) && !Helper::matchWildcard($filter, $label)) {
+                continue;
+            }
+
             if ($effectiveStackName != $blueprintName) {
-                $label .= " (Effective: $effectiveStackName)";
+                $label .= " <fg=yellow>(Effective: $effectiveStackName)</>";
             }
             $labels[] = $label;
         }
