@@ -99,7 +99,10 @@ class TemplateMerger
                     foreach ($array[$topLevelKey] as $key => $value) {
                         $newKey = $prefix . $key;
                         if (isset($mergedTemplate[$topLevelKey][$newKey])) {
-                            throw new \Exception("Duplicate key '$newKey' found in '$topLevelKey'");
+                            // it's ok if the parameter has the same name and type...
+                            if (($topLevelKey != 'Parameters') || ($value['Type'] != $mergedTemplate[$topLevelKey][$newKey]['Type'])) {
+                                throw new \Exception("Duplicate key '$newKey' found in '$topLevelKey'");
+                            }
                         }
                         $mergedTemplate[$topLevelKey][$newKey] = $value;
                     }
