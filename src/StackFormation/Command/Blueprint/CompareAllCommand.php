@@ -77,7 +77,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                     $tmp['parameters'] = 'Stack not found';
                     $tmp['template'] = 'Stack not found';
                 } catch (\Exception $e) {
-                    $tmp['parameters'] = 'EXCEPTION';
+                    $tmp['parameters'] = 'EXCEPTION ' . $e->getMessage();
                     $tmp['template'] = 'EXCEPTION';
                 }
             } else {
