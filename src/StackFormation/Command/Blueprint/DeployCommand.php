@@ -81,6 +81,17 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
                     $this->stackManager->deployStack($blueprint, $dryRun);
                 }
+            } elseif (strpos($message, 'is in DELETE_IN_PROGRESS state and can not be updated.') !== false) {
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion('Stack is in DELETE_IN_PROGRESS state. Do you want to wait and deploy then? [Y/n]');
+                $confirmed = $helper->ask($input, $output, $question);
+                if ($confirmed) {
+                    $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
+                    $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
+
+                    $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
+                    $this->stackManager->deployStack($blueprint, $dryRun);
+                }
             } else {
                 throw $exception;
             }
