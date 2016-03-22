@@ -38,7 +38,7 @@ class ListCommand extends \StackFormation\Command\AbstractCommand
 
         $rows = [];
         foreach ($stacks as $stackName => $details) {
-            $rows[] = [$stackName, $details['Status']];
+            $rows[] = [$stackName, \StackFormation\Helper::decorateStatus($details['Status'])];
         }
 
         $table = new Table($output);

@@ -49,4 +49,19 @@ class Helper
         return $exception->getMessage();
     }
 
+    public static function decorateStatus($status)
+    {
+        if (strpos($status, 'IN_PROGRESS') !== false) {
+            return "<fg=yellow>$status</>";
+        }
+        if (strpos($status, 'COMPLETE') !== false) {
+            return "<fg=green>$status</>";
+        }
+        if (strpos($status, 'FAILED') !== false) {
+            return "<fg=red>$status</>";
+        }
+
+        return $status;
+    }
+
 }

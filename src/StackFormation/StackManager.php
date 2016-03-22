@@ -407,7 +407,7 @@ class StackManager
                         $printedEvents[] = $eventId;
                         $rows[] = [
                             // $event['Timestamp'],
-                            $this->decorateStatus($event['Status']),
+                            Helper::decorateStatus($event['Status']),
                             $event['ResourceType'],
                             $event['LogicalResourceId'],
                             wordwrap($event['ResourceStatusReason'], 40, "\n"),
@@ -463,21 +463,6 @@ class StackManager
         }
 
         return $returnValue;
-    }
-
-    protected function decorateStatus($status)
-    {
-        if (strpos($status, 'IN_PROGRESS') !== false) {
-            return "<fg=yellow>$status</>";
-        }
-        if (strpos($status, 'COMPLETE') !== false) {
-            return "<fg=green>$status</>";
-        }
-        if (strpos($status, 'FAILED') !== false) {
-            return "<fg=red>$status</>";
-        }
-
-        return $status;
     }
 
     public function getStackStatus($stackName)
