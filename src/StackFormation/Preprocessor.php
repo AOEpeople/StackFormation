@@ -12,10 +12,14 @@ class Preprocessor
         }
         $json = file_get_contents($filepath);
 
-        $json = $this->injectFilecontent($json, dirname($filepath));
-        $json = $this->replaceRef($json);
-        $json = $this->replaceMarkers($json);
-
+        try {
+            $json = $this->injectFilecontent($json, dirname($filepath));
+            $json = $this->replaceRef($json);
+            $json = $this->replaceMarkers($json);
+        } catch(\Exception $e) {
+            // adding some more information to the exception message
+            throw new \Exception("Error processing $filepath ({$e->getMessage()})");
+        }
         return $json;
     }
 
