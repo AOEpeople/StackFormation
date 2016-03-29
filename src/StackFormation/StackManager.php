@@ -256,6 +256,11 @@ class StackManager
         return $stacks;
     }
 
+    public function cancelUpdate($stackName)
+    {
+        $this->getCfnClient()->cancelUpdateStack(['StackName' => $stackName]);
+    }
+
 
     public function deleteStack($stackName)
     {
@@ -568,6 +573,15 @@ class StackManager
             '/\{parameter:(.*?):(.*?)\}/',
             function ($matches) {
                 return $this->getParameters($matches[1], $matches[2]);
+            },
+            $string
+        );
+
+        // {clean:...}
+        $string = preg_replace_callback(
+            '/\{clean:([^:\}]+?)\}/',
+            function ($matches) {
+                return preg_replace('/[^-a-zA-Z0-9]/', '', $matches[1]);
             },
             $string
         );

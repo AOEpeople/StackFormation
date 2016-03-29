@@ -92,6 +92,18 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
                     $this->stackManager->deployStack($blueprint, $dryRun);
                 }
+            } elseif (strpos($message, 'is in UPDATE_IN_PROGRESS state and can not be updated.') !== false) {
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion('Stack is in UPDATE_IN_PROGRESS state. Do you want to cancel the current update and deploy then? [Y/n]');
+                $confirmed = $helper->ask($input, $output, $question);
+                if ($confirmed) {
+                    $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
+                    $this->stackManager->cancelUpdate($effectiveStackName);
+                    $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
+
+                    $output->writeln('Cancellation completed. Now deploying stack: ' . $effectiveStackName);
+                    $this->stackManager->deployStack($blueprint, $dryRun);
+                }
             } else {
                 throw $exception;
             }
