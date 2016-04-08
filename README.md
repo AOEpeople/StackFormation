@@ -33,6 +33,7 @@ blueprints:
 
 Structure your blueprints including all templates and other files (e.g. userdata) in "modules".
 StackFormation will load all stack.yml files from following locations:
+- `blueprints/*/*/*/blueprints.yml`
 - `blueprints/*/*/blueprints.yml`
 - `blueprints/*/blueprints.yml`
 - `blueprints/blueprints.yml`

@@ -66,6 +66,7 @@ class Config
     public static function findAllConfigurationFiles($dirname='blueprints', $filename='blueprints.yml')
     {
         $files = array_merge(
+            glob($dirname.'/*/*/*/'.$filename),
             glob($dirname.'/*/*/'.$filename),
             glob($dirname.'/*/'.$filename),
             glob($dirname.'/'.$filename),
