@@ -20,6 +20,11 @@ class ResourcesCommand extends \StackFormation\Command\AbstractCommand
                 'stack',
                 InputArgument::REQUIRED,
                 'Stack'
+            )
+            ->addArgument(
+                'key',
+                InputArgument::OPTIONAL,
+                'key'
             );
     }
 
@@ -33,6 +38,15 @@ class ResourcesCommand extends \StackFormation\Command\AbstractCommand
         $stack = $input->getArgument('stack');
 
         $data = $this->stackManager->getResources($stack);
+
+        $key = $input->getArgument('key');
+        if ($key) {
+            if (!isset($data[$key])) {
+                throw new \InvalidArgumentException("Could not find '$key'.");
+            }
+            $output->writeln($data[$key]);
+            return;
+        }
 
         $rows = [];
         foreach ($data as $k => $v) {
