@@ -13,6 +13,7 @@ class Preprocessor
         $json = file_get_contents($filepath);
 
         try {
+            $json = $this->stripComments($json);
             $json = $this->injectFilecontent($json, dirname($filepath));
             $json = $this->replaceRef($json);
             $json = $this->replaceMarkers($json);
@@ -20,6 +21,12 @@ class Preprocessor
             // adding some more information to the exception message
             throw new \Exception("Error processing $filepath ({$e->getMessage()})");
         }
+        return $json;
+    }
+    
+    public function stripComments($json)
+    {
+        $json = preg_replace('~//[^\r\n]*|/\*.*?\*/~s', '', $json);
         return $json;
     }
 
