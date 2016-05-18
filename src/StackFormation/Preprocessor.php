@@ -14,6 +14,7 @@ class Preprocessor
 
         try {
             $json = $this->stripComments($json);
+            $json = $this->expandPort($json);
             $json = $this->injectFilecontent($json, dirname($filepath));
             $json = $this->replaceRef($json);
             $json = $this->replaceMarkers($json);
@@ -28,7 +29,12 @@ class Preprocessor
     {
         // there's a problem with '"http://example.com"' being converted to '"http:'
         // $json = preg_replace('~//[^\r\n]*|/\*.*?\*/~s', '', $json);
-        $json = preg_replace('~/\*.*?\*/~s', '', $json);
+
+        // there's a problem with "arn:aws:s3:::my-bucket/*"
+        // $json = preg_replace('~/\*.*?\*/~s', '', $json);
+
+        // quick workaround: don't allow quotes
+        $json = preg_replace('~/\*[^"]*?\*/~s', '', $json);
         return $json;
     }
 
@@ -52,6 +58,11 @@ class Preprocessor
         );
 
         return $json;
+    }
+
+    public function expandPort($jsonString)
+    {
+        return preg_replace('/([\{,]\s*)"Port"\s*:\s*"(\d+)"/', '\1"FromPort": "\2", "ToPort": "\2"', $jsonString);
     }
 
     public function injectFilecontent($jsonString, $basePath)
