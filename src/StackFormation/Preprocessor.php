@@ -26,7 +26,9 @@ class Preprocessor
     
     public function stripComments($json)
     {
-        $json = preg_replace('~//[^\r\n]*|/\*.*?\*/~s', '', $json);
+        // there's a problem with '"http://example.com"' being converted to '"http:'
+        // $json = preg_replace('~//[^\r\n]*|/\*.*?\*/~s', '', $json);
+        $json = preg_replace('~/\*.*?\*/~s', '', $json);
         return $json;
     }
 
