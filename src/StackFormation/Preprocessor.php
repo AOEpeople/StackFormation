@@ -14,6 +14,7 @@ class Preprocessor
 
         try {
             $json = $this->stripComments($json);
+            $json = $this->parseRefs($json);
             $json = $this->expandPort($json);
             $json = $this->injectFilecontent($json, dirname($filepath));
             $json = $this->replaceRef($json);
@@ -35,6 +36,32 @@ class Preprocessor
 
         // quick workaround: don't allow quotes
         $json = preg_replace('~/\*[^"]*?\*/~s', '', $json);
+        return $json;
+    }
+
+    public function parseRefs($json)
+    {
+        $json = preg_replace_callback(
+            '/"([^"]*){Ref:(.+?)}([^"]*)"/',
+            function ($matches) {
+                $snippet = $matches[0];
+                $snippet = trim($snippet, '"');
+                $pieces = preg_split('/({Ref:.+})/U', $snippet, -1, PREG_SPLIT_DELIM_CAPTURE);
+                $processedPieces = [];
+                foreach ($pieces as $piece) {
+                    if (empty($piece)) {
+                        continue;
+                    }
+                    if (substr($piece, 0, 5) == '{Ref:') {
+                        $processedPieces[] = preg_replace('/{Ref:(.+)}/', '{"Ref":"$1"}', $piece);
+                    } else {
+                        $processedPieces[] = '"' . $piece . '"';
+                    }
+                }
+                return '{"Fn::Join": ["", [' . implode(', ', $processedPieces) . ']]}';
+            },
+            $json
+        );
         return $json;
     }
 

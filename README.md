@@ -415,6 +415,40 @@ Example:
 STACKFORMATION_NAME_FILTER=/^myproject-(a|b)-/
 ```
 
+### Comments
+
+You can add comments to your JSON file. Due to a current bug you can't have double quotes in your comment block.
+
+Example:
+```
+{"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"}, /* AOE WI Office */
+{"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "5.6.7.8/32"}, /* Fabrizio Home Office */
+```
+
+### Port
+
+`"Port":"..."` will automatically expanded to `"FromPort": "...", "ToPort": "..."`. So if you're specifying a single
+port instead of a range of ports you can reduce the redundancy:
+
+Example:
+```
+{"IpProtocol": "tcp", "Port": "80", "CidrIp": "1.2.3.4/32"}, 
+/* expands to: */
+{"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"},
+```
+
+### Expand strings with {Ref:...}
+
+Tired of concatenating strings with `{"Fn::Join": ["", [` manually? Just add the references in a string and StackFormation will
+expand this for you:
+
+Example:
+```
+"Key": "Name", "Value": "magento-{Ref:Environment}-{Ref:Build}-instance"
+/* will be replaced with: */
+"Key": "Name", "Value": {"Fn::Join": ["", ["magento-", {"Ref":"Environment"}, "-", {"Ref":"Build"}, "-instance"]]}
+```
+
 ### Misc
 
 Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the blueprints.yml
