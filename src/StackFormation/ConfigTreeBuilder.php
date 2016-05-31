@@ -29,6 +29,7 @@ class ConfigTreeBuilder implements ConfigurationInterface
                         ->variableNode('template')->end()
                         ->scalarNode('stackname')->end()
                         ->scalarNode('profile')->end()
+                        ->scalarNode('account')->end()
                         ->scalarNode('description')->end()
                         ->scalarNode('OnFailure')->end()
                         ->scalarNode('Capabilities')->end()

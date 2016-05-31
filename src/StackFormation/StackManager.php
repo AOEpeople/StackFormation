@@ -316,10 +316,25 @@ class StackManager
     {
         $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
 
+        if (isset($stackConfig['account'])) {
+            $configuredAcountId = $this->resolvePlaceholders($stackConfig['account'], $stackName);
+            if ($configuredAcountId != $this->getConfig()->getCurrentUsersAccountId()) {
+                throw new \Exception(sprintf("Current user's AWS account id '%s' does not match the one configured in the blueprint: '%s'",
+                    $this->getConfig()->getCurrentUsersAccountId(),
+                    $configuredAcountId
+                ));
+            }
+        }
+
         if (isset($stackConfig['profile'])) {
-            $profileManager = new \AwsInspector\ProfileManager();
-            $profileManager->loadProfile($stackConfig['profile']);
-            echo "Loading Profile: " . $stackConfig['profile'] . "\n";
+            $profile = $this->resolvePlaceholders($stackConfig['profile'], $stackName);
+            if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
+                echo "Using IAM instance profile\n";
+            } else {
+                $profileManager = new \AwsInspector\ProfileManager();
+                $profileManager->loadProfile($profile);
+                echo "Loading Profile: $profile\n";
+            }
         }
 
         $effectiveStackName = $this->getConfig()->getEffectiveStackName($stackName);

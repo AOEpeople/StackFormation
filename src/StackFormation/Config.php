@@ -172,4 +172,13 @@ class Config
     {
         return '/^'.preg_replace('/\{[^\}]+?\}/', '(.*)', $blueprintName) .'$/';
     }
+
+    public function getCurrentUsersAccountId()
+    {
+        $iamClient = SdkFactory::getClient('Iam'); /* @var $iamClient \Aws\Iam\IamClient */
+        $res = $iamClient->getUser();
+        $arn = $res->search('User.Arn');
+        $parts = explode(':', $arn);
+        return $parts[4];
+    }
 }
