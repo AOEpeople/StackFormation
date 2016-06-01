@@ -280,6 +280,17 @@ class StackManager
     {
         $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
 
+        if (isset($stackConfig['profile'])) {
+            $profile = $this->resolvePlaceholders($stackConfig['profile'], $stackName);
+            if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
+                echo "Using IAM instance profile\n";
+            } else {
+                $profileManager = new \AwsInspector\ProfileManager();
+                $profileManager->loadProfile($profile);
+                echo "Loading Profile: $profile\n";
+            }
+        }
+
         if (empty($stackConfig['template']) || !is_array($stackConfig['template'])) {
             throw new \Exception('No template(s) found');
         }
@@ -615,6 +626,18 @@ class StackManager
         $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
 
         $parameters = [];
+
+        if (isset($stackConfig['profile'])) {
+            $profile = $this->resolvePlaceholders($stackConfig['profile'], $stackName);
+            if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
+                echo "Using IAM instance profile\n";
+            } else {
+                $profileManager = new \AwsInspector\ProfileManager();
+                $profileManager->loadProfile($profile);
+                echo "Loading Profile: $profile\n";
+            }
+        }
+
 
         if (isset($stackConfig['parameters'])) {
             foreach ($stackConfig['parameters'] as $parameterKey => $parameterValue) {
