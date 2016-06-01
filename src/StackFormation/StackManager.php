@@ -421,6 +421,8 @@ class StackManager
             try {
                 $events = $this->describeStackEvents($stackName);
 
+                $logMessages = [];
+
                 $rows = [];
                 foreach ($events as $eventId => $event) {
                     if (!in_array($eventId, $printedEvents)) {
@@ -432,12 +434,40 @@ class StackManager
                             $event['LogicalResourceId'],
                             wordwrap($event['ResourceStatusReason'], 40, "\n"),
                         ];
+
+                        if (preg_match('/See the details in CloudWatch Log Stream: (.*)/', $event['ResourceStatusReason'], $matches)) {
+                            $logStream = $matches[1];
+
+                            $logGroupName = Helper::findCloudWatchLogGroupByStream($logStream);
+
+                            $params = [
+                                'limit' => 20,
+                                'logGroupName' => $logGroupName,
+                                'logStreamName' => $logStream
+                            ];
+                            $cloudWatchLogClient = \AwsInspector\SdkFactory::getClient('CloudWatchLogs'); /* @var $cloudWatchLogClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
+                            $res = $cloudWatchLogClient->getLogEvents($params);
+                            $logMessages = array_merge(
+                                [ "==> Showing last 20 messages from $logGroupName -> $logStream" ],
+                                $res->search('events[].message')
+                            );
+                        }
                     }
                 }
 
                 $table = new Table($output);
                 $table->setRows($rows);
                 $table->render();
+
+                if ($logMessages) {
+                    $output->writeln('');
+                    $output->writeln("====================");
+                    $output->writeln("Detailed log output:");
+                    $output->writeln("====================");
+                    foreach ($logMessages as $line) {
+                        $output->writeln(trim($line));
+                    }
+                }
             } catch (CloudFormationException $exception) {
                 $message = \StackFormation\Helper::extractMessage($exception);
                 if ($message == "Stack [$stackName] does not exist") {

@@ -64,4 +64,26 @@ class Helper
         return $status;
     }
 
+    public static function findCloudWatchLogGroupByStream($stream, $logGroupNamePrefix=null)
+    {
+        $cloudWatchLogClient = \AwsInspector\SdkFactory::getClient('CloudWatchLogs'); /* @var $cloudWatchLogClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
+        $params = [];
+        if ($logGroupNamePrefix) {
+            $params['logGroupNamePrefix'] = $logGroupNamePrefix;
+        }
+        $resGroups = $cloudWatchLogClient->describeLogGroups($params);
+        foreach ($resGroups->search('logGroups[].logGroupName') as $logGroupName) {
+            $resStreams = $cloudWatchLogClient->describeLogStreams([
+                'logGroupName' => $logGroupName,
+                'orderBy' => 'LastEventTime'
+            ]);
+            foreach ($resStreams->search('logStreams[].logStreamName') as $logStreamName) {
+                if ($stream == $logStreamName) {
+                    return $logGroupName;
+                }
+            }
+        }
+        return null;
+    }
+
 }
