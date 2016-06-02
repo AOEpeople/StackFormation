@@ -16,4 +16,11 @@ foreach (\StackFormation\CommandRegistry::getCommands() as $command) {
     $app->add($command);
 }
 
+// import AwsInspector commands for convenience reasons
+if (class_exists('\AwsInspector\CommandRegistry')) {
+    foreach (\AwsInspector\CommandRegistry::getCommands() as $command) {
+        $app->add($command);
+    }
+}
+
 $app->run();
