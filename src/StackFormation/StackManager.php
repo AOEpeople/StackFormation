@@ -560,26 +560,6 @@ class StackManager
 
         $originalString = $string;
 
-        // {var:...}
-        $string = preg_replace_callback(
-            '/\{var:([^:\}]+?)\}/',
-            function ($matches) use ($vars) {
-                if (!isset($vars[$matches[1]])) {
-                    throw new \Exception("Variable '{$matches[1]}' not found");
-                }
-
-                return $vars[$matches[1]];
-            },
-            $string
-        );
-
-        // {var:...}
-        static $time;
-        if (!isset($time)) {
-            $time = time();
-        }
-        $string = preg_replace('/\{tstamp}/', $time, $string);
-
         // {env:...}
         $string = preg_replace_callback(
             '/\{env:([^:\}]+?)\}/',
@@ -587,7 +567,6 @@ class StackManager
                 if (!getenv($matches[1])) {
                     throw new \Exception("Environment variable '{$matches[1]}' not found");
                 }
-
                 return getenv($matches[1]);
             },
             $string
@@ -600,11 +579,29 @@ class StackManager
                 if (!getenv($matches[1])) {
                     return $matches[2];
                 }
-
                 return getenv($matches[1]);
             },
             $string
         );
+
+        // {var:...}
+        $string = preg_replace_callback(
+            '/\{var:([^:\}]+?)\}/',
+            function ($matches) use ($vars) {
+                if (!isset($vars[$matches[1]])) {
+                    throw new \Exception("Variable '{$matches[1]}' not found");
+                }
+                return $vars[$matches[1]];
+            },
+            $string
+        );
+
+        // {var:...}
+        static $time;
+        if (!isset($time)) {
+            $time = time();
+        }
+        $string = preg_replace('/\{tstamp}/', $time, $string);
 
         // {output:...:...}
         $string = preg_replace_callback(
