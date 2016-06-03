@@ -585,7 +585,7 @@ class StackManager
 
         // {env:...:...} (with default value if env var is not set)
         $string = preg_replace_callback(
-            '/\{env:(.*?):(.*?)\}/',
+            '/\{env:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
                 if (!getenv($matches[1])) {
                     return $matches[2];
@@ -607,16 +607,16 @@ class StackManager
             $string
         );
 
-        // {var:...}
+        // {tstamp}
         static $time;
         if (!isset($time)) {
             $time = time();
         }
-        $string = preg_replace('/\{tstamp}/', $time, $string);
+        $string = str_replace('{tstamp}', $time, $string);
 
         // {output:...:...}
         $string = preg_replace_callback(
-            '/\{output:(.*?):(.*?)\}/',
+            '/\{output:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
                 return $this->getOutputs($matches[1], $matches[2]);
             },
@@ -625,7 +625,7 @@ class StackManager
 
         // {resource:...:...}
         $string = preg_replace_callback(
-            '/\{resource:(.*?):(.*?)\}/',
+            '/\{resource:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
                 return $this->getResources($matches[1], $matches[2]);
             },
@@ -634,7 +634,7 @@ class StackManager
 
         // {parameter:...:...}
         $string = preg_replace_callback(
-            '/\{parameter:(.*?):(.*?)\}/',
+            '/\{parameter:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
                 return $this->getParameters($matches[1], $matches[2]);
             },
