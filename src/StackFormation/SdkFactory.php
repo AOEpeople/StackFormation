@@ -39,8 +39,6 @@ class SdkFactory
             ]);
 
             if ($assumeRole) {
-                echo "Assuming role: $assumeRole\n";
-
                 $stsClient = $sdk->createSts();
                 $res = $stsClient->assumeRole([
                     'RoleArn' => getenv('AWS_ASSUME_ROLE'),
