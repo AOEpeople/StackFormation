@@ -6,35 +6,60 @@ use Aws\Sdk;
 
 class SdkFactory
 {
-    private static $sdk;
+    private static $sdk = [];
     private static $clients = [];
 
     public static function getSdk()
     {
-        if (is_null(self::$sdk)) {
-            $region = getenv('AWS_DEFAULT_REGION');
-            if (empty($region)) {
-                throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
-            }
+        $region = getenv('AWS_DEFAULT_REGION');
+        if (empty($region)) {
+            throw new \Exception('No valid region found in AWS_DEFAULT_REGION env var.');
+        }
+        $useInstanceProfile = getenv('USE_INSTANCE_PROFILE');
+        $accessKey = getenv('AWS_ACCESS_KEY_ID');
+        $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
 
-            if (!getenv('USE_INSTANCE_PROFILE')) {
-                if (!getenv('AWS_ACCESS_KEY_ID')) {
-                    throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var.');
-                }
-                if (!getenv('AWS_SECRET_ACCESS_KEY')) {
-                    throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var.');
-                }
+        if (!$useInstanceProfile) {
+            if (!$accessKey) {
+                throw new \Exception('No valid access key found in AWS_ACCESS_KEY_ID env var (or set USE_INSTANCE_PROFILE).');
             }
-
-            self::$sdk = new Sdk(
-                [
-                    'region'  => $region,
-                    'version' => 'latest',
-                ]
-            );
+            if (!$secretKey) {
+                throw new \Exception('No valid secret access key found in AWS_SECRET_ACCESS_KEY env var (or set USE_INSTANCE_PROFILE).');
+            }
         }
 
-        return self::$sdk;
+        $assumeRole = getenv('AWS_ASSUME_ROLE');
+
+        $conf = implode('|', [$region,$useInstanceProfile,$accessKey,$secretKey,$assumeRole]);
+
+        if (empty(self::$sdk[$conf])) {
+            $sdk = new Sdk([
+                'region'  => $region,
+                'version' => 'latest'
+            ]);
+
+            if ($assumeRole) {
+                echo "Assuming role: $assumeRole\n";
+
+                $stsClient = $sdk->createSts();
+                $res = $stsClient->assumeRole([
+                    'RoleArn' => getenv('AWS_ASSUME_ROLE'),
+                    'RoleSessionName' => 'StackFormation'
+                ]);
+                $credentials = $stsClient->createCredentials($res);
+
+                // replace SDK object with new one that is assuming the role
+                $sdk = new Sdk([
+                    'region'  => $region,
+                    'version' => 'latest',
+                    'credentials' => $credentials
+                ]);
+            }
+
+            self::$sdk[$conf] = $sdk;
+        }
+
+        return self::$sdk[$conf] ;
     }
 
     /**
