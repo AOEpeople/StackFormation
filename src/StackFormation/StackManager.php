@@ -134,6 +134,18 @@ class StackManager
         return $this->tagsCache[$stackName];
     }
 
+    public function getBlueprintNameForStack($stackName)
+    {
+        $tags = $this->getTags($stackName);
+        if (isset($tags["stackformation:blueprint"])) {
+            return base64_decode($tags["stackformation:blueprint"]);
+        }
+        if ($this->getConfig()->blueprintExists($stackName)) {
+            return $stackName;
+        }
+        return null;
+    }
+
     /**
      * Get output values for stack
      *

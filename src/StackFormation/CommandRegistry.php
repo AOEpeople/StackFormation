@@ -12,16 +12,16 @@ class CommandRegistry
             new Command\Stack\ObserveCommand(),
             new Command\Stack\DeleteCommand(),
             new Command\Stack\TimelineCommand(),
+            new Command\Stack\CompareAllCommand(),
+            new Command\Stack\DiffCommand(),
             new Command\Stack\Show\OutputsCommand(),
             new Command\Stack\Show\ParametersCommand(),
             new Command\Stack\Show\ResourcesCommand(),
 
             new Command\Blueprint\DeployCommand(),
-            new Command\Blueprint\DiffCommand(),
             new Command\Blueprint\ValidateCommand(),
             new Command\Blueprint\Show\TemplateCommand(),
             new Command\Blueprint\Show\ParametersCommand(),
-            new Command\Blueprint\CompareAllCommand(),
             new Command\Blueprint\MigrateCommand()
 
             //new Command\UpdateRoute53AliasCommand(),

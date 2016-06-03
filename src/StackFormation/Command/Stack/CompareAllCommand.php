@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\Command\Blueprint;
+namespace StackFormation\Command\Stack;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use Symfony\Component\Console\Helper\FormatterHelper;
@@ -15,43 +15,37 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('blueprint:compare-all')
-            ->setDescription('Compare all local blueprints with the corresponding live stack');
+            ->setName('stack:compare-all')
+            ->setDescription('Compare all live stacks with their corresponding blueprint');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $localStacks = $this->stackManager->getConfig()->getBlueprintNames();
+        $stacks = $this->stackManager->getStacksFromApi(false);
 
         $data = [];
-        foreach ($localStacks as $localStack) {
+        foreach ($stacks as $stackName => $status) {
             $error = false;
 
-            try {
-                $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($localStack, true);
-            } catch (\Exception $e) {
+            $blueprintName = $this->stackManager->getBlueprintNameForStack($stackName);
+            if (empty($blueprintName)) {
                 $error = true;
-                $effectiveStackName = '[' . $e->getMessage() . ']';
-            }
-
-            // skip stacks with dynamic names
-            if ($localStack != $effectiveStackName) {
-                continue;
+                $blueprintName = '<fg=red>Not found</>';
             }
 
             $tmp = [];
-            $tmp['stackName'] = $localStack;
-            //$tmp['effectiveStackName'] = $effectiveStackName;
+            $tmp['stackName'] = $stackName;
+            $tmp['blueprintName'] = $blueprintName;
 
             if (!$error) {
 
                 // parameters
                 if (!$output->isQuiet()) {
-                    $output->writeln($localStack. ': Comparing parameters');
+                    $output->writeln($stackName. ': Comparing parameters');
                 }
                 try {
-                    $parameters_live = $this->stackManager->getParameters($effectiveStackName);
-                    $parameters_local = $this->stackManager->getParametersFromConfig($effectiveStackName, true, true);
+                    $parameters_live = $this->stackManager->getParameters($stackName);
+                    $parameters_local = $this->stackManager->getParametersFromConfig($blueprintName, true, true);
                     if ($this->compareParameters($parameters_live, $parameters_local)) {
                         $tmp['parameters'] = "<fg=green>equal</>";
                     } else {
@@ -60,10 +54,10 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
                     // template
                     if (!$output->isQuiet()) {
-                        $output->writeln($localStack. ': Comparing template');
+                        $output->writeln($stackName. ': Comparing template');
                     }
-                    $template_live = trim($this->stackManager->getTemplate($effectiveStackName));
-                    $template_local = trim($this->stackManager->getPreprocessedTemplate($localStack));
+                    $template_live = trim($this->stackManager->getTemplate($stackName));
+                    $template_local = trim($this->stackManager->getPreprocessedTemplate($blueprintName));
 
                     $template_live = $this->normalizeJson($template_live);
                     $template_local = $this->normalizeJson($template_local);
@@ -92,16 +86,16 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $output->writeln('');
 
         $table = new Table($output);
-        $table->setHeaders(['Blueprint / Stack' /*, 'Effective Stackname'*/, 'Parameters', 'Template']);
+        $table->setHeaders(['Stack', 'Blueprint', 'Parameters', 'Template']);
         $table->setRows($data);
         $table->render();
 
         $output->writeln('');
         $output->writeln("-> Run this to show a diff for a specific stack:");
-        $output->writeln("{$GLOBALS['argv'][0]} blueprint:diff <stackName>");
+        $output->writeln("{$GLOBALS['argv'][0]} stack:diff <stackName>");
         $output->writeln('');
         $output->writeln("-> Run this to update a live stack:");
-        $output->writeln("{$GLOBALS['argv'][0]} blueprint:deploy -o <stackName>");
+        $output->writeln("{$GLOBALS['argv'][0]} blueprint:deploy -o <blueprintName>");
         $output->writeln('');
     }
 
