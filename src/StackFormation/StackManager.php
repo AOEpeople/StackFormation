@@ -462,6 +462,17 @@ class StackManager
                                 [ "==> Showing last 20 messages from $logGroupName -> $logStream" ],
                                 $res->search('events[].message')
                             );
+                        } elseif (preg_match('/WaitCondition received failed message:.*for uniqueId: (i-[0-9a-f]+)/', $event['ResourceStatusReason'], $matches)) {
+                            $instanceId = $matches[1];
+                            if (class_exists('\AwsInspector\Model\Ec2\Repository')) {
+                                $ec2Repo = new \AwsInspector\Model\Ec2\Repository();
+                                $instance = $ec2Repo->findEc2InstanceBy('instance-id', $instanceId);
+                                $res = $instance->exec('tail -50 /var/log/cloud-init-output.log');
+                                $logMessages = array_merge(
+                                    [ "==> Showing last 50 lines in /var/log/cloud-init-output.log"],
+                                    $res['output']
+                                );
+                            }
                         }
                     }
                 }
