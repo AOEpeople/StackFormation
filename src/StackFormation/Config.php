@@ -132,7 +132,9 @@ class Config
 
     public function getBlueprintTags($blueprintName, $resolvePlaceholders=true)
     {
-        $tags = [];
+        $tags = [
+            ['Key' => 'stackformation:blueprint', 'Value' => base64_encode($blueprintName)]
+        ];
         $stackConfig = $this->getBlueprintConfig($blueprintName);
         if (isset($stackConfig['tags'])) {
             foreach ($stackConfig['tags'] as $key => $value) {
