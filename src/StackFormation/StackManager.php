@@ -630,7 +630,12 @@ class StackManager
         $string = preg_replace_callback(
             '/\{output:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
-                return $this->getOutputs($matches[1], $matches[2]);
+                try {
+                    return $this->getOutputs($matches[1], $matches[2]);
+                } catch (CloudFormationException $e) {
+                    $extractedMessage = Helper::extractMessage($e);
+                    throw new \Exception("Error resolving '{$matches[0]}' ($extractedMessage)");
+                }
             },
             $string
         );
@@ -639,7 +644,12 @@ class StackManager
         $string = preg_replace_callback(
             '/\{resource:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
-                return $this->getResources($matches[1], $matches[2]);
+                try {
+                    return $this->getResources($matches[1], $matches[2]);
+                } catch (CloudFormationException $e) {
+                    $extractedMessage = Helper::extractMessage($e);
+                    throw new \Exception("Error resolving '{$matches[0]}' ($extractedMessage)");
+                }
             },
             $string
         );
@@ -648,7 +658,12 @@ class StackManager
         $string = preg_replace_callback(
             '/\{parameter:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
-                return $this->getParameters($matches[1], $matches[2]);
+                try {
+                    return $this->getParameters($matches[1], $matches[2]);
+                } catch (CloudFormationException $e) {
+                    $extractedMessage = Helper::extractMessage($e);
+                    throw new \Exception("Error resolving '{$matches[0]}' ($extractedMessage)");
+                }
             },
             $string
         );
