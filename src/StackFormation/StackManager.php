@@ -164,7 +164,7 @@ class StackManager
             $res = $this->getCfnClient()->describeStackResources(['StackName' => $stackName]);
             $resources = [];
             foreach ($res->search('StackResources[]') as $resource) {
-                $resources[$resource['LogicalResourceId']] = $resource['PhysicalResourceId'];
+                $resources[$resource['LogicalResourceId']] = isset($resource['PhysicalResourceId']) ? $resource['PhysicalResourceId'] : '';
             }
             $this->resourcesCache[$stackName] = $resources;
         }
