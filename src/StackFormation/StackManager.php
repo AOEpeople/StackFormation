@@ -288,12 +288,12 @@ class StackManager
         // will throw an exception if there's a problem
     }
 
-    public function getPreprocessedTemplate($stackName)
+    public function getPreprocessedTemplate($blueprintName)
     {
-        $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
+        $stackConfig = $this->getConfig()->getBlueprintConfig($blueprintName);
 
         if (isset($stackConfig['profile'])) {
-            $profile = $this->resolvePlaceholders($stackConfig['profile'], $stackName);
+            $profile = $this->resolvePlaceholders($stackConfig['profile'], $blueprintName, 'profile');
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
@@ -331,16 +331,16 @@ class StackManager
     /**
      * Update stack
      *
-     * @param string $stackName
+     * @param string $blueprintName
      * @param bool $dryRun
      * @throws \Exception
      */
-    public function deployStack($stackName, $dryRun = false)
+    public function deployStack($blueprintName, $dryRun = false)
     {
-        $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
+        $stackConfig = $this->getConfig()->getBlueprintConfig($blueprintName);
 
         if (isset($stackConfig['account'])) {
-            $configuredAcountId = $this->resolvePlaceholders($stackConfig['account'], $stackName);
+            $configuredAcountId = $this->resolvePlaceholders($stackConfig['account'], $blueprintName, 'account');
             if ($configuredAcountId != $this->getConfig()->getCurrentUsersAccountId()) {
                 throw new \Exception(sprintf("Current user's AWS account id '%s' does not match the one configured in the blueprint: '%s'",
                     $this->getConfig()->getCurrentUsersAccountId(),
@@ -350,7 +350,7 @@ class StackManager
         }
 
         if (isset($stackConfig['profile'])) {
-            $profile = $this->resolvePlaceholders($stackConfig['profile'], $stackName);
+            $profile = $this->resolvePlaceholders($stackConfig['profile'], $blueprintName, 'profile');
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
@@ -360,16 +360,16 @@ class StackManager
             }
         }
 
-        $effectiveStackName = $this->getConfig()->getEffectiveStackName($stackName);
+        $effectiveStackName = $this->getConfig()->getEffectiveStackName($blueprintName);
 
         $arguments = [
             'StackName' => $effectiveStackName,
-            'Parameters' => $this->getParametersFromConfig($stackName),
-            'TemplateBody' => $this->getPreprocessedTemplate($stackName),
+            'Parameters' => $this->getParametersFromConfig($blueprintName),
+            'TemplateBody' => $this->getPreprocessedTemplate($blueprintName),
         ];
 
         if (isset($stackConfig['before']) && is_array($stackConfig['before']) && count($stackConfig['before']) > 0) {
-            $this->executeScripts($stackConfig['before'], $stackConfig['basepath'], $stackName);
+            $this->executeScripts($stackConfig['before'], $stackConfig['basepath'], $blueprintName);
         }
 
         if (isset($stackConfig['Capabilities'])) {
@@ -384,14 +384,14 @@ class StackManager
         }
 
         $stackStatus = $this->getStackStatus($effectiveStackName);
-        if (strpos($stackName, 'IN_PROGRESS') !== false) {
+        if (strpos($blueprintName, 'IN_PROGRESS') !== false) {
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
             if (!$dryRun) {
                 $this->getCfnClient()->updateStack($arguments);
             }
         } else {
-            $arguments['Tags'] = $this->getConfig()->getBlueprintTags($stackName);
+            $arguments['Tags'] = $this->getConfig()->getBlueprintTags($blueprintName);
 
             $onFailure = isset($stackConfig['OnFailure']) ? $stackConfig['OnFailure'] : 'DO_NOTHING';
             if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
@@ -411,7 +411,7 @@ class StackManager
         chdir($path);
 
         foreach ($scripts as &$script) {
-            $script = $this->resolvePlaceholders($script, $stackName);
+            $script = $this->resolvePlaceholders($script, $stackName, 'scripts');
         }
         passthru(implode("\n", $scripts), $returnVar);
         if ($returnVar !== 0) {
@@ -577,18 +577,25 @@ class StackManager
         return array_reverse($events, true);
     }
 
-    public function resolvePlaceholders($string, $stackName = null)
+    /**
+     * Resolve placeholders
+     *
+     * @param $string
+     * @param null $blueprintName (optional) will be used to load blueprint specific vars and will be appended to Exception message for debugging purposes
+     * @param string $type (optional) will be appended to Exception message for debugging purposes
+     * @return mixed
+     * @throws \Exception
+     */
+    public function resolvePlaceholders($string, $blueprintName=null, $type=null)
     {
-        $vars = $stackName ? $this->getConfig()->getBlueprintVars($stackName) : $this->getConfig()->getGlobalVars();
-
         $originalString = $string;
 
         // {env:...}
         $string = preg_replace_callback(
             '/\{env:([^:\}]+?)\}/',
-            function ($matches) {
+            function ($matches) use ($blueprintName, $type) {
                 if (!getenv($matches[1])) {
-                    throw new \Exception("Environment variable '{$matches[1]}' not found");
+                    throw new \Exception("Environment variable '{$matches[1]}' not found (Blueprint: $blueprintName, Type: $type)");
                 }
                 return getenv($matches[1]);
             },
@@ -608,11 +615,12 @@ class StackManager
         );
 
         // {var:...}
+        $vars = $blueprintName ? $this->getConfig()->getBlueprintVars($blueprintName) : $this->getConfig()->getGlobalVars();
         $string = preg_replace_callback(
             '/\{var:([^:\}]+?)\}/',
-            function ($matches) use ($vars) {
+            function ($matches) use ($vars, $blueprintName, $type) {
                 if (!isset($vars[$matches[1]])) {
-                    throw new \Exception("Variable '{$matches[1]}' not found");
+                    throw new \Exception("Variable '{$matches[1]}' not found (Blueprint: $blueprintName, Type: $type)");
                 }
                 return $vars[$matches[1]];
             },
@@ -629,12 +637,12 @@ class StackManager
         // {output:...:...}
         $string = preg_replace_callback(
             '/\{output:([^:\}]+?):([^:\}]+?)\}/',
-            function ($matches) {
+            function ($matches) use ($blueprintName, $type) {
                 try {
                     return $this->getOutputs($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' ($extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -643,12 +651,12 @@ class StackManager
         // {resource:...:...}
         $string = preg_replace_callback(
             '/\{resource:([^:\}]+?):([^:\}]+?)\}/',
-            function ($matches) {
+            function ($matches) use ($blueprintName, $type) {
                 try {
                     return $this->getResources($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' ($extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -657,12 +665,12 @@ class StackManager
         // {parameter:...:...}
         $string = preg_replace_callback(
             '/\{parameter:([^:\}]+?):([^:\}]+?)\}/',
-            function ($matches) {
+            function ($matches) use ($blueprintName, $type) {
                 try {
                     return $this->getParameters($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' ($extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -679,21 +687,27 @@ class StackManager
 
         // recursively continue until everything is replaced
         if ($string != $originalString) {
-            $string = $this->resolvePlaceholders($string, $stackName);
+            $string = $this->resolvePlaceholders($string, $blueprintName, $type);
+        }
+
+        var_dump($string);
+
+        if (strpos($string, '{') !== false) {
+            throw new \Exception("Unresolved placeholder in string: '$string'");
         }
 
         return $string;
     }
 
-    public function getParametersFromConfig($stackName, $resolvePlaceholders = true, $flatten = false)
+    public function getParametersFromConfig($blueprintName, $resolvePlaceholders = true, $flatten = false)
     {
 
-        $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
+        $stackConfig = $this->getConfig()->getBlueprintConfig($blueprintName);
 
         $parameters = [];
 
         if (isset($stackConfig['profile'])) {
-            $profile = $this->resolvePlaceholders($stackConfig['profile'], $stackName);
+            $profile = $this->resolvePlaceholders($stackConfig['profile'], $blueprintName, 'profile');
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
@@ -710,7 +724,7 @@ class StackManager
                 if (is_null($parameterValue)) {
                     $tmp['UsePreviousValue'] = true;
                 } else {
-                    $tmp['ParameterValue'] = $resolvePlaceholders ? $this->resolvePlaceholders($parameterValue, $stackName) : $parameterValue;
+                    $tmp['ParameterValue'] = $resolvePlaceholders ? $this->resolvePlaceholders($parameterValue, $blueprintName, "parameter:$parameterKey") : $parameterValue;
                 }
                 if (strpos($tmp['ParameterKey'], '*') !== false) {
                     $count = 0;
