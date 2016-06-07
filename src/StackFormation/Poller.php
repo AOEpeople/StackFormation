@@ -20,5 +20,6 @@ class Poller
 
             $result = $callback();
         } while (!$result);
+        return $result;
     }
 }
