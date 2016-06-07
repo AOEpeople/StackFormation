@@ -592,7 +592,7 @@ class StackManager
 
         // {env:...}
         $string = preg_replace_callback(
-            '/\{env:([^:\}]+?)\}/',
+            '/\{env:([^:\}\{]+?)\}/',
             function ($matches) use ($blueprintName, $type) {
                 if (!getenv($matches[1])) {
                     throw new \Exception("Environment variable '{$matches[1]}' not found (Blueprint: $blueprintName, Type: $type)");
@@ -604,7 +604,7 @@ class StackManager
 
         // {env:...:...} (with default value if env var is not set)
         $string = preg_replace_callback(
-            '/\{env:([^:\}]+?):([^:\}]+?)\}/',
+            '/\{env:([^:\}\{]+?):([^:\}\{]+?)\}/',
             function ($matches) {
                 if (!getenv($matches[1])) {
                     return $matches[2];
@@ -617,7 +617,7 @@ class StackManager
         // {var:...}
         $vars = $blueprintName ? $this->getConfig()->getBlueprintVars($blueprintName) : $this->getConfig()->getGlobalVars();
         $string = preg_replace_callback(
-            '/\{var:([^:\}]+?)\}/',
+            '/\{var:([^:\}\{]+?)\}/',
             function ($matches) use ($vars, $blueprintName, $type) {
                 if (!isset($vars[$matches[1]])) {
                     throw new \Exception("Variable '{$matches[1]}' not found (Blueprint: $blueprintName, Type: $type)");
@@ -636,7 +636,7 @@ class StackManager
 
         // {output:...:...}
         $string = preg_replace_callback(
-            '/\{output:([^:\}]+?):([^:\}]+?)\}/',
+            '/\{output:([^:\}\{]+?):([^:\}\{]+?)\}/',
             function ($matches) use ($blueprintName, $type) {
                 try {
                     return $this->getOutputs($matches[1], $matches[2]);
@@ -650,7 +650,7 @@ class StackManager
 
         // {resource:...:...}
         $string = preg_replace_callback(
-            '/\{resource:([^:\}]+?):([^:\}]+?)\}/',
+            '/\{resource:([^:\}\{]+?):([^:\}\{]+?)\}/',
             function ($matches) use ($blueprintName, $type) {
                 try {
                     return $this->getResources($matches[1], $matches[2]);
@@ -664,7 +664,7 @@ class StackManager
 
         // {parameter:...:...}
         $string = preg_replace_callback(
-            '/\{parameter:([^:\}]+?):([^:\}]+?)\}/',
+            '/\{parameter:([^:\}\{]+?):([^:\}\{]+?)\}/',
             function ($matches) use ($blueprintName, $type) {
                 try {
                     return $this->getParameters($matches[1], $matches[2]);
@@ -678,7 +678,7 @@ class StackManager
 
         // {clean:...}
         $string = preg_replace_callback(
-            '/\{clean:([^:\}]+?)\}/',
+            '/\{clean:([^:\}\{]+?)\}/',
             function ($matches) {
                 return preg_replace('/[^-a-zA-Z0-9]/', '', $matches[1]);
             },
@@ -688,12 +688,6 @@ class StackManager
         // recursively continue until everything is replaced
         if ($string != $originalString) {
             $string = $this->resolvePlaceholders($string, $blueprintName, $type);
-        }
-
-        var_dump($string);
-
-        if (strpos($string, '{') !== false) {
-            throw new \Exception("Unresolved placeholder in string: '$string'");
         }
 
         return $string;
