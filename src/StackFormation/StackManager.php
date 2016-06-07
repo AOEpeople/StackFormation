@@ -328,19 +328,12 @@ class StackManager
         return $res->get("TemplateBody");
     }
 
-    /**
-     * Update stack
-     *
-     * @param string $stackName
-     * @param bool $dryRun
-     * @throws \Exception
-     */
-    public function deployStack($stackName, $dryRun = false)
+    protected function prepareArguments($blueprintName)
     {
-        $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
+        $stackConfig = $this->getConfig()->getBlueprintConfig($blueprintName);
 
         if (isset($stackConfig['account'])) {
-            $configuredAcountId = $this->resolvePlaceholders($stackConfig['account'], $stackName);
+            $configuredAcountId = $this->resolvePlaceholders($stackConfig['account'], $blueprintName);
             if ($configuredAcountId != $this->getConfig()->getCurrentUsersAccountId()) {
                 throw new \Exception(sprintf("Current user's AWS account id '%s' does not match the one configured in the blueprint: '%s'",
                     $this->getConfig()->getCurrentUsersAccountId(),
@@ -350,7 +343,7 @@ class StackManager
         }
 
         if (isset($stackConfig['profile'])) {
-            $profile = $this->resolvePlaceholders($stackConfig['profile'], $stackName);
+            $profile = $this->resolvePlaceholders($stackConfig['profile'], $blueprintName);
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
@@ -360,16 +353,14 @@ class StackManager
             }
         }
 
-        $effectiveStackName = $this->getConfig()->getEffectiveStackName($stackName);
-
         $arguments = [
-            'StackName' => $effectiveStackName,
-            'Parameters' => $this->getParametersFromConfig($stackName),
-            'TemplateBody' => $this->getPreprocessedTemplate($stackName),
+            'StackName' =>  $this->getConfig()->getEffectiveStackName($blueprintName),
+            'Parameters' => $this->getParametersFromConfig($blueprintName),
+            'TemplateBody' => $this->getPreprocessedTemplate($blueprintName),
         ];
 
         if (isset($stackConfig['before']) && is_array($stackConfig['before']) && count($stackConfig['before']) > 0) {
-            $this->executeScripts($stackConfig['before'], $stackConfig['basepath'], $stackName);
+            $this->executeScripts($stackConfig['before'], $stackConfig['basepath'], $blueprintName);
         }
 
         if (isset($stackConfig['Capabilities'])) {
@@ -383,26 +374,70 @@ class StackManager
             $arguments['StackPolicyBody'] = file_get_contents($stackConfig['stackPolicy']);
         }
 
-        $stackStatus = $this->getStackStatus($effectiveStackName);
-        if (strpos($stackName, 'IN_PROGRESS') !== false) {
+        $arguments['Tags'] = $this->getConfig()->getBlueprintTags($blueprintName);
+
+        return $arguments;
+    }
+
+    /**
+     * Update stack
+     *
+     * @param string $blueprintName
+     * @param bool $dryRun
+     * @throws \Exception
+     */
+    public function deployStack($blueprintName, $dryRun = false)
+    {
+        $arguments = $this->prepareArguments($blueprintName);
+
+        $stackStatus = $this->getStackStatus($arguments['StackName']);
+
+        if (strpos($stackStatus, 'IN_PROGRESS') !== false) {
+
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
+
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
+
             if (!$dryRun) {
                 $this->getCfnClient()->updateStack($arguments);
             }
+
         } else {
-            $arguments['Tags'] = $this->getConfig()->getBlueprintTags($stackName);
 
             $onFailure = isset($stackConfig['OnFailure']) ? $stackConfig['OnFailure'] : 'DO_NOTHING';
             if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
                 throw new \InvalidArgumentException("Invalid value for onFailure parameter");
             }
-
             $arguments['OnFailure'] = $onFailure;
+
             if (!$dryRun) {
                 $this->getCfnClient()->createStack($arguments);
             }
+
         }
+    }
+
+    public function getChangeSet($blueprintName)
+    {
+        $arguments = $this->prepareArguments($blueprintName);
+        if (isset($arguments['StackPolicyBody'])) {
+            unset($arguments['StackPolicyBody']);
+        }
+
+        $arguments['ChangeSetName'] = 'stackformation' . time();
+
+        $client = $this->getCfnClient();
+
+        $res = $client->createChangeSet($arguments);
+        $changeSetId = $res->get('Id');
+
+        $result = Poller::poll(function() use ($client, $changeSetId) {
+            $result = $client->describeChangeSet([ 'ChangeSetName' => $changeSetId ]);
+            echo "Status: {$result['Status']}\n";
+            return ($result['Status'] != 'CREATE_COMPLETE') ? false : $result;
+        });
+
+        return $result;
     }
 
     protected function executeScripts(array $scripts, $path, $stackName = null)

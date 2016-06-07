@@ -64,6 +64,34 @@ class Helper
         return $status;
     }
 
+    public static function decorateChangesetAction($changeSetAction)
+    {
+        if ($changeSetAction == 'Modify') {
+            return "<fg=yellow>$changeSetAction</>";
+        }
+        if ($changeSetAction == 'Add') {
+            return "<fg=green>$changeSetAction</>";
+        }
+        if ($changeSetAction == 'Remove') {
+            return "<fg=red>$changeSetAction</>";
+        }
+        return $changeSetAction;
+    }
+
+    public static function decorateChangesetReplacement($changeSetReplacement)
+    {
+        if ($changeSetReplacement == 'Conditional') {
+            return "<fg=yellow>$changeSetReplacement</>";
+        }
+        if ($changeSetReplacement == 'False') {
+            return "<fg=green>$changeSetReplacement</>";
+        }
+        if ($changeSetReplacement == 'True') {
+            return "<fg=red>$changeSetReplacement</>";
+        }
+        return $changeSetReplacement;
+    }
+
     public static function findCloudWatchLogGroupByStream($stream, $logGroupNamePrefix=null)
     {
         $cloudWatchLogClient = \AwsInspector\SdkFactory::getClient('CloudWatchLogs'); /* @var $cloudWatchLogClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
