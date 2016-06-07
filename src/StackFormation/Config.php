@@ -119,7 +119,7 @@ class Config
 
     public function getEffectiveStackName($blueprintName)
     {
-        return $this->getStackManager()->resolvePlaceholders($blueprintName, $blueprintName); // without the stackname parameter obviously...
+        return $this->getStackManager()->resolvePlaceholders($blueprintName, $blueprintName, 'stackname');
     }
 
     protected function getStackManager()
