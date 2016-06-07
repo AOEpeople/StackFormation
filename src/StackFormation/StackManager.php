@@ -434,6 +434,9 @@ class StackManager
         $result = Poller::poll(function() use ($client, $changeSetId) {
             $result = $client->describeChangeSet([ 'ChangeSetName' => $changeSetId ]);
             echo "Status: {$result['Status']}\n";
+            if ($result['Status'] == 'FAILED') {
+                throw new \Exception($result['StatusReason']);
+            }
             return ($result['Status'] != 'CREATE_COMPLETE') ? false : $result;
         });
 
