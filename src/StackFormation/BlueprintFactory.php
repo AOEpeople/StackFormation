@@ -27,6 +27,21 @@ class BlueprintFactory {
         return $blueprint;
     }
 
+    public function getBlueprintByStack(Stack $stack)
+    {
+        try {
+            $blueprintName = $stack->getBlueprintName();
+            return $this->getBlueprint($blueprintName);
+        } catch (\Exception $e) {
+            try {
+                // let's try if there's a blueprint with the same name
+                return $this->getBlueprint($stack->getName());
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+    }
+
     public function blueprintExists($blueprint)
     {
         return $this->config->blueprintExists($blueprint);

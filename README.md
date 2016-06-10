@@ -394,16 +394,6 @@ Example:
 ######
 ```
 
-### PHP 
-
-Deploy a stack programmatically
-```
-require_once __DIR__ . '/vendor/autoload.php';
-
-$stackmanager = new \StackFormation\StackManager();
-$stackmanager->deployStack('my-stack');
-```
-
 ### Stackname filter
 
 You can configure a regular expression in the `STACKFORMATION_NAME_FILTER` environment variable (e.g. via `.env.default`) which

@@ -30,22 +30,23 @@ class DiffCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        $blueprint = $this->stackManager->getBlueprintNameForStack($stack);
+        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
+        $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
+        
         if (empty($blueprint)) {
             throw new \Exception('Could not find blueprint for stack ' . $stack);
         }
 
-        $parameters_live = $this->stackManager->getParameters($stack);
-        $parameters_local = $this->stackManager->getBlueprintParameters($blueprint, true, true);
+        $parametersStack = $this->stackManager->getParameters($stack);
+        $parametersBlueprint = $this->stackManager->getBlueprintParameters($blueprint, true, true);
 
 
         $formatter = new FormatterHelper();
         $output->writeln("\n" . $formatter->formatBlock(['Parameters:'], 'error', true) . "\n");
 
         $returnVar = $this->printDiff(
-            $this->arrayToString($parameters_live),
-            $this->arrayToString($parameters_local)
+            $this->arrayToString($parametersStack),
+            $this->arrayToString($parametersBlueprint)
         );
         if ($returnVar == 0) {
             $output->writeln('No changes'."\n");
@@ -54,15 +55,15 @@ class DiffCommand extends \StackFormation\Command\AbstractCommand
         $formatter = new FormatterHelper();
         $output->writeln("\n" . $formatter->formatBlock(['Template:'], 'error', true) . "\n");
 
-        $template_live = trim($this->stackManager->getTemplate($stack));
-        $template_local = trim($this->stackManager->getPreprocessedTemplate($blueprint));
+        $templateStack = trim($this->stackManager->getTemplate($stack));
+        $templateBlueprint = trim($this->stackManager->getPreprocessedTemplate($blueprint));
 
-        $template_live = $this->normalizeJson($template_live);
-        $template_local = $this->normalizeJson($template_local);
+        $templateStack = $this->normalizeJson($templateStack);
+        $templateBlueprint = $this->normalizeJson($templateBlueprint);
 
         $returnVar = $this->printDiff(
-            $template_live,
-            $template_local
+            $templateStack,
+            $templateBlueprint
         );
         if ($returnVar == 0) {
             $output->writeln('No changes'."\n");

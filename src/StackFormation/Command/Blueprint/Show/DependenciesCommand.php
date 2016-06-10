@@ -44,6 +44,5 @@ class DependenciesCommand extends \StackFormation\Command\AbstractCommand
         $table->setHeaders(['Type', 'Var', 'Count'])
             ->setRows($this->dependencyTracker->getEnvDependenciesAsFlatList())
             ->render();
-        // var_dump($this->stackManager->getDependencyTracker()->getStacks());
     }
 }

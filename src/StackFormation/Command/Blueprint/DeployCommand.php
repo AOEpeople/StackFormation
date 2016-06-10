@@ -110,14 +110,13 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
         }
 
         if (!$dryRun) {
-            $stackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
             $output->writeln("Triggered deployment of stack '$stackName'.");
 
-            if ($observe) {
-                return $this->stackManager->observeStackActivity($stackName, $output, 10, $deleteOnTerminate);
-            } else {
+            if ($noObserve) {
                 $output->writeln("\n-> Run this to observe the stack creation/update:");
                 $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stackName\n");
+            } else {
+                return $this->stackFactory->getStack($stackName)->observe($output);
             }
         }
     }
