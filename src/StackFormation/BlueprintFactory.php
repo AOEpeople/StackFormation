@@ -20,7 +20,7 @@ class BlueprintFactory {
         }
         $blueprint = new Blueprint(
             $blueprintName,
-            $this->config,
+            $this->config->getBlueprintConfig($blueprintName),
             $this->resolver,
             $this->cfnClient
         );

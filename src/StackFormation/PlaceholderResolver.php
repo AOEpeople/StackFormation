@@ -61,7 +61,10 @@ class PlaceholderResolver {
         );
 
         // {var:...}
-        $vars = $blueprint ? $blueprint->getVars() : $this->config->getGlobalVars();
+        $vars = $this->config->getGlobalVars();
+        if ($blueprint) {
+            $vars = array_merge($vars, $blueprint->getVars());
+        }
         $string = preg_replace_callback(
             '/\{var:([^:\}\{]+?)\}/',
             function ($matches) use ($vars, $exceptionMessageAppendix) {

@@ -9,15 +9,13 @@ class Blueprint {
      */
     protected $name;
     protected $blueprintConfig;
-    protected $config;
     protected $resolver;
     protected $cfnClient;
 
-    public function __construct($name, Config $config, PlaceholderResolver $resolver, \Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct($name, array $blueprintConfig, PlaceholderResolver $resolver, \Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
         $this->name = $name;
-        $this->config = $config; // global config
-        $this->blueprintConfig = $this->config->getBlueprintConfig($name);
+        $this->blueprintConfig = $blueprintConfig;
         $this->resolver = $resolver;
         $this->cfnClient = $cfnClient;
     }
@@ -57,6 +55,7 @@ class Blueprint {
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
+                // TODO: dependency to AwsInspector!
                 $profileManager = new \AwsInspector\ProfileManager();
                 $profileManager->loadProfile($profile);
                 echo "Loading Profile: $profile\n";
@@ -185,9 +184,7 @@ class Blueprint {
 
     public function getVars()
     {
-        $globalVars = $this->config->getGlobalVars();
-        $blueprintVars = isset($this->blueprintConfig['vars']) ? $this->blueprintConfig['vars'] : [];
-        return array_merge($globalVars, $blueprintVars);
+        return isset($this->blueprintConfig['vars']) ? $this->blueprintConfig['vars'] : [];
     }
 
     public function prepareArguments()
@@ -208,10 +205,12 @@ class Blueprint {
     public function executeBeforeScripts()
     {
         $scripts = $this->getBeforeScripts();
-        $path = $this->getBasePath();
+        if (count($scripts) == 0) {
+            return;
+        }
 
         $cwd = getcwd();
-        chdir($path);
+        chdir($this->getBasePath());
 
         passthru(implode("\n", $scripts), $returnVar);
         if ($returnVar !== 0) {
