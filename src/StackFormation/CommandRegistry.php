@@ -22,6 +22,7 @@ class CommandRegistry
             new Command\Blueprint\ValidateCommand(),
             new Command\Blueprint\Show\TemplateCommand(),
             new Command\Blueprint\Show\ParametersCommand(),
+            new Command\Blueprint\Show\DependenciesCommand(),
             new Command\Blueprint\MigrateCommand()
 
             //new Command\UpdateRoute53AliasCommand(),

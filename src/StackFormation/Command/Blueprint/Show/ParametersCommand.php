@@ -39,7 +39,7 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
         $blueprint = $input->getArgument('blueprint');
         $unresolved = $input->getOption('unresolved');
         $output->writeln("Stack '$blueprint':");
-        $parameters = $this->stackManager->getParametersFromConfig($blueprint, !$unresolved);
+        $parameters = $this->stackManager->getBlueprintParameters($blueprint, !$unresolved);
 
         $output->writeln('== PARAMETERS ==');
         $table = new Table($output);

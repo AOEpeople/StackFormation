@@ -45,7 +45,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                 }
                 try {
                     $parameters_live = $this->stackManager->getParameters($stackName);
-                    $parameters_local = $this->stackManager->getParametersFromConfig($blueprintName, true, true);
+                    $parameters_local = $this->stackManager->getBlueprintParameters($blueprintName, true, true);
                     if ($this->compareParameters($parameters_live, $parameters_local)) {
                         $tmp['parameters'] = "<fg=green>equal</>";
                     } else {

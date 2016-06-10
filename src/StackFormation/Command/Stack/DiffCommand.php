@@ -37,7 +37,7 @@ class DiffCommand extends \StackFormation\Command\AbstractCommand
         }
 
         $parameters_live = $this->stackManager->getParameters($stack);
-        $parameters_local = $this->stackManager->getParametersFromConfig($blueprint, true, true);
+        $parameters_local = $this->stackManager->getBlueprintParameters($blueprint, true, true);
 
 
         $formatter = new FormatterHelper();

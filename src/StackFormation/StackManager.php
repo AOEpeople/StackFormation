@@ -14,8 +14,14 @@ class StackManager
     protected $outputsCache = [];
     protected $resourcesCache = [];
     protected $tagsCache = [];
+    protected $dependencyTracker;
 
     protected $config;
+
+    public function __construct()
+    {
+        $this->dependencyTracker = new DependencyTracker();
+    }
 
     /**
      * @return \Aws\CloudFormation\CloudFormationClient
@@ -364,7 +370,7 @@ class StackManager
 
         $arguments = [
             'StackName' => $effectiveStackName,
-            'Parameters' => $this->getParametersFromConfig($stackName),
+            'Parameters' => $this->getBlueprintNameForStack($stackName),
             'TemplateBody' => $this->getPreprocessedTemplate($stackName),
         ];
 
@@ -587,6 +593,7 @@ class StackManager
         $string = preg_replace_callback(
             '/\{env:([^:\}]+?)\}/',
             function ($matches) {
+                $this->dependencyTracker->trackEnvUsage($matches[1]);
                 if (!getenv($matches[1])) {
                     throw new \Exception("Environment variable '{$matches[1]}' not found");
                 }
@@ -599,6 +606,7 @@ class StackManager
         $string = preg_replace_callback(
             '/\{env:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
+                $this->dependencyTracker->trackEnvUsage($matches[1], true);
                 if (!getenv($matches[1])) {
                     return $matches[2];
                 }
@@ -631,6 +639,7 @@ class StackManager
             '/\{output:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
                 try {
+                    $this->dependencyTracker->trackStackDependency('output', $matches[1], $matches[2]);
                     return $this->getOutputs($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
@@ -645,6 +654,7 @@ class StackManager
             '/\{resource:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
                 try {
+                    $this->dependencyTracker->trackStackDependency('resource', $matches[1], $matches[2]);
                     return $this->getResources($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
@@ -659,6 +669,7 @@ class StackManager
             '/\{parameter:([^:\}]+?):([^:\}]+?)\}/',
             function ($matches) {
                 try {
+                    $this->dependencyTracker->trackStackDependency('parameter', $matches[1], $matches[2]);
                     return $this->getParameters($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
@@ -685,7 +696,15 @@ class StackManager
         return $string;
     }
 
+    /**
+     * @deprecated
+     */
     public function getParametersFromConfig($stackName, $resolvePlaceholders = true, $flatten = false)
+    {
+        return $this->getBlueprintParameters($stackName, $resolvePlaceholders, $flatten);
+    }
+
+    public function getBlueprintParameters($stackName, $resolvePlaceholders = true, $flatten = false)
     {
 
         $stackConfig = $this->getConfig()->getBlueprintConfig($stackName);
@@ -748,7 +767,11 @@ class StackManager
         if (is_null($this->config)) {
             $this->config = new Config();
         }
-
         return $this->config;
+    }
+
+    public function getDependencyTracker()
+    {
+        return $this->dependencyTracker;
     }
 }
