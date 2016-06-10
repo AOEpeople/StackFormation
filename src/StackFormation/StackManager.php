@@ -3,24 +3,42 @@
 namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
-use Symfony\Component\Console\Helper\FormatterHelper;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class StackManager
 {
 
-    protected $parametersCache = [];
-    protected $outputsCache = [];
-    protected $resourcesCache = [];
-    protected $tagsCache = [];
     protected $dependencyTracker;
+
+    protected $stackFactory;
 
     protected $config;
 
     public function __construct()
     {
         $this->dependencyTracker = new DependencyTracker();
+        $this->stackFactory = new StackFactory();
+    }
+
+    /**
+     * Get parameter values for stack
+     *
+     * @deprecated
+     *
+     * @param      $stackName
+     * @param null $key
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getParameters($stackName, $key = null)
+    {
+        $stack = $this->stackFactory->getStack($stackName);
+        if (!is_null($key)) {
+            return $stack->getParameter($key);
+        } else {
+            return $stack->getParameters();
+        }
     }
 
     /**
@@ -32,45 +50,9 @@ class StackManager
     }
 
     /**
-     * Get parameter values for stack
-     *
-     * @param      $stackName
-     * @param null $key
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    public function getParameters($stackName, $key = null)
-    {
-        $stackName = $this->resolveWildcard($stackName);
-
-        if (!isset($this->parametersCache[$stackName])) {
-            $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
-            $parameters = [];
-            $res = $res->search('Stacks[0].Parameters');
-            if (is_array($res)) {
-                foreach ($res as $parameter) {
-                    $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
-                }
-            }
-            $this->parametersCache[$stackName] = $parameters;
-        }
-        if (!is_null($key)) {
-            if (!isset($this->parametersCache[$stackName][$key])) {
-                throw new \Exception("Parameter '$key' not found in stack '$stackName'");
-            }
-            if ($this->parametersCache[$stackName][$key] == '****') {
-                throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
-            }
-            return $this->parametersCache[$stackName][$key];
-        }
-
-        return $this->parametersCache[$stackName];
-    }
-
-    /**
      * Get output values for stack
      *
+     * @deprecated
      * @param      $stackName
      * @param null $key
      *
@@ -79,77 +61,35 @@ class StackManager
      */
     public function getOutputs($stackName, $key = null)
     {
-        $stackName = $this->resolveWildcard($stackName);
-
-        if (!isset($this->outputsCache[$stackName])) {
-            $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
-            $outputs = [];
-            $res = $res->search('Stacks[0].Outputs');
-            if (is_array($res)) {
-                foreach ($res as $output) {
-                    $outputs[$output['OutputKey']] = $output['OutputValue'];
-                }
-            }
-            $this->outputsCache[$stackName] = $outputs;
-        }
+        $stack = $this->stackFactory->getStack($stackName);
         if (!is_null($key)) {
-            if (!isset($this->outputsCache[$stackName][$key])) {
-                throw new \Exception("Output '$key' not found in stack '$stackName'");
-            }
-            if ($this->outputsCache[$stackName][$key] == '****') {
-                throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
-            }
-            return $this->outputsCache[$stackName][$key];
+            return $stack->getOutput($key);
+        } else {
+            return $stack->getOutputs();
         }
-
-        return $this->outputsCache[$stackName];
     }
 
     /**
-     * Get output values for stack
-     *
-     * @param      $stackName
-     * @param null $key
-     *
-     * @return mixed
-     * @throws \Exception
+     * @deprecated
      */
     public function getTags($stackName, $key = null)
     {
-        $stackName = $this->resolveWildcard($stackName);
-
-        if (!isset($this->tagsCache[$stackName])) {
-            $res = $this->getCfnClient()->describeStacks(['StackName' => $stackName]);
-            $outputs = [];
-            $res = $res->search('Stacks[0].Tags');
-            if (is_array($res)) {
-                foreach ($res as $output) {
-                    $outputs[$output['Key']] = $output['Value'];
-                }
-            }
-            $this->tagsCache[$stackName] = $outputs;
-        }
+        $stack = $this->stackFactory->getStack($stackName);
         if (!is_null($key)) {
-            if (!isset($this->tagsCache[$stackName][$key])) {
-                throw new \Exception("Tag '$key' not found in stack '$stackName'");
-            }
-
-            return $this->tagsCache[$stackName][$key];
+            return $stack->getTag($key);
+        } else {
+            return $stack->getTags();
         }
-
-        return $this->tagsCache[$stackName];
     }
 
+    /**
+     * @param $stackName
+     * @return null|string
+     * @deprecated
+     */
     public function getBlueprintNameForStack($stackName)
     {
-        $tags = $this->getTags($stackName);
-        if (isset($tags["stackformation:blueprint"])) {
-            return base64_decode($tags["stackformation:blueprint"]);
-        }
-        if ($this->getConfig()->blueprintExists($stackName)) {
-            return $stackName;
-        }
-        return null;
+        return $stack = $this->stackFactory->getStack($stackName)->getBlueprintName();
     }
 
     /**
@@ -157,32 +97,19 @@ class StackManager
      *
      * @param      $stackName
      * @param null $LogicalResourceId
+     * @deprecated
      *
      * @return mixed
      * @throws \Exception
      */
     public function getResources($stackName, $LogicalResourceId = null)
     {
-        $stackName = $this->resolveWildcard($stackName);
-
-        if (!isset($this->resourcesCache[$stackName])) {
-
-            $res = $this->getCfnClient()->describeStackResources(['StackName' => $stackName]);
-            $resources = [];
-            foreach ($res->search('StackResources[]') as $resource) {
-                $resources[$resource['LogicalResourceId']] = isset($resource['PhysicalResourceId']) ? $resource['PhysicalResourceId'] : '';
-            }
-            $this->resourcesCache[$stackName] = $resources;
-        }
+        $stack = $this->stackFactory->getStack($stackName);
         if (!is_null($LogicalResourceId)) {
-            if (!isset($this->resourcesCache[$stackName][$LogicalResourceId])) {
-                throw new \Exception("LogicalResourceId '$LogicalResourceId' not found");
-            }
-
-            return $this->resourcesCache[$stackName][$LogicalResourceId];
+            return $stack->getResource($LogicalResourceId);
+        } else {
+            return $stack->getResources();
         }
-
-        return $this->resourcesCache[$stackName];
     }
 
     /**
@@ -191,95 +118,41 @@ class StackManager
      * @param $stackName
      * @return mixed
      * @throws \Exception
+     * @deprecated
      */
     protected function resolveWildcard($stackName)
     {
-        if (strpos($stackName, '*') === false) {
-            return $stackName;
-        }
-
-        $helper = new \StackFormation\Helper();
-        $stacks = $helper->find($stackName, array_keys($this->getStacksFromApi()));
-
-        if (count($stacks) == 0) {
-            throw new \Exception("No matching stack found for '$stackName'");
-        } elseif (count($stacks) > 1) {
-            throw new \Exception("Found more than one matching stack for '$stackName'.");
-        }
-        return end($stacks);
+        return $this->stackFactory->resolveWildcard($stackName);
     }
 
     /**
+     * @deprecated
      * @return array
      */
     public function getStacksFromApi($fresh = false, $nameFilter=null, $statusFilter=null)
     {
-        $stacks = StaticCache::get('stacks-from-api', function () {
-            $res = $this->getCfnClient()->listStacks([
-                'StackStatusFilter' => [
-                    'CREATE_IN_PROGRESS',
-                    'CREATE_FAILED',
-                    'CREATE_COMPLETE',
-                    'ROLLBACK_IN_PROGRESS',
-                    'ROLLBACK_FAILED',
-                    'ROLLBACK_COMPLETE',
-                    'DELETE_IN_PROGRESS',
-                    'DELETE_FAILED',
-                    'UPDATE_IN_PROGRESS',
-                    'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-                    'UPDATE_COMPLETE',
-                    'UPDATE_ROLLBACK_IN_PROGRESS',
-                    'UPDATE_ROLLBACK_FAILED',
-                    'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
-                    'UPDATE_ROLLBACK_COMPLETE',
-                ]]
-            );
-            $stacks = [];
-            foreach ($res->search('StackSummaries[]') as $stack) {
-                $stacks[$stack['StackName']] = ['Status' => $stack['StackStatus']];
-            }
-
-            return $stacks;
-        }, $fresh);
-
-        if (is_null($nameFilter)) {
-            if ($filter = getenv('STACKFORMATION_NAME_FILTER')) {
-                $nameFilter = $filter;
-            }
-        }
-
-        ksort($stacks);
-
-        // filter names
-        if (!is_null($nameFilter)) {
-            foreach ($stacks as $key => $info) {
-                if (!preg_match($nameFilter, $key)) {
-                    unset($stacks[$key]);
-                }
-            }
-        }
-
-        // filter status
-        if (!is_null($statusFilter)) {
-            foreach ($stacks as $key => $info) {
-                if (!preg_match($statusFilter, $info['Status'])) {
-                    unset($stacks[$key]);
-                }
-            }
-        }
-
-        return $stacks;
+        $stackFactory = new StackFactory($this->getCfnClient());
+        return $stackFactory->getStacksFromApi($fresh, $nameFilter, $statusFilter);
     }
 
+    /**
+     * @deprecated
+     */
     public function cancelUpdate($stackName)
     {
-        $this->getCfnClient()->cancelUpdateStack(['StackName' => $stackName]);
+        $stack = new Stack($stackName, $this->getCfnClient());
+        return $stack->cancelUpdate();
     }
 
-
+    /**
+     * @param $stackName
+     * @return bool
+     * @deprecated
+     */
     public function deleteStack($stackName)
     {
-        $this->getCfnClient()->deleteStack(['StackName' => $stackName]);
+        $stack = new Stack($stackName, $this->getCfnClient());
+        return $stack->delete();
     }
 
     public function validateTemplate($blueprintName)
@@ -471,161 +344,46 @@ class StackManager
         chdir($cwd);
     }
 
+    /**
+     * @param $stackName
+     * @param OutputInterface $output
+     * @param int $pollInterval
+     * @param bool $deleteOnSignal
+     * @return int
+     * @deprecated
+     */
     public function observeStackActivity($stackName, OutputInterface $output, $pollInterval = 10, $deleteOnSignal=false)
     {
+        $stack = $this->stackFactory->getStack($stackName);
+        $observer = new Observer($stack, $output);
         if ($deleteOnSignal) {
-            $terminator = new Terminator($stackName, $this, $output);
-            $terminator->setupSignalHandler();
+            $observer->deleteOnSignal();
         }
-
-        $returnValue = 0;
-        $printedEvents = [];
-        $first = true;
-        do {
-            if ($first) {
-                $first = false;
-            } else {
-                sleep($pollInterval);
-            }
-            $status = $this->getStackStatus($stackName);
-
-            $output->writeln("-> Polling... (Stack Status: $status)");
-
-            $stackGone = false; // while deleting
-            try {
-                $events = $this->describeStackEvents($stackName);
-
-                $logMessages = [];
-
-                $rows = [];
-                foreach ($events as $eventId => $event) {
-                    if (!in_array($eventId, $printedEvents)) {
-                        $printedEvents[] = $eventId;
-                        $rows[] = [
-                            // $event['Timestamp'],
-                            Helper::decorateStatus($event['Status']),
-                            $event['ResourceType'],
-                            $event['LogicalResourceId'],
-                            wordwrap($event['ResourceStatusReason'], 40, "\n"),
-                        ];
-
-                        if (preg_match('/See the details in CloudWatch Log Stream: (.*)/', $event['ResourceStatusReason'], $matches)) {
-                            $logStream = $matches[1];
-
-                            $logGroupName = Helper::findCloudWatchLogGroupByStream($logStream);
-
-                            $params = [
-                                'limit' => 20,
-                                'logGroupName' => $logGroupName,
-                                'logStreamName' => $logStream
-                            ];
-                            $cloudWatchLogClient = \AwsInspector\SdkFactory::getClient('CloudWatchLogs'); /* @var $cloudWatchLogClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
-                            $res = $cloudWatchLogClient->getLogEvents($params);
-                            $logMessages = array_merge(
-                                [ "==> Showing last 20 messages from $logGroupName -> $logStream" ],
-                                $res->search('events[].message')
-                            );
-                        } elseif (preg_match('/WaitCondition received failed message:.*for uniqueId: (i-[0-9a-f]+)/', $event['ResourceStatusReason'], $matches)) {
-                            $instanceId = $matches[1];
-                            if (class_exists('\AwsInspector\Model\Ec2\Repository')) {
-                                $ec2Repo = new \AwsInspector\Model\Ec2\Repository();
-                                $instance = $ec2Repo->findEc2InstanceBy('instance-id', $instanceId);
-                                $res = $instance->exec('tail -50 /var/log/cloud-init-output.log');
-                                $logMessages = array_merge(
-                                    [ "==> Showing last 50 lines in /var/log/cloud-init-output.log"],
-                                    $res['output']
-                                );
-                            }
-                        }
-                    }
-                }
-
-                $table = new Table($output);
-                $table->setRows($rows);
-                $table->render();
-
-                if ($logMessages) {
-                    $output->writeln('');
-                    $output->writeln("====================");
-                    $output->writeln("Detailed log output:");
-                    $output->writeln("====================");
-                    foreach ($logMessages as $line) {
-                        $output->writeln(trim($line));
-                    }
-                }
-            } catch (CloudFormationException $exception) {
-                $message = \StackFormation\Helper::extractMessage($exception);
-                if ($message == "Stack [$stackName] does not exist") {
-                    $stackGone = true;
-                    $output->writeln("-> Stack gone.");
-                } else {
-                    throw $exception;
-                }
-
-            }
-        } while (!$stackGone && strpos($status, 'IN_PROGRESS') !== false);
-
-        $formatter = new FormatterHelper();
-        if (strpos($status, 'FAILED') !== false) {
-            $formattedBlock = $formatter->formatBlock(['Error!', 'Status: ' . $status], 'error', true);
-        } else {
-            $formattedBlock = $formatter->formatBlock(['Completed', 'Status: ' . $status], 'info', true);
-        }
-
-        if (!in_array($status, ['CREATE_COMPLETE', 'UPDATE_COMPLETE'])) {
-            $returnValue = 1;
-        }
-
-        $output->writeln("\n\n$formattedBlock\n\n");
-
-        $output->writeln("== OUTPUTS ==");
-        try {
-            $outputs = $this->getOutputs($stackName);
-
-            $rows = [];
-            foreach ($outputs as $key => $value) {
-                $value = strlen($value) > 100 ? substr($value, 0, 100) . "..." : $value;
-                $rows[] = [$key, $value];
-            }
-
-            $table = new Table($output);
-            $table
-                ->setHeaders(['Key', 'Value'])
-                ->setRows($rows);
-            $table->render();
-        } catch (\Exception $e) {
-            // never mind...
-        }
-
+        $returnValue = $observer->observeStackActivity($pollInterval);
         return $returnValue;
     }
 
+    /**
+     * @param $stackName
+     * @return null
+     * @throws \Exception
+     * @deprecated
+     */
     public function getStackStatus($stackName)
     {
-        $stacksFromApi = $this->getStacksFromApi(true);
-        if (isset($stacksFromApi[$stackName])) {
-            return $stacksFromApi[$stackName]['Status'];
-        }
-
-        return null;
+        $stack = new Stack($stackName, $this->getCfnClient());
+        return $stack->getStatus();
     }
 
+    /**
+     * @param $stackName
+     * @return array
+     * @deprecated
+     */
     public function describeStackEvents($stackName)
     {
-        $res = $this->getCfnClient()->describeStackEvents(['StackName' => $stackName]);
-        $events = [];
-        foreach ($res->search('StackEvents[]') as $event) {
-            $events[$event['EventId']] = [
-                'Timestamp' => (string)$event['Timestamp'],
-                'Status' => $event['ResourceStatus'],
-                'ResourceType' => $event['ResourceType'],
-                'LogicalResourceId' => $event['LogicalResourceId'],
-                'ResourceStatus' => $event['ResourceStatus'],
-                'ResourceStatusReason' => isset($event['ResourceStatusReason']) ? $event['ResourceStatusReason'] : '',
-            ];
-        }
-
-        return array_reverse($events, true);
+        $stack = new Stack($stackName, $this->getCfnClient());
+        return $stack->getEvents();
     }
 
     /**
