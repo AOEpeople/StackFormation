@@ -119,7 +119,7 @@ class Config
 
     public function getEffectiveStackName($blueprintName)
     {
-        return $this->getStackManager()->resolvePlaceholders($blueprintName); // without the stackname parameter obviously...
+        return $this->getStackManager()->resolvePlaceholders($blueprintName, $blueprintName, 'stackname');
     }
 
     protected function getStackManager()
@@ -139,7 +139,7 @@ class Config
         if (isset($stackConfig['tags'])) {
             foreach ($stackConfig['tags'] as $key => $value) {
                 if ($resolvePlaceholders) {
-                    $value = $this->getStackManager()->resolvePlaceholders($value, $blueprintName);
+                    $value = $this->getStackManager()->resolvePlaceholders($value, $blueprintName, "tag:$key");
                 }
                 $tags[] = ['Key' => $key, 'Value' => $value];
             }
