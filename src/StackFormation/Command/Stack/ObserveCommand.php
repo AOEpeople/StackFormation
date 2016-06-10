@@ -30,7 +30,7 @@ class ObserveCommand extends \StackFormation\Command\AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output, null, '/IN_PROGRESS/');
+        $this->interactAskForStack($input, $output, null, '/IN_PROGRESS/');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

@@ -23,7 +23,7 @@ class TimelineCommand extends \StackFormation\Command\AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output);
+        $this->interactAskForStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

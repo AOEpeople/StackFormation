@@ -3,7 +3,10 @@
 namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
-use StackFormation\StackManager;
+use StackFormation\Config;
+use StackFormation\DependencyTracker;
+use StackFormation\PlaceholderResolver;
+use StackFormation\SdkFactory;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,15 +16,18 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 abstract class AbstractCommand extends Command
 {
 
-    /**
-     * @var StackManager
-     */
-    protected $stackManager;
+    protected $blueprintFactory;
+    protected $stackFactory;
 
     public function __construct($name = null)
     {
-        $this->stackManager = new StackManager();
-
+        $cfnClient = SdkFactory::getCfnClient();
+        $this->stackFactory = new \StackFormation\StackFactory($cfnClient);
+        $this->blueprintFactory = new \StackFormation\BlueprintFactory(
+            $cfnClient,
+            new Config(),
+            new PlaceholderResolver(new DependencyTracker(), $this->stackFactory)
+        );
         parent::__construct($name);
     }
 
@@ -30,17 +36,7 @@ abstract class AbstractCommand extends Command
         $blueprint = $input->getArgument('blueprint');
         if (empty($blueprint) || strpos($blueprint, '*') !== false || strpos($blueprint, '?') !== false) {
 
-            try {
-                $config = $this->stackManager->getConfig();
-            } catch (\StackFormation\Exception\NoBlueprintsFoundException $e) {
-                if (count(\StackFormation\Config::findAllConfigurationFiles('stacks', 'stacks.yml')) > 0) {
-                    throw new \Exception('Old stacks.yml files detected. Please run blueprint:migrate.');
-                } else {
-                    throw $e;
-                }
-            }
-
-            $choices = $config->getBlueprintLabels($blueprint ? $blueprint : null);
+            $choices = $this->blueprintFactory->getBlueprintLabels($blueprint ? $blueprint : null);
             if (count($choices) == 0) {
                 throw new \Exception('No matching blueprints found');
             } elseif (count($choices) == 1) {
@@ -62,16 +58,16 @@ abstract class AbstractCommand extends Command
         return $blueprint;
     }
 
-    protected function getRemoteStacks($nameFilter=null, $statusFilter=null)
+    protected function getStacks($nameFilter=null, $statusFilter=null)
     {
-        return array_keys($this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter));
+        return array_keys($this->stackFactory->getStacksFromApi(false, $nameFilter, $statusFilter));
     }
 
-    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)
+    public function interactAskForStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
-            $choices = $this->getRemoteStacks($nameFilter, $statusFilter);
+            $choices = $this->getStacks($nameFilter, $statusFilter);
 
             if (count($choices) == 0) {
                 throw new \Exception('No valid stacks found.');

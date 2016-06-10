@@ -4,20 +4,17 @@ namespace StackFormation;
 
 class StackFactory {
 
+    protected $cfnClient;
 
-    /**
-     * @return \Aws\CloudFormation\CloudFormationClient
-     */
-    protected function getCfnClient()
+    public function __construct(\Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
-        return SdkFactory::getCfnClient();
+        $this->cfnClient = $cfnClient;
     }
-
 
     public function getStack($stackName)
     {
         $stackName = $this->resolveWildcard($stackName);
-        return new Stack($stackName, $this->getCfnClient());
+        return new Stack($stackName, $this->cfnClient);
     }
 
     /**
@@ -47,7 +44,7 @@ class StackFactory {
     public function getStacksFromApi($fresh = false, $nameFilter=null, $statusFilter=null)
     {
         $stacks = StaticCache::get('stacks-from-api', function () {
-            $res = $this->getCfnClient()->listStacks([
+            $res = $this->cfnClient->listStacks([
                     'StackStatusFilter' => [
                         'CREATE_IN_PROGRESS',
                         'CREATE_FAILED',

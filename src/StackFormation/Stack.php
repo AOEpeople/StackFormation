@@ -46,8 +46,8 @@ class Stack {
     {
         return StaticCache::get('stack-parameters-'.$this->name, function(){
             $parameters = [];
-            $res = $this->getDataFromApi();
-            if (is_array($res->search('Stacks[0].Parameters'))) {
+            $res = $this->getDataFromApi()->search('Stacks[0].Parameters');
+            if (is_array($res)) {
                 foreach ($res as $parameter) {
                     $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
                 }
@@ -79,8 +79,8 @@ class Stack {
     {
         return StaticCache::get('stack-outputs-' . $this->name, function () {
             $outputs = [];
-            $res = $this->getDataFromApi();
-            if (is_array($res->search('Stacks[0].Outputs'))) {
+            $res = $this->getDataFromApi()->search('Stacks[0].Outputs');
+            if (is_array($res)) {
                 foreach ($res as $output) {
                     $outputs[$output['OutputKey']] = $output['OutputValue'];
                 }
@@ -102,8 +102,8 @@ class Stack {
     {
         return StaticCache::get('stack-resources-' . $this->name, function () {
             $resources = [];
-            $res = $this->getDataFromApi();
-            if (is_array($res->search('StackResources[]'))) {
+            $res = $this->getDataFromApi()->search('StackResources[]');
+            if (is_array($res)) {
                 foreach ($res as $resource) {
                     $resources[$resource['LogicalResourceId']] = isset($resource['PhysicalResourceId']) ? $resource['PhysicalResourceId'] : '';
                 }
@@ -125,8 +125,8 @@ class Stack {
     {
         return StaticCache::get('stack-resources-' . $this->name, function () {
             $tags = [];
-            $res = $this->getDataFromApi();
-            if (is_array($res->search('Stacks[0].Tags'))) {
+            $res = $this->getDataFromApi()->search('Stacks[0].Tags');
+            if (is_array($res)) {
                 foreach ($res as $tag) {
                     $tags[$tag['Key']] = $tag['Value'];
                 }
