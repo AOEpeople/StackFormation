@@ -11,13 +11,18 @@ class StackManager
     protected $dependencyTracker;
 
     protected $stackFactory;
+    protected $blueprintFactory;
 
+    /**
+     * @deprecated
+     */
     protected $config;
 
     public function __construct()
     {
         $this->dependencyTracker = new DependencyTracker();
         $this->stackFactory = new StackFactory();
+        $this->blueprintFactory = new BlueprintFactory();
     }
 
     /**
@@ -164,44 +169,25 @@ class StackManager
         // will throw an exception if there's a problem
     }
 
+    /**
+     * @param $blueprintName
+     * @return string
+     * @throws \Exception
+     * @deprecated
+     */
     public function getPreprocessedTemplate($blueprintName)
     {
-        $stackConfig = $this->getConfig()->getBlueprintConfig($blueprintName);
-
-        if (isset($stackConfig['profile'])) {
-            $profile = $this->resolvePlaceholders($stackConfig['profile'], $blueprintName, 'profile');
-            if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
-                echo "Using IAM instance profile\n";
-            } else {
-                $profileManager = new \AwsInspector\ProfileManager();
-                $profileManager->loadProfile($profile);
-                echo "Loading Profile: $profile\n";
-            }
-        }
-
-        if (empty($stackConfig['template']) || !is_array($stackConfig['template'])) {
-            throw new \Exception('No template(s) found');
-        }
-
-        $preProcessor = new Preprocessor();
-
-        $templateContents = [];
-        foreach ($stackConfig['template'] as $key => $template) {
-            $templateContents[$key] = $preProcessor->process($template);
-        }
-
-        $templateMerger = new TemplateMerger();
-        $description = !empty($stackConfig['description']) ? $stackConfig['description'] : null;
-        return $templateMerger->merge($templateContents, $description);
+        return $this->blueprintFactory->getBlueprint($blueprintName)->getPreprocessedTemplate();
     }
 
+    /**
+     * @param $stackName
+     * @return mixed|null
+     * @deprecated
+     */
     public function getTemplate($stackName)
     {
-        $stackName = $this->resolveWildcard($stackName);
-
-        $res = $this->getCfnClient()->getTemplate(['StackName' => $stackName]);
-
-        return $res->get("TemplateBody");
+        return $this->stackFactory->getStack($stackName)->getTemplate();
     }
 
     protected function prepareArguments($blueprintName)
@@ -329,21 +315,6 @@ class StackManager
         return $result;
     }
 
-    protected function executeScripts(array $scripts, $path, $stackName = null)
-    {
-        $cwd = getcwd();
-        chdir($path);
-
-        foreach ($scripts as &$script) {
-            $script = $this->resolvePlaceholders($script, $stackName, 'scripts');
-        }
-        passthru(implode("\n", $scripts), $returnVar);
-        if ($returnVar !== 0) {
-            throw new \Exception('Error executing commands');
-        }
-        chdir($cwd);
-    }
-
     /**
      * @param $stackName
      * @param OutputInterface $output
@@ -394,117 +365,17 @@ class StackManager
      * @param string $type (optional) will be appended to Exception message for debugging purposes
      * @return mixed
      * @throws \Exception
+     * @deprecated
      */
     public function resolvePlaceholders($string, $blueprintName=null, $type=null)
     {
-        $originalString = $string;
-
-        // {env:...}
-        $string = preg_replace_callback(
-            '/\{env:([^:\}\{]+?)\}/',
-            function ($matches) use ($blueprintName, $type) {
-                $this->dependencyTracker->trackEnvUsage($matches[1]);
-                if (!getenv($matches[1])) {
-                    throw new \Exception("Environment variable '{$matches[1]}' not found (Blueprint: $blueprintName, Type: $type)");
-                }
-                return getenv($matches[1]);
-            },
-            $string
-        );
-
-        // {env:...:...} (with default value if env var is not set)
-        $string = preg_replace_callback(
-            '/\{env:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) {
-                $this->dependencyTracker->trackEnvUsage($matches[1], true);
-                if (!getenv($matches[1])) {
-                    return $matches[2];
-                }
-                return getenv($matches[1]);
-            },
-            $string
-        );
-
-        // {var:...}
-        $vars = $blueprintName ? $this->getConfig()->getBlueprintVars($blueprintName) : $this->getConfig()->getGlobalVars();
-        $string = preg_replace_callback(
-            '/\{var:([^:\}\{]+?)\}/',
-            function ($matches) use ($vars, $blueprintName, $type) {
-                if (!isset($vars[$matches[1]])) {
-                    throw new \Exception("Variable '{$matches[1]}' not found (Blueprint: $blueprintName, Type: $type)");
-                }
-                return $vars[$matches[1]];
-            },
-            $string
-        );
-
-        // {tstamp}
-        static $time;
-        if (!isset($time)) {
-            $time = time();
+        if ($blueprintName) {
+            $blueprint = $this->blueprintFactory->getBlueprint($blueprintName);
+        } else {
+            $blueprint = null;
         }
-        $string = str_replace('{tstamp}', $time, $string);
-
-        // {output:...:...}
-        $string = preg_replace_callback(
-            '/\{output:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($blueprintName, $type) {
-                try {
-                    $this->dependencyTracker->trackStackDependency('output', $matches[1], $matches[2]);
-                    return $this->getOutputs($matches[1], $matches[2]);
-                } catch (CloudFormationException $e) {
-                    $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
-                }
-            },
-            $string
-        );
-
-        // {resource:...:...}
-        $string = preg_replace_callback(
-            '/\{resource:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($blueprintName, $type) {
-                try {
-                    $this->dependencyTracker->trackStackDependency('resource', $matches[1], $matches[2]);
-                    return $this->getResources($matches[1], $matches[2]);
-                } catch (CloudFormationException $e) {
-                    $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
-                }
-            },
-            $string
-        );
-
-        // {parameter:...:...}
-        $string = preg_replace_callback(
-            '/\{parameter:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($blueprintName, $type) {
-                try {
-                    $this->dependencyTracker->trackStackDependency('parameter', $matches[1], $matches[2]);
-                    return $this->getParameters($matches[1], $matches[2]);
-                } catch (CloudFormationException $e) {
-                    $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
-                }
-            },
-            $string
-        );
-
-        // {clean:...}
-        $string = preg_replace_callback(
-            '/\{clean:([^:\}\{]+?)\}/',
-            function ($matches) {
-                return preg_replace('/[^-a-zA-Z0-9]/', '', $matches[1]);
-            },
-            $string
-        );
-
-        // recursively continue until everything is replaced
-        if ($string != $originalString) {
-            $string = $this->resolvePlaceholders($string, $blueprintName, $type);
-        }
-
-        return $string;
+        $resolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory);
+        return $resolver->resolvePlaceholders($string, $blueprint, $type);
     }
 
     /**

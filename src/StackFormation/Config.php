@@ -88,26 +88,26 @@ class Config
         return isset($this->conf['vars']) ? $this->conf['vars'] : [];
     }
 
-    public function getBlueprintVars($stack)
+    public function getBlueprintVars($blueprint)
     {
-        if (!is_string($stack)) {
-            throw new \InvalidArgumentException('Invalid stack name');
+        if (!is_string($blueprint)) {
+            throw new \InvalidArgumentException('Invalid blueprint name');
         }
-        $blueprintConfig = $this->getBlueprintConfig($stack);
+        $blueprintConfig = $this->getBlueprintConfig($blueprint);
         $localVars = isset($blueprintConfig['vars']) ? $blueprintConfig['vars'] : [];
         return array_merge($this->getGlobalVars(), $localVars);
     }
 
-    public function getBlueprintConfig($stack)
+    public function getBlueprintConfig($blueprint)
     {
-        if (!is_string($stack)) {
+        if (!is_string($blueprint)) {
             throw new \InvalidArgumentException('Invalid stack name');
         }
-        if (!$this->blueprintExists($stack)) {
-            throw new \Exception("Stack '$stack' not found.");
+        if (!$this->blueprintExists($blueprint)) {
+            throw new \Exception("Blueprint '$blueprint' not found.");
         }
 
-        return $this->conf['blueprints'][$stack];
+        return $this->conf['blueprints'][$blueprint];
     }
 
     public function getBlueprintNames()
@@ -117,34 +117,12 @@ class Config
         return $blueprintNames;
     }
 
-    public function getEffectiveStackName($blueprintName)
-    {
-        return $this->getStackManager()->resolvePlaceholders($blueprintName, $blueprintName, 'stackname');
-    }
-
     protected function getStackManager()
     {
         if (is_null($this->stackManager)) {
             $this->stackManager = new StackManager();
         }
         return $this->stackManager;
-    }
-
-    public function getBlueprintTags($blueprintName, $resolvePlaceholders=true)
-    {
-        $tags = [
-            ['Key' => 'stackformation:blueprint', 'Value' => base64_encode($blueprintName)]
-        ];
-        $stackConfig = $this->getBlueprintConfig($blueprintName);
-        if (isset($stackConfig['tags'])) {
-            foreach ($stackConfig['tags'] as $key => $value) {
-                if ($resolvePlaceholders) {
-                    $value = $this->getStackManager()->resolvePlaceholders($value, $blueprintName, "tag:$key");
-                }
-                $tags[] = ['Key' => $key, 'Value' => $value];
-            }
-        }
-        return $tags;
     }
 
     public function getBlueprintLabels($filter=null)

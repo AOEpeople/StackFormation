@@ -20,7 +20,8 @@ class Stack {
         $this->cfnClient = $cfnClient;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
@@ -188,6 +189,12 @@ class Stack {
             return $stackName;
         }
         return null;
+    }
+
+    public function getTemplate()
+    {
+        $res = $this->cfnClient->getTemplate(['StackName' => $this->name]);
+        return $res->get("TemplateBody");
     }
 
 }
