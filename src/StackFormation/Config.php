@@ -88,14 +88,21 @@ class Config
         return isset($this->conf['vars']) ? $this->conf['vars'] : [];
     }
 
+    /**
+     * @param $blueprint
+     * @throws \Exception
+     * @deprecated
+     */
     public function getBlueprintVars($blueprint)
     {
-        if (!is_string($blueprint)) {
-            throw new \InvalidArgumentException('Invalid blueprint name');
-        }
-        $blueprintConfig = $this->getBlueprintConfig($blueprint);
-        $localVars = isset($blueprintConfig['vars']) ? $blueprintConfig['vars'] : [];
-        return array_merge($this->getGlobalVars(), $localVars);
+        throw new \Exception('Use $blueprint->getVars() instead');
+
+        //if (!is_string($blueprint)) {
+        //    throw new \InvalidArgumentException('Invalid blueprint name');
+        //}
+        //$blueprintConfig = $this->getBlueprintConfig($blueprint);
+        //$localVars = isset($blueprintConfig['vars']) ? $blueprintConfig['vars'] : [];
+        //return array_merge($this->getGlobalVars(), $localVars);
     }
 
     public function getBlueprintConfig($blueprint)
@@ -115,37 +122,6 @@ class Config
         $blueprintNames = array_keys($this->conf['blueprints']);
         sort($blueprintNames);
         return $blueprintNames;
-    }
-
-    protected function getStackManager()
-    {
-        if (is_null($this->stackManager)) {
-            $this->stackManager = new StackManager();
-        }
-        return $this->stackManager;
-    }
-
-    public function getBlueprintLabels($filter=null)
-    {
-        $labels = [];
-        foreach ($this->getBlueprintNames() as $blueprintName) {
-            try {
-                $effectiveStackName = $this->getEffectiveStackName($blueprintName);
-            } catch (\Exception $e) {
-                $effectiveStackName = '[Missing env var] Error: ' . $e->getMessage();
-            }
-            $label = $blueprintName;
-
-            if (!is_null($filter) && !Helper::matchWildcard($filter, $label)) {
-                continue;
-            }
-
-            if ($effectiveStackName != $blueprintName) {
-                $label .= " <fg=yellow>(Effective: $effectiveStackName)</>";
-            }
-            $labels[] = $label;
-        }
-        return $labels;
     }
 
     public function convertBlueprintNameIntoRegex($blueprintName)

@@ -20,6 +20,11 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
                 'stack',
                 InputArgument::REQUIRED,
                 'Stack'
+            )
+            ->addArgument(
+                'key',
+                InputArgument::OPTIONAL,
+                'key'
             );
     }
 
@@ -30,9 +35,15 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
 
-        $data = $this->stackManager->getParameters($stack);
+        $key = $input->getArgument('key');
+        if ($key) {
+            $output->writeln($stack->getParameter($key));
+            return;
+        }
+
+        $data = $stack->getParameters();
 
         $rows = [];
         foreach ($data as $k => $v) {

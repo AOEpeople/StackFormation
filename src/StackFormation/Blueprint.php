@@ -8,14 +8,16 @@ class Blueprint {
      * @var string
      */
     protected $name;
+    protected $blueprintConfig;
     protected $config;
     protected $resolver;
     protected $cfnClient;
 
-    public function __construct($name, array $config, PlaceholderResolver $resolver, \Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct($name, Config $config, PlaceholderResolver $resolver, \Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
         $this->name = $name;
-        $this->config = $config;
+        $this->config = $config; // global config
+        $this->blueprintConfig = $this->config->getBlueprintConfig($name);
         $this->resolver = $resolver;
         $this->cfnClient = $cfnClient;
     }
@@ -31,8 +33,8 @@ class Blueprint {
             ['Key' => 'stackformation:blueprint', 'Value' => base64_encode($this->name)] // this is how we reference a stack back to its blueprint
         ];
 
-        if (isset($this->config['tags'])) {
-            foreach ($this->config['tags'] as $key => $value) {
+        if (isset($this->blueprintConfig['tags'])) {
+            foreach ($this->blueprintConfig['tags'] as $key => $value) {
                 if ($resolvePlaceholders) {
                     $value = $this->resolver->resolvePlaceholders($value, $this, "tag:$key");
                 }
@@ -50,8 +52,8 @@ class Blueprint {
     public function enforceProfile()
     {
         // TODO: loading profiles shouldn't be done within a blueprint!
-        if (isset($this->config['profile'])) {
-            $profile = $this->resolver->resolvePlaceholders($this->config['profile'], $this, 'profile');
+        if (isset($this->blueprintConfig['profile'])) {
+            $profile = $this->resolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
@@ -66,25 +68,25 @@ class Blueprint {
     {
         $this->enforceProfile();
 
-        if (empty($this->config['template']) || !is_array($this->config['template'])) {
+        if (empty($this->blueprintConfig['template']) || !is_array($this->blueprintConfig['template'])) {
             throw new \Exception('No template(s) found');
         }
 
         $preProcessor = new Preprocessor();
 
         $templateContents = [];
-        foreach ($this->config['template'] as $key => $template) {
+        foreach ($this->blueprintConfig['template'] as $key => $template) {
             $templateContents[$key] = $preProcessor->process($template);
         }
 
         $templateMerger = new TemplateMerger();
-        $description = !empty($this->config['description']) ? $this->config['description'] : null;
+        $description = !empty($this->blueprintConfig['description']) ? $this->blueprintConfig['description'] : null;
         return $templateMerger->merge($templateContents, $description);
     }
 
-    public function getConfig()
+    public function getBlueprintConfig()
     {
-        return $this->config;
+        return $this->blueprintConfig;
     }
 
     public function getParameters($resolvePlaceholders = true, $flatten = false)
@@ -93,8 +95,8 @@ class Blueprint {
 
         $this->enforceProfile();
 
-        if (isset($this->config['parameters'])) {
-            foreach ($this->config['parameters'] as $parameterKey => $parameterValue) {
+        if (isset($this->blueprintConfig['parameters'])) {
+            foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
                 $tmp = ['ParameterKey' => $parameterKey];
                 if (is_null($parameterValue)) {
                     $tmp['UsePreviousValue'] = true;
@@ -106,7 +108,7 @@ class Blueprint {
                 }
                 if (strpos($tmp['ParameterKey'], '*') !== false) {
                     $count = 0;
-                    foreach (array_keys($this->config['template']) as $key) {
+                    foreach (array_keys($this->blueprintConfig['template']) as $key) {
                         if (!is_int($key)) {
                             $count++;
                             $newParameter = $tmp;
@@ -137,8 +139,8 @@ class Blueprint {
     public function getBeforeScripts($resolvePlaceholders = true)
     {
         $scripts = [];
-        if (isset($this->config['before']) && is_array($this->config['before']) && count($this->config['before']) > 0) {
-            $scripts = $this->config['before'];
+        if (isset($this->blueprintConfig['before']) && is_array($this->blueprintConfig['before']) && count($this->blueprintConfig['before']) > 0) {
+            $scripts = $this->blueprintConfig['before'];
         }
         if ($resolvePlaceholders) {
             foreach ($scripts as &$script) {
@@ -150,35 +152,42 @@ class Blueprint {
 
     public function getBasePath()
     {
-        if (!isset($this->config['basepath']) || !is_dir($this->config['basepath'])) {
-            throw new \Exception("Invalid basepath '{$this->config['basepath']}'");
+        if (!isset($this->blueprintConfig['basepath']) || !is_dir($this->blueprintConfig['basepath'])) {
+            throw new \Exception("Invalid basepath '{$this->blueprintConfig['basepath']}'");
         }
-        return $this->config['basepath'];
+        return $this->blueprintConfig['basepath'];
     }
 
     public function getCapabilities()
     {
-        return isset($this->config['Capabilities']) ? explode(',', $this->config['Capabilities']) : [];
+        return isset($this->blueprintConfig['Capabilities']) ? explode(',', $this->blueprintConfig['Capabilities']) : [];
     }
 
     public function getStackPolicy()
     {
-        if (isset($this->config['stackPolicy'])) {
-            if (!is_file($this->config['stackPolicy'])) {
-                throw new \Exception('Stack policy "' . $this->config['stackPolicy'] . '" not found');
+        if (isset($this->blueprintConfig['stackPolicy'])) {
+            if (!is_file($this->blueprintConfig['stackPolicy'])) {
+                throw new \Exception('Stack policy "' . $this->blueprintConfig['stackPolicy'] . '" not found');
             }
-            return file_get_contents($this->config['stackPolicy']);
+            return file_get_contents($this->blueprintConfig['stackPolicy']);
         }
         return false;
     }
 
     public function getOnFailure()
     {
-        $onFailure = isset($this->config['OnFailure']) ? $this->config['OnFailure'] : 'DO_NOTHING';
+        $onFailure = isset($this->blueprintConfig['OnFailure']) ? $this->blueprintConfig['OnFailure'] : 'DO_NOTHING';
         if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
             throw new \InvalidArgumentException("Invalid value for onFailure parameter");
         }
         return $onFailure;
+    }
+
+    public function getVars()
+    {
+        $globalVars = $this->config->getGlobalVars();
+        $blueprintVars = isset($this->blueprintConfig['vars']) ? $this->blueprintConfig['vars'] : [];
+        return array_merge($globalVars, $blueprintVars);
     }
 
     public function prepareArguments()
@@ -209,6 +218,12 @@ class Blueprint {
             throw new \Exception('Error executing commands');
         }
         chdir($cwd);
+    }
+
+    public function validateTemplate()
+    {
+        $this->cfnClient->validateTemplate(['TemplateBody' => $this->getPreprocessedTemplate()]);
+        // will throw an exception if there's a problem
     }
 
     public function getChangeSet($verbose=true)

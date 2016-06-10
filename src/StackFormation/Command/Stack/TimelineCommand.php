@@ -28,9 +28,9 @@ class TimelineCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
 
-        $events = $this->stackManager->describeStackEvents($stack);
+        $events = $stack->getEvents();
 
         $groups = [];
         $itemsByGroup = [];
@@ -102,18 +102,12 @@ class TimelineCommand extends \StackFormation\Command\AbstractCommand
                 em { font-size: smaller; }
                 .vis-labelset .vis-label { background-color: #eee; }
                 .vis-item.aws--cloudformation--waitcondition.in_progress {
-                    background: repeating-linear-gradient(
-                      to right,
-                      #f6ba52,
-                      #f6ba52 10px,
-                      #ffd180 10px,
-                      #ffd180 20px
-                    );
+                    background: repeating-linear-gradient(to right, #f6ba52, #f6ba52 10px, #ffd180 10px, #ffd180 20px);
                 }
             </style>
         </head>
         <body>
-        <h1>'.$stack.'</h1>
+        <h1>'.$stack->getName().'</h1>
         <div id="visualization"></div>
         <script>
             var groups = new vis.DataSet();
@@ -129,7 +123,5 @@ class TimelineCommand extends \StackFormation\Command\AbstractCommand
         </html>';
 
         $output->writeln($timeline);
-
-        // return $this->stackManager->observeStackActivity($stack, $output);
     }
 }

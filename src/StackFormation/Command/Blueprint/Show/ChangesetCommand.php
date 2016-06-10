@@ -30,9 +30,9 @@ class ChangesetCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
 
-        $changeSetResult = $this->stackManager->getChangeSet($blueprint);
+        $changeSetResult = $blueprint->getChangeSet(true);
 
         $rows = [];
         foreach ($changeSetResult->search('Changes[]') as $change) {

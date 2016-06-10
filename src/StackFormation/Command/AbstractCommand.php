@@ -18,16 +18,16 @@ abstract class AbstractCommand extends Command
 
     protected $blueprintFactory;
     protected $stackFactory;
+    protected $dependencyTracker;
 
     public function __construct($name = null)
     {
         $cfnClient = SdkFactory::getCfnClient();
         $this->stackFactory = new \StackFormation\StackFactory($cfnClient);
-        $this->blueprintFactory = new \StackFormation\BlueprintFactory(
-            $cfnClient,
-            new Config(),
-            new PlaceholderResolver(new DependencyTracker(), $this->stackFactory)
-        );
+        $config = new Config();
+        $this->dependencyTracker = new DependencyTracker();
+        $placeholderResolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory, $config);
+        $this->blueprintFactory = new \StackFormation\BlueprintFactory($cfnClient, $config, $placeholderResolver);
         parent::__construct($name);
     }
 

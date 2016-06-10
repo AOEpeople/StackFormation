@@ -11,10 +11,19 @@ class StackFactory {
         $this->cfnClient = $cfnClient;
     }
 
+    /**
+     * @param $stackName
+     * @return Stack $stack
+     * @throws \Exception
+     */
     public function getStack($stackName)
     {
         $stackName = $this->resolveWildcard($stackName);
-        return new Stack($stackName, $this->cfnClient);
+        $stacksFromApi = $this->getStacksFromApi(true);
+        if (!isset($stacksFromApi[$stackName])) {
+            throw new \Exception("Stack $stackName not found.");
+        }
+        return $stacksFromApi[$stackName];
     }
 
     /**
@@ -41,33 +50,39 @@ class StackFactory {
         return end($stacks);
     }
 
-    public function getStacksFromApi($fresh = false, $nameFilter=null, $statusFilter=null)
+    /**
+     * @param bool $fresh
+     * @param null $nameFilter
+     * @param null $statusFilter
+     * @return Stack[]
+     * @throws \Exception
+     */
+    public function getStacksFromApi($fresh=false, $nameFilter=null, $statusFilter=null)
     {
         $stacks = StaticCache::get('stacks-from-api', function () {
             $res = $this->cfnClient->listStacks([
-                    'StackStatusFilter' => [
-                        'CREATE_IN_PROGRESS',
-                        'CREATE_FAILED',
-                        'CREATE_COMPLETE',
-                        'ROLLBACK_IN_PROGRESS',
-                        'ROLLBACK_FAILED',
-                        'ROLLBACK_COMPLETE',
-                        'DELETE_IN_PROGRESS',
-                        'DELETE_FAILED',
-                        'UPDATE_IN_PROGRESS',
-                        'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-                        'UPDATE_COMPLETE',
-                        'UPDATE_ROLLBACK_IN_PROGRESS',
-                        'UPDATE_ROLLBACK_FAILED',
-                        'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
-                        'UPDATE_ROLLBACK_COMPLETE',
-                    ]]
+                'StackStatusFilter' => [
+                    'CREATE_IN_PROGRESS',
+                    'CREATE_FAILED',
+                    'CREATE_COMPLETE',
+                    'ROLLBACK_IN_PROGRESS',
+                    'ROLLBACK_FAILED',
+                    'ROLLBACK_COMPLETE',
+                    'DELETE_IN_PROGRESS',
+                    'DELETE_FAILED',
+                    'UPDATE_IN_PROGRESS',
+                    'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
+                    'UPDATE_COMPLETE',
+                    'UPDATE_ROLLBACK_IN_PROGRESS',
+                    'UPDATE_ROLLBACK_FAILED',
+                    'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
+                    'UPDATE_ROLLBACK_COMPLETE',
+                ]]
             );
             $stacks = [];
             foreach ($res->search('StackSummaries[]') as $stack) {
-                $stacks[$stack['StackName']] = ['Status' => $stack['StackStatus']];
+                $stacks[$stack['StackName']] = new Stack($stack['StackName'], $stack['StackStatus'], $this->cfnClient);
             }
-
             return $stacks;
         }, $fresh);
 
@@ -81,18 +96,18 @@ class StackFactory {
 
         // filter names
         if (!is_null($nameFilter)) {
-            foreach ($stacks as $key => $info) {
-                if (!preg_match($nameFilter, $key)) {
-                    unset($stacks[$key]);
+            foreach (array_keys($stacks) as $stackName) {
+                if (!preg_match($nameFilter, $stackName)) {
+                    unset($stacks[$stackName]);
                 }
             }
         }
 
         // filter status
         if (!is_null($statusFilter)) {
-            foreach ($stacks as $key => $info) {
-                if (!preg_match($statusFilter, $info['Status'])) {
-                    unset($stacks[$key]);
+            foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */
+                if (!preg_match($statusFilter, $stack->getStatus())) {
+                    unset($stacks[$stackName]);
                 }
             }
         }

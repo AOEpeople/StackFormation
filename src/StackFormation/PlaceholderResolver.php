@@ -8,11 +8,13 @@ class PlaceholderResolver {
 
     protected $dependencyTracker;
     protected $stackFactory;
+    protected $config;
 
-    public function __construct(DependencyTracker $dependencyTracker, StackFactory $stackFactory)
+    public function __construct(DependencyTracker $dependencyTracker, StackFactory $stackFactory, Config $config)
     {
         $this->dependencyTracker = $dependencyTracker;
         $this->stackFactory = $stackFactory;
+        $this->config = $config;
     }
 
     /**
@@ -59,7 +61,7 @@ class PlaceholderResolver {
         );
 
         // {var:...}
-        $vars = $blueprintName ? $this->getConfig()->getBlueprintVars($blueprintName) : $this->getConfig()->getGlobalVars();
+        $vars = $blueprint ? $blueprint->getVars() : $this->config->getGlobalVars();
         $string = preg_replace_callback(
             '/\{var:([^:\}\{]+?)\}/',
             function ($matches) use ($vars, $exceptionMessageAppendix) {
@@ -96,13 +98,13 @@ class PlaceholderResolver {
         // {resource:...:...}
         $string = preg_replace_callback(
             '/\{resource:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($blueprintName, $type) {
+            function ($matches) use ($exceptionMessageAppendix) {
                 try {
                     $this->dependencyTracker->trackStackDependency('resource', $matches[1], $matches[2]);
                     return $this->stackFactory->getStack($matches[1])->getResource($matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMessageAppendix (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -111,13 +113,13 @@ class PlaceholderResolver {
         // {parameter:...:...}
         $string = preg_replace_callback(
             '/\{parameter:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($blueprintName, $type) {
+            function ($matches) use ($exceptionMessageAppendix) {
                 try {
                     $this->dependencyTracker->trackStackDependency('parameter', $matches[1], $matches[2]);
                     return $this->stackFactory->getStack($matches[1])->getParameter($matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}' (Blueprint: $blueprintName, Type: $type) (CloudFormation error: $extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMessageAppendix (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -134,7 +136,7 @@ class PlaceholderResolver {
 
         // recursively continue until everything is replaced
         if ($string != $originalString) {
-            $string = $this->resolvePlaceholders($string, $blueprintName, $type);
+            $string = $this->resolvePlaceholders($string, $blueprint, $type);
         }
 
         return $string;

@@ -3,6 +3,7 @@
 namespace StackFormation\Command\Stack;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\Stack;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -21,32 +22,42 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stacks = $this->stackManager->getStacksFromApi(false);
+        $stacks = $this->stackFactory->getStacksFromApi(false);
 
         $data = [];
-        foreach ($stacks as $stackName => $status) {
+        foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */
+            
             $error = false;
 
-            $blueprintName = $this->stackManager->getBlueprintNameForStack($stackName);
-            if (empty($blueprintName)) {
-                $error = true;
-                $blueprintName = '<fg=red>Not found</>';
+            try {
+                $blueprintName = $stack->getBlueprintName();
+            } catch (\Exception $e) {
+                try {
+                    // let's try if there's a blueprint with the same name
+                    $blueprint = $this->blueprintFactory->getBlueprint($stackName);
+                    $blueprintName = $blueprint->getName();
+                } catch (\Exception $e) {
+                    $error = true;
+                    $blueprintName = '<fg=red>Not found</>';
+                }
             }
-
+            
             $tmp = [];
             $tmp['stackName'] = $stackName;
             $tmp['blueprintName'] = $blueprintName;
 
             if (!$error) {
 
+                $blueprint = $this->blueprintFactory->getBlueprint($blueprintName);
+
                 // parameters
                 if (!$output->isQuiet()) {
                     $output->writeln($stackName. ': Comparing parameters');
                 }
                 try {
-                    $parameters_live = $this->stackManager->getParameters($stackName);
-                    $parameters_local = $this->stackManager->getBlueprintParameters($blueprintName, true, true);
-                    if ($this->compareParameters($parameters_live, $parameters_local)) {
+                    $parametersStack = $stack->getParameters();
+                    $parametersBlueprint = $blueprint->getParameters(true, true);
+                    if ($this->compareParameters($parametersStack, $parametersBlueprint)) {
                         $tmp['parameters'] = "<fg=green>equal</>";
                     } else {
                         $tmp['parameters'] = "<fg=red>different</>";
@@ -56,13 +67,13 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                     if (!$output->isQuiet()) {
                         $output->writeln($stackName. ': Comparing template');
                     }
-                    $template_live = trim($this->stackManager->getTemplate($stackName));
-                    $template_local = trim($this->stackManager->getPreprocessedTemplate($blueprintName));
+                    $templateStack = trim($stack->getTemplate());
+                    $templateBlueprint = trim($blueprint->getPreprocessedTemplate());
 
-                    $template_live = $this->normalizeJson($template_live);
-                    $template_local = $this->normalizeJson($template_local);
+                    $templateStack = $this->normalizeJson($templateStack);
+                    $templateBlueprint = $this->normalizeJson($templateBlueprint);
 
-                    if ($template_live === $template_local) {
+                    if ($templateStack === $templateBlueprint) {
                         $tmp['template'] = "<fg=green>equal</>";
                     } else {
                         $tmp['template'] = "<fg=red>different</>";

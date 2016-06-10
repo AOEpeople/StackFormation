@@ -28,7 +28,7 @@ class TemplateCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
-        $output->writeln($this->stackManager->getPreprocessedTemplate($blueprint));
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
+        $output->writeln($blueprint->getPreprocessedTemplate());
     }
 }

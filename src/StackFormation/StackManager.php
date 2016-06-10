@@ -138,15 +138,6 @@ class StackManager
         return $stack->delete();
     }
 
-    public function validateTemplate($blueprintName)
-    {
-        $res = $this->getCfnClient()->validateTemplate([
-            'TemplateBody' => $this->getPreprocessedTemplate($blueprintName)
-        ]);
-
-        // will throw an exception if there's a problem
-    }
-
     /**
      * @deprecated
      */

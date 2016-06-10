@@ -82,9 +82,9 @@ class DeleteCommand extends \StackFormation\Command\AbstractCommand
             $output->writeln("No stacks deleted.");
         }
 
-        foreach ($stacks as $stack) {
-            $this->stackManager->deleteStack($stack);
-            $output->writeln("Triggered deletion of stack '$stack'.");
+        foreach ($stacks as $stackName) {
+            $this->stackFactory->getStack($stackName)->delete();
+            $output->writeln("Triggered deletion of stack '$stackName'.");
         }
     }
 }

@@ -36,10 +36,12 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
         $unresolved = $input->getOption('unresolved');
-        $output->writeln("Stack '$blueprint':");
-        $parameters = $this->stackManager->getBlueprintParameters($blueprint, !$unresolved);
+
+        $output->writeln("Blueprint '{$blueprint->getName()}':");
+
+        $parameters = $blueprint->getParameters(!$unresolved);
 
         $output->writeln('== PARAMETERS ==');
         $table = new Table($output);
@@ -52,7 +54,7 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
         $table = new Table($output);
         $table
             ->setHeaders(['Key', 'Value'])
-            ->setRows($this->stackManager->getConfig()->getBlueprintTags($blueprint, !$unresolved));
+            ->setRows($blueprint->getTags(!$unresolved));
         $table->render();
     }
 }

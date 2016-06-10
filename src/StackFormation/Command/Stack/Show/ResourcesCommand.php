@@ -35,18 +35,15 @@ class ResourcesCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-
-        $data = $this->stackManager->getResources($stack);
+        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
 
         $key = $input->getArgument('key');
         if ($key) {
-            if (!isset($data[$key])) {
-                throw new \InvalidArgumentException("Could not find '$key'.");
-            }
-            $output->writeln($data[$key]);
+            $output->writeln($stack->getResource($key));
             return;
         }
+
+        $data = $stack->getResources();
 
         $rows = [];
         foreach ($data as $k => $v) {

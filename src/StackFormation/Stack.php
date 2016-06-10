@@ -8,16 +8,18 @@ class Stack {
      * @var string
      */
     protected $name;
+    protected $status;
 
     /**
      * @var \Aws\CloudFormation\CloudFormationClient
      */
     protected $cfnClient;
 
-    public function __construct($name, \Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct($name, $status, \Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
         $this->name = $name;
         $this->cfnClient = $cfnClient;
+        $this->status = $status;
     }
 
     public function getName()
@@ -137,15 +139,7 @@ class Stack {
 
     public function getStatus()
     {
-        throw new \Exception('getStatus is not implemented yet');
-
-        $stacksFromApi = $this->getStacksFromApi(true);
-        if (isset($stacksFromApi[$stackName])) {
-            return $stacksFromApi[$stackName]['Status'];
-        }
-
-        return null;
-
+        return $this->status;
     }
 
     public function getEvents()
@@ -168,33 +162,35 @@ class Stack {
     public function cancelUpdate()
     {
          $this->cfnClient->cancelUpdateStack(['StackName' => $this->name]);
-        return true;
+        return $this;
     }
 
     public function delete()
     {
         $this->cfnClient->deleteStack(['StackName' => $this->name]);
-        return true;
+        return $this;
     }
 
     public function getBlueprintName()
     {
-        throw new \Exception("getBlueprintName not implemented yet");
-
-        $tags = $this->getTags($stackName);
-        if (isset($tags["stackformation:blueprint"])) {
-            return base64_decode($tags["stackformation:blueprint"]);
-        }
-        if ($this->getConfig()->blueprintExists($stackName)) {
-            return $stackName;
-        }
-        return null;
+        $blueprintName = $this->getTag('stackformation:blueprint');
+        $blueprintName = base64_decode($blueprintName);
+        return $blueprintName;
     }
 
     public function getTemplate()
     {
         $res = $this->cfnClient->getTemplate(['StackName' => $this->name]);
         return $res->get("TemplateBody");
+    }
+
+    public function observe(\Symfony\Component\Console\Output\OutputInterface $output, $deleteOnTerminate=false)
+    {
+        $observer = new Observer($this, $output);
+        if ($deleteOnTerminate) {
+            $observer->deleteOnSignal();
+        }
+        return $observer->observeStackActivity();
     }
 
 }

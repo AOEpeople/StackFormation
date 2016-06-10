@@ -29,19 +29,20 @@ class DependenciesCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
 
-        $this->stackManager->getBlueprintParameters($blueprint);
-        $this->stackManager->getPreprocessedTemplate($blueprint);
+        // trigger resolving all placeholders
+        $blueprint->getParameters();
+        $blueprint->getPreprocessedTemplate();
 
         $table = new Table($output);
         $table->setHeaders(['Type', 'Stack', 'Resource', 'Count'])
-            ->setRows($this->stackManager->getDependencyTracker()->getStackDependenciesAsFlatList())
+            ->setRows($this->dependencyTracker->getStackDependenciesAsFlatList())
             ->render();
 
         $table = new Table($output);
         $table->setHeaders(['Type', 'Var', 'Count'])
-            ->setRows($this->stackManager->getDependencyTracker()->getEnvDependenciesAsFlatList())
+            ->setRows($this->dependencyTracker->getEnvDependenciesAsFlatList())
             ->render();
         // var_dump($this->stackManager->getDependencyTracker()->getStacks());
     }

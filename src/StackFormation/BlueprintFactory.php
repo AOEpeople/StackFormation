@@ -15,13 +15,21 @@ class BlueprintFactory {
 
     public function getBlueprint($blueprintName)
     {
+        if (!$this->blueprintExists($blueprintName)) {
+            throw new \Exception("Blueprint '$blueprintName' does not exist'");
+        }
         $blueprint = new Blueprint(
             $blueprintName,
-            $this->config->getBlueprintConfig($blueprintName),
+            $this->config,
             $this->resolver,
             $this->cfnClient
         );
         return $blueprint;
+    }
+
+    public function blueprintExists($blueprint)
+    {
+        return $this->config->blueprintExists($blueprint);
     }
 
     public function getBlueprintLabels($filter=null)

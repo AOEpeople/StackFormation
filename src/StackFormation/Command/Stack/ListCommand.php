@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Stack;
 
+use StackFormation\Stack;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -34,11 +35,11 @@ class ListCommand extends \StackFormation\Command\AbstractCommand
         $nameFilter = $input->getOption('nameFilter');
         $statusFilter = $input->getOption('statusFilter');
 
-        $stacks = $this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter);
+        $stacks = $this->stackFactory->getStacksFromApi(false, $nameFilter, $statusFilter);
 
         $rows = [];
-        foreach ($stacks as $stackName => $details) {
-            $rows[] = [$stackName, \StackFormation\Helper::decorateStatus($details['Status'])];
+        foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */
+            $rows[] = [$stackName, \StackFormation\Helper::decorateStatus($stack->getStatus())];
         }
 
         $table = new Table($output);
