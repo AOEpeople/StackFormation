@@ -65,7 +65,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
         }
 
         try {
-            $this->stackManager->deployStack($blueprint, $dryRun);
+            $this->stackManager->deployBlueprint($blueprint, $dryRun);
         } catch (CloudFormationException $exception) {
             $message = \StackFormation\Helper::extractMessage($exception);
             if (strpos($message, 'is in CREATE_FAILED state and can not be updated.') !== false) {
@@ -79,7 +79,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
 
                     $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
-                    $this->stackManager->deployStack($blueprint, $dryRun);
+                    $this->stackManager->deployBlueprint($blueprint, $dryRun);
                 }
             } elseif (strpos($message, 'is in DELETE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
@@ -90,7 +90,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
 
                     $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
-                    $this->stackManager->deployStack($blueprint, $dryRun);
+                    $this->stackManager->deployBlueprint($blueprint, $dryRun);
                 }
             } elseif (strpos($message, 'is in UPDATE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
@@ -102,7 +102,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
 
                     $output->writeln('Cancellation completed. Now deploying stack: ' . $effectiveStackName);
-                    $this->stackManager->deployStack($blueprint, $dryRun);
+                    $this->stackManager->deployBlueprint($blueprint, $dryRun);
                 }
             } else {
                 throw $exception;

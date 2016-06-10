@@ -214,28 +214,25 @@ class StackManager
      */
     public function getStacksFromApi($fresh = false, $nameFilter=null, $statusFilter=null)
     {
-        $that = $this;
-        $stacks = StaticCache::get('stacks-from-api', function () use ($that) {
-            $res = $that->getCfnClient()->listStacks(
-                [
-                    'StackStatusFilter' => [
-                        'CREATE_IN_PROGRESS',
-                        'CREATE_FAILED',
-                        'CREATE_COMPLETE',
-                        'ROLLBACK_IN_PROGRESS',
-                        'ROLLBACK_FAILED',
-                        'ROLLBACK_COMPLETE',
-                        'DELETE_IN_PROGRESS',
-                        'DELETE_FAILED',
-                        'UPDATE_IN_PROGRESS',
-                        'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-                        'UPDATE_COMPLETE',
-                        'UPDATE_ROLLBACK_IN_PROGRESS',
-                        'UPDATE_ROLLBACK_FAILED',
-                        'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
-                        'UPDATE_ROLLBACK_COMPLETE',
-                    ],
-                ]
+        $stacks = StaticCache::get('stacks-from-api', function () {
+            $res = $this->getCfnClient()->listStacks([
+                'StackStatusFilter' => [
+                    'CREATE_IN_PROGRESS',
+                    'CREATE_FAILED',
+                    'CREATE_COMPLETE',
+                    'ROLLBACK_IN_PROGRESS',
+                    'ROLLBACK_FAILED',
+                    'ROLLBACK_COMPLETE',
+                    'DELETE_IN_PROGRESS',
+                    'DELETE_FAILED',
+                    'UPDATE_IN_PROGRESS',
+                    'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
+                    'UPDATE_COMPLETE',
+                    'UPDATE_ROLLBACK_IN_PROGRESS',
+                    'UPDATE_ROLLBACK_FAILED',
+                    'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
+                    'UPDATE_ROLLBACK_COMPLETE',
+                ]]
             );
             $stacks = [];
             foreach ($res->search('StackSummaries[]') as $stack) {
@@ -285,10 +282,10 @@ class StackManager
         $this->getCfnClient()->deleteStack(['StackName' => $stackName]);
     }
 
-    public function validateTemplate($stackName)
+    public function validateTemplate($blueprintName)
     {
         $res = $this->getCfnClient()->validateTemplate([
-            'TemplateBody' => $this->getPreprocessedTemplate($stackName)
+            'TemplateBody' => $this->getPreprocessedTemplate($blueprintName)
         ]);
 
         // will throw an exception if there's a problem
@@ -339,11 +336,11 @@ class StackManager
         $stackConfig = $this->getConfig()->getBlueprintConfig($blueprintName);
 
         if (isset($stackConfig['account'])) {
-            $configuredAcountId = $this->resolvePlaceholders($stackConfig['account'], $blueprintName, 'account');
-            if ($configuredAcountId != $this->getConfig()->getCurrentUsersAccountId()) {
+            $configuredAccountId = $this->resolvePlaceholders($stackConfig['account'], $blueprintName, 'account');
+            if ($configuredAccountId != $this->getConfig()->getCurrentUsersAccountId()) {
                 throw new \Exception(sprintf("Current user's AWS account id '%s' does not match the one configured in the blueprint: '%s'",
                     $this->getConfig()->getCurrentUsersAccountId(),
-                    $configuredAcountId
+                    $configuredAccountId
                 ));
             }
         }
@@ -386,13 +383,23 @@ class StackManager
     }
 
     /**
-     * Update stack
+     * @param $blueprintName
+     * @param bool $dryRun
+     * @throws \Exception
+     * @deprecated 
+     */
+    public function deployStack($blueprintName, $dryRun = false) {
+        return $this->deployBlueprint($blueprintName, $dryRun);
+    }
+
+    /**
+     * Deploy Blueprint
      *
      * @param string $blueprintName
      * @param bool $dryRun
      * @throws \Exception
      */
-    public function deployStack($blueprintName, $dryRun = false)
+    public function deployBlueprint($blueprintName, $dryRun = false)
     {
         $arguments = $this->prepareArguments($blueprintName);
 
