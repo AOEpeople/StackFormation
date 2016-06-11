@@ -9,17 +9,18 @@ class Stack {
      */
     protected $name;
     protected $status;
+    protected $data;
 
     /**
      * @var \Aws\CloudFormation\CloudFormationClient
      */
     protected $cfnClient;
 
-    public function __construct($name, $status, \Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct($name, $data, \Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
         $this->name = $name;
         $this->cfnClient = $cfnClient;
-        $this->status = $status;
+        $this->data = $data;
     }
 
     public function getName()
@@ -46,23 +47,16 @@ class Stack {
      */
     public function getParameters()
     {
-        return StaticCache::get('stack-parameters-'.$this->name, function(){
+        //return StaticCache::get('stack-parameters-'.$this->name, function(){
             $parameters = [];
-            $res = $this->getDataFromApi()->search('Stacks[0].Parameters');
+            $res = $this->data['Parameters'];
             if (is_array($res)) {
                 foreach ($res as $parameter) {
                     $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
                 }
             }
             return $parameters;
-        });
-    }
-
-    protected function getDataFromApi()
-    {
-        return StaticCache::get('stack-'.$this->name, function() {
-            return $this->cfnClient->describeStacks(['StackName' => $this->name]);
-        });
+        //});
     }
 
     public function getOutput($key)
@@ -79,16 +73,16 @@ class Stack {
 
     public function getOutputs()
     {
-        return StaticCache::get('stack-outputs-' . $this->name, function () {
+        //return StaticCache::get('stack-outputs-' . $this->name, function () {
             $outputs = [];
-            $res = $this->getDataFromApi()->search('Stacks[0].Outputs');
+            $res = $this->data['Outputs'];
             if (is_array($res)) {
                 foreach ($res as $output) {
                     $outputs[$output['OutputKey']] = $output['OutputValue'];
                 }
             }
             return $outputs;
-        });
+        //});
     }
 
     public function getResource($key)
@@ -125,21 +119,21 @@ class Stack {
 
     public function getTags()
     {
-        return StaticCache::get('stack-resources-' . $this->name, function () {
+        //return StaticCache::get('stack-tags-' . $this->name, function () {
             $tags = [];
-            $res = $this->getDataFromApi()->search('Stacks[0].Tags');
+            $res = $this->data['Tags'];
             if (is_array($res)) {
                 foreach ($res as $tag) {
                     $tags[$tag['Key']] = $tag['Value'];
                 }
             }
             return $tags;
-        });
+        //});
     }
 
     public function getStatus()
     {
-        return $this->status;
+        return $this->data['StackStatus'];
     }
 
     public function getEvents()
@@ -161,7 +155,7 @@ class Stack {
 
     public function cancelUpdate()
     {
-         $this->cfnClient->cancelUpdateStack(['StackName' => $this->name]);
+        $this->cfnClient->cancelUpdateStack(['StackName' => $this->name]);
         return $this;
     }
 
@@ -201,6 +195,7 @@ class Stack {
 
     public function getTemplate()
     {
+        echo "Get Template {$this->name}\n";
         $res = $this->cfnClient->getTemplate(['StackName' => $this->name]);
         return $res->get("TemplateBody");
     }

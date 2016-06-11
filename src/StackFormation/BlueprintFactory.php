@@ -47,6 +47,19 @@ class BlueprintFactory {
         return $this->config->blueprintExists($blueprint);
     }
 
+    /**
+     * @return Blueprint[]
+     * @throws \Exception
+     */
+    public function getAllBlueprints()
+    {
+        $blueprints = [];
+        foreach ($this->config->getBlueprintNames() as $blueprintName) {
+            $blueprints[$blueprintName] = $this->getBlueprint($blueprintName);
+        }
+        return $blueprints;
+    }
+
     public function getBlueprintLabels($filter=null)
     {
         $labels = [];

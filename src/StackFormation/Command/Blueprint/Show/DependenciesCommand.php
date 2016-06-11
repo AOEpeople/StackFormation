@@ -14,7 +14,7 @@ class DependenciesCommand extends \StackFormation\Command\AbstractCommand
     {
         $this
             ->setName('blueprint:show:dependencies')
-            ->setDescription('Show dependencies to other stacks and environment variables')
+            ->setDescription('Show (incoming) dependencies to stacks and environment variables')
             ->addArgument(
                 'blueprint',
                 InputArgument::REQUIRED,
@@ -32,16 +32,19 @@ class DependenciesCommand extends \StackFormation\Command\AbstractCommand
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
 
         // trigger resolving all placeholders
-        $blueprint->getParameters();
-        $blueprint->getPreprocessedTemplate();
+        $this->dependencyTracker->reset();
+        $blueprint->gatherDependencies();
+
+        $output->writeln("Blueprint '{$blueprint->getName()} depends on following stack's resources/parameters/outputs:");
 
         $table = new Table($output);
-        $table->setHeaders(['Type', 'Stack', 'Resource', 'Count'])
+        $table->setHeaders(['Origin ('.$blueprint->getName().')', 'Source Stack', 'Field'])
             ->setRows($this->dependencyTracker->getStackDependenciesAsFlatList())
             ->render();
 
+        $output->writeln("Blueprint '{$blueprint->getName()} depends on following environment variables:");
         $table = new Table($output);
-        $table->setHeaders(['Type', 'Var', 'Count'])
+        $table->setHeaders(['Origin ('.$blueprint->getName().')', 'Type', 'Var', 'Current Value'])
             ->setRows($this->dependencyTracker->getEnvDependenciesAsFlatList())
             ->render();
     }

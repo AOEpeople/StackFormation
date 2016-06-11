@@ -40,7 +40,7 @@ class Observer
             }
 
             // load fresh instance for updated status
-            $this->stack = $this->stackFactory->getStack($this->stack->getName());
+            $this->stack = $this->stackFactory->getStack($this->stack->getName(), true);
             $status = $this->stack->getStatus();
 
             $this->output->writeln("-> Polling... (Stack Status: $status)");

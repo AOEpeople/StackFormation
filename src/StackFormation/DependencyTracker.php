@@ -14,22 +14,23 @@ class DependencyTracker
         $this->envVars = [];
     }
 
-    public function trackEnvUsage($envVar, $withDefault=false, $value)
+    public function trackEnvUsage($envVar, $withDefault=false, $value, Blueprint $sourceBlueprint, $sourceType, $sourceKey)
     {
         $type = $withDefault ? 'env_with_default' : 'env';
         if (!isset($this->envVars[$type])) {
             $this->envVars[$type] = [];
         }
         if (!isset($this->envVars[$type][$envVar])) {
-            $this->envVars[$type][$envVar] = $value;
-        } else {
-            if ($value != $this->envVars[$type][$envVar]) {
-                throw new \Exception("Value has changed for environment variable '$envVar'");
-            }
+            $this->envVars[$type][$envVar] = ['value' => $value, 'sources' => []];
         }
+        $this->envVars[$type][$envVar]['sources'][] = [
+            'blueprint' => $sourceBlueprint ? $sourceBlueprint->getName() : '',
+            'type' => $sourceType ? $sourceType : '',
+            'key' => $sourceKey ? $sourceKey : ''
+        ];
     }
 
-    public function trackStackDependency($type, $stack, $resource)
+    public function trackStackDependency($type, $stack, $resource, Blueprint $sourceBlueprint, $sourceType, $sourceKey)
     {
         if (!isset($this->stacks[$type])) {
             $this->stacks[$type] = [];
@@ -38,9 +39,13 @@ class DependencyTracker
             $this->stacks[$type][$stack] = [];
         }
         if (!isset($this->stacks[$type][$stack][$resource])) {
-            $this->stacks[$type][$stack][$resource] = 0;
+            $this->stacks[$type][$stack][$resource] = [];
         }
-        $this->stacks[$type][$stack][$resource]++;
+        $this->stacks[$type][$stack][$resource][] = [
+            'type' => $sourceType ? $sourceType : '',
+            'blueprint' => $sourceBlueprint ? $sourceBlueprint->getName() : '',
+            'key' => $sourceKey ? $sourceKey : ''
+        ];
     }
 
     public function getStackDependencies()
@@ -66,13 +71,17 @@ class DependencyTracker
     {
         $rows = [];
         foreach ($this->stacks as $type => $typeData) {
-            foreach ($typeData as $stack => $stackData) {
-                foreach ($stackData as $resource => $count) {
+            foreach ($typeData as $stackName => $stackData) {
+                foreach ($stackData as $resource => $sources) {
+                    $sourcesList = [];
+                    foreach ($sources as $source) {
+                        unset($source['blueprint']);
+                        $sourcesList[] = implode(':', $source);
+                    }
                     $rows[] = [
-                        $type,
-                        $stack,
-                        $resource,
-                        $count
+                        implode("\n", $sourcesList),
+                        $stackName,
+                        $type.':'.$resource
                     ];
                 }
             }
@@ -84,11 +93,17 @@ class DependencyTracker
     {
         $rows = [];
         foreach ($this->envVars as $type => $typeData) {
-            foreach ($typeData as $envVar => $count) {
+            foreach ($typeData as $envVar => $tmp) {
+                $sourcesList = [];
+                foreach ($tmp['sources'] as $source) {
+                    unset($source['blueprint']);
+                    $sourcesList[] = implode(':', $source);
+                }
                 $rows[] = [
+                    implode("\n", $sourcesList),
                     $type,
                     $envVar,
-                    $count
+                    $tmp['value']
                 ];
             }
         }
@@ -104,5 +119,23 @@ class DependencyTracker
         $stacks = array_unique($stacks);
         sort($stacks);
         return $stacks;
+    }
+
+    public function findDependantsForStack($stackName)
+    {
+        $dependants = [];
+        foreach ($this->stacks as $type => $typeData) {
+            if (isset($typeData[$stackName])) {
+                foreach ($typeData[$stackName] as $resource => $sources) {
+                    foreach ($sources as $source) {
+                        $source['targetType'] = $type;
+                        $source['targetStack'] = $stackName;
+                        $source['targetResource'] = $resource;
+                        $dependants[] = $source;
+                    }
+                }
+            }
+        }
+        return $dependants;
     }
 }

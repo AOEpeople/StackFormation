@@ -33,7 +33,7 @@ class Blueprint {
         if (isset($this->blueprintConfig['tags'])) {
             foreach ($this->blueprintConfig['tags'] as $key => $value) {
                 if ($resolvePlaceholders) {
-                    $value = $this->resolver->resolvePlaceholders($value, $this, "tag:$key");
+                    $value = $this->resolver->resolvePlaceholders($value, $this, 'tag', $key);
                 }
                 $tags[] = ['Key' => $key, 'Value' => $value];
             }
@@ -100,7 +100,7 @@ class Blueprint {
                     $tmp['UsePreviousValue'] = true;
                 } else {
                     if ($resolvePlaceholders) {
-                        $parameterValue = $this->resolver->resolvePlaceholders($parameterValue, $this, "parameter:$parameterKey");
+                        $parameterValue = $this->resolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
                     }
                     $tmp['ParameterValue'] = $parameterValue;
                 }
@@ -188,7 +188,6 @@ class Blueprint {
 
     public function prepareArguments()
     {
-        $this->resolver->getDependencyTracker()->reset();
         $arguments = [
             'StackName' => $this->getStackName(),
             'Parameters' => $this->getParameters(),
@@ -283,6 +282,12 @@ class Blueprint {
                 $this->cfnClient->createStack($arguments);
             }
         }
+    }
+
+    public function gatherDependencies()
+    {
+        $this->getParameters();
+        $this->getPreprocessedTemplate();
     }
 
 }
