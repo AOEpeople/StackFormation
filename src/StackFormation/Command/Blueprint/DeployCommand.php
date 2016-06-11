@@ -29,6 +29,12 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 'Don\'t observe stack after deploying'
             )
             ->addOption(
+                'observe',
+                'o',
+                InputOption::VALUE_NONE,
+                'Deprecated. Deployments are being observed by default now'
+            )
+            ->addOption(
                 'deleteOnTerminate',
                 null,
                 InputOption::VALUE_NONE,
@@ -55,6 +61,10 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if ($input->getOption('observe')) {
+            $output->writeln('-/--observe is deprecated now. Deployments are being observed by default. Please remove this option.');
+        }
+
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
         $stackName = $blueprint->getStackName();
 
@@ -74,6 +84,11 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
 
             $message = \StackFormation\Helper::extractMessage($exception);
 
+            if (strpos($message, 'No updates are to be performed.') !== false) {
+                $output->writeln('No updates are to be performed.');
+                return 0; // exit code
+            }
+
             // TODO: we're already checking the status in deploy(). This should be handled there
             if (strpos($message, 'is in CREATE_FAILED state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
@@ -81,7 +96,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $confirmed = $helper->ask($input, $output, $question);
                 if ($confirmed) {
                     $output->writeln('Deleting failed stack ' . $stackName);
-                    $this->stackFactory->getStack($stackName)->delete()->observe($output);
+                    $this->stackFactory->getStack($stackName)->delete()->observe($output, $this->stackFactory);
                     $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
                     $blueprint->deploy($dryRun, $this->stackFactory);
                 }
@@ -90,7 +105,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $question = new ConfirmationQuestion('Stack is in DELETE_IN_PROGRESS state. Do you want to wait and deploy then? [Y/n]');
                 $confirmed = $helper->ask($input, $output, $question);
                 if ($confirmed) {
-                    $this->stackFactory->getStack($stackName)->observe($output);
+                    $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
                     $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
                     $blueprint->deploy($dryRun, $this->stackFactory);
                 }
@@ -100,7 +115,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $confirmed = $helper->ask($input, $output, $question);
                 if ($confirmed) {
                     $output->writeln('Cancelling update for ' . $stackName);
-                    $this->stackFactory->getStack($stackName)->cancelUpdate()->observe($output);
+                    $this->stackFactory->getStack($stackName)->cancelUpdate()->observe($output, $this->stackFactory);
                     $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
                     $blueprint->deploy($dryRun, $this->stackFactory);
                 }
@@ -116,7 +131,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $output->writeln("\n-> Run this to observe the stack creation/update:");
                 $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stackName\n");
             } else {
-                return $this->stackFactory->getStack($stackName)->observe($output);
+                return $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
             }
         }
     }

@@ -37,7 +37,7 @@ class BlueprintFactory {
                 // let's try if there's a blueprint with the same name
                 return $this->getBlueprint($stack->getName());
             } catch (\Exception $e) {
-                return false;
+                throw new \Exception('No blueprint found for stack ' . $stack->getName());
             }
         }
     }

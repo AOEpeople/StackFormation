@@ -2,6 +2,8 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\StackNotFoundException;
+
 class StackFactory {
 
     protected $cfnClient;
@@ -21,7 +23,7 @@ class StackFactory {
         $stackName = $this->resolveWildcard($stackName);
         $stacksFromApi = $this->getStacksFromApi(true);
         if (!isset($stacksFromApi[$stackName])) {
-            throw new \Exception("Stack $stackName not found.");
+            throw new StackNotFoundException("Stack $stackName not found.");
         }
         return $stacksFromApi[$stackName];
     }

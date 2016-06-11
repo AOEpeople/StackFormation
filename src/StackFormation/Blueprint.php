@@ -2,6 +2,8 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\StackNotFoundException;
+
 class Blueprint {
     
     /**
@@ -27,10 +29,7 @@ class Blueprint {
 
     public function getTags($resolvePlaceholders=true)
     {
-        $tags = [
-            ['Key' => 'stackformation:blueprint', 'Value' => base64_encode($this->name)] // this is how we reference a stack back to its blueprint
-        ];
-
+        $tags = [];
         if (isset($this->blueprintConfig['tags'])) {
             foreach ($this->blueprintConfig['tags'] as $key => $value) {
                 if ($resolvePlaceholders) {
@@ -75,7 +74,7 @@ class Blueprint {
 
         $templateContents = [];
         foreach ($this->blueprintConfig['template'] as $key => $template) {
-            $templateContents[$key] = $preProcessor->process($template);
+            $templateContents[$key] = $preProcessor->processFile($template);
         }
 
         $templateMerger = new TemplateMerger();
@@ -189,16 +188,30 @@ class Blueprint {
 
     public function prepareArguments()
     {
+        $this->resolver->getDependencyTracker()->reset();
         $arguments = [
             'StackName' => $this->getStackName(),
             'Parameters' => $this->getParameters(),
             'TemplateBody' => $this->getPreprocessedTemplate(),
-            'Capabilities' => $this->getCapabilities(),
             'Tags' => $this->getTags()
         ];
+        if ($capabilities = $this->getCapabilities()) {
+            $arguments['Capabilities'] = $capabilities;
+        }
         if ($policy = $this->getStackPolicy()) {
             $arguments['StackPolicyBody'] = $this->getStackPolicy();
         }
+
+        // this is how we reference a stack back to its blueprint
+        $blueprintReference = array_merge(
+            ['Name' => $this->name],
+            $this->resolver->getDependencyTracker()->getUsedEnvironmentVariables()
+        );
+
+        $arguments['Tags'][] = [
+            'Key' => 'stackformation:blueprint',
+            'Value' => base64_encode(http_build_query($blueprintReference))
+        ];
         return $arguments;
     }
 
@@ -252,7 +265,12 @@ class Blueprint {
     {
         $arguments = $this->prepareArguments();
 
-        $stackStatus = $stackFactory->getStack($this->getStackName())->getStatus();
+        try {
+            $stackStatus = $stackFactory->getStack($this->getStackName())->getStatus();
+        } catch (StackNotFoundException $e) {
+            $stackStatus = false;
+        }
+
         if (strpos($stackStatus, 'IN_PROGRESS') !== false) {
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {

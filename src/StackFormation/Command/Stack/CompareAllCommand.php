@@ -37,8 +37,10 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
             try {
                 $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
+                $diff->setStack($stack);
+                $diff->setBlueprint($blueprint);
                 $tmp['blueprintName'] = $blueprint->getName();
-                $tmp = array_merge($tmp, $diff->compare($stack, $blueprint));
+                $tmp = array_merge($tmp, $diff->compare());
             } catch (\Exception $e) {
                 $tmp['blueprintName'] = '<fg=red>Not found</>';
             }

@@ -14,16 +14,19 @@ class DependencyTracker
         $this->envVars = [];
     }
 
-    public function trackEnvUsage($envVar, $withDefault=false)
+    public function trackEnvUsage($envVar, $withDefault=false, $value)
     {
         $type = $withDefault ? 'env_with_default' : 'env';
         if (!isset($this->envVars[$type])) {
             $this->envVars[$type] = [];
         }
         if (!isset($this->envVars[$type][$envVar])) {
-            $this->envVars[$type][$envVar] = 0;
+            $this->envVars[$type][$envVar] = $value;
+        } else {
+            if ($value != $this->envVars[$type][$envVar]) {
+                throw new \Exception("Value has changed for environment variable '$envVar'");
+            }
         }
-        $this->envVars[$type][$envVar]++;
     }
 
     public function trackStackDependency($type, $stack, $resource)
@@ -48,6 +51,15 @@ class DependencyTracker
     public function getEnvDependencies()
     {
         return $this->envVars;
+    }
+
+    public function getUsedEnvironmentVariables()
+    {
+        $vars = [];
+        foreach ($this->envVars as $type => $typeData) {
+            $vars = array_merge($vars, $typeData);
+        }
+        return $vars;
     }
 
     public function getStackDependenciesAsFlatList()

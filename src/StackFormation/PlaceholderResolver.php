@@ -38,10 +38,11 @@ class PlaceholderResolver {
         $string = preg_replace_callback(
             '/\{env:([^:\}\{]+?)\}/',
             function ($matches) use ($exceptionMessageAppendix) {
-                $this->dependencyTracker->trackEnvUsage($matches[1]);
-                if (!getenv($matches[1])) {
+                $value = getenv($matches[1]);
+                if (!$value) {
                     throw new \Exception("Environment variable '{$matches[1]}' not found$exceptionMessageAppendix");
                 }
+                $this->dependencyTracker->trackEnvUsage($matches[1], false, $value);
                 return getenv($matches[1]);
             },
             $string
@@ -51,11 +52,10 @@ class PlaceholderResolver {
         $string = preg_replace_callback(
             '/\{env:([^:\}\{]+?):([^:\}\{]+?)\}/',
             function ($matches) {
-                $this->dependencyTracker->trackEnvUsage($matches[1], true);
-                if (!getenv($matches[1])) {
-                    return $matches[2];
-                }
-                return getenv($matches[1]);
+                $value = getenv($matches[1]);
+                $value = $value ? $value : $matches[2];
+                $this->dependencyTracker->trackEnvUsage($matches[1], true, $value);
+                return $value;
             },
             $string
         );
@@ -143,6 +143,11 @@ class PlaceholderResolver {
         }
 
         return $string;
+    }
+
+    public function getDependencyTracker()
+    {
+        return $this->dependencyTracker;
     }
 
 }

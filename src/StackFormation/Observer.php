@@ -10,11 +10,13 @@ class Observer
 {
 
     protected $stack;
+    protected $stackFactory;
     protected $output;
 
-    public function __construct(Stack $stack, \Symfony\Component\Console\Output\OutputInterface $output)
+    public function __construct(Stack $stack, StackFactory $stackFactory, \Symfony\Component\Console\Output\OutputInterface $output)
     {
         $this->stack = $stack;
+        $this->stackFactory = $stackFactory;
         $this->output = $output;
     }
 
@@ -36,6 +38,9 @@ class Observer
             } else {
                 sleep($pollInterval);
             }
+
+            // load fresh instance for updated status
+            $this->stack = $this->stackFactory->getStack($this->stack->getName());
             $status = $this->stack->getStatus();
 
             $this->output->writeln("-> Polling... (Stack Status: $status)");

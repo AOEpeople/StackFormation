@@ -95,7 +95,7 @@ class Stack {
     {
         $resources = $this->getResources();
         if (!isset($resources[$key])) {
-            throw new \Exception("LogicalResourceId '$key' not found");
+            throw new \Exception("Resource '$key' not found in stack '{$this->name}'");
         }
         return $resources[$key];
     }
@@ -104,7 +104,7 @@ class Stack {
     {
         return StaticCache::get('stack-resources-' . $this->name, function () {
             $resources = [];
-            $res = $this->getDataFromApi()->search('StackResources[]');
+            $res = $this->cfnClient->describeStackResources(['StackName' => $this->name])->search('StackResources[]');
             if (is_array($res)) {
                 foreach ($res as $resource) {
                     $resources[$resource['LogicalResourceId']] = isset($resource['PhysicalResourceId']) ? $resource['PhysicalResourceId'] : '';
@@ -173,9 +173,30 @@ class Stack {
 
     public function getBlueprintName()
     {
-        $blueprintName = $this->getTag('stackformation:blueprint');
-        $blueprintName = base64_decode($blueprintName);
-        return $blueprintName;
+        $reference = $this->getBlueprintReference();
+        return $reference['Name'];
+    }
+
+    public function getUsedEnvVars()
+    {
+        $reference = $this->getBlueprintReference();
+        unset($reference['Name']);
+        return $reference;
+    }
+
+    public function getBlueprintReference()
+    {
+        $data = [];
+        $reference = $this->getTag('stackformation:blueprint');
+        $reference = base64_decode($reference);
+
+        if (substr($reference, 0, 5) == 'Name=') {
+            parse_str($reference, $data);
+        } else {
+            // old style
+            $data['Name'] = $reference;
+        }
+        return $data;
     }
 
     public function getTemplate()
@@ -184,9 +205,12 @@ class Stack {
         return $res->get("TemplateBody");
     }
 
-    public function observe(\Symfony\Component\Console\Output\OutputInterface $output, $deleteOnTerminate=false)
+    public function observe(
+        \Symfony\Component\Console\Output\OutputInterface $output,
+        \StackFormation\StackFactory $stackFactory,
+        $deleteOnTerminate=false)
     {
-        $observer = new Observer($this, $output);
+        $observer = new Observer($this, $stackFactory, $output);
         if ($deleteOnTerminate) {
             $observer->deleteOnSignal();
         }
