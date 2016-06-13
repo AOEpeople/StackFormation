@@ -523,11 +523,15 @@ class StackManager
                             if (class_exists('\AwsInspector\Model\Ec2\Repository')) {
                                 $ec2Repo = new \AwsInspector\Model\Ec2\Repository();
                                 $instance = $ec2Repo->findEc2InstanceBy('instance-id', $instanceId);
-                                $res = $instance->exec('tail -50 /var/log/cloud-init-output.log');
-                                $logMessages = array_merge(
-                                    [ "==> Showing last 50 lines in /var/log/cloud-init-output.log"],
-                                    $res['output']
-                                );
+                                if ($instance) {
+                                    $res = $instance->exec('tail -50 /var/log/cloud-init-output.log');
+                                    $logMessages = array_merge(
+                                        ["==> Showing last 50 lines in /var/log/cloud-init-output.log"],
+                                        $res['output']
+                                    );
+                                } else {
+                                    $logMessages = ["Could not find instance " . $instanceId];
+                                }
                             }
                         }
                     }
