@@ -62,7 +62,9 @@ class DependencyTracker
     {
         $vars = [];
         foreach ($this->envVars as $type => $typeData) {
-            $vars = array_merge($vars, $typeData);
+            foreach ($typeData as $variableName => $data) {
+                $vars[$variableName] = $data['value'];
+            }
         }
         return $vars;
     }
