@@ -1,0 +1,12 @@
+{
+    "main": "src/stackformation.php",
+    "output": "stackformation.phar",
+    "chmod": "0775",
+    "compression": "GZ",
+    "extract": false,
+    "files": [ "vendor/autoload.php" ],
+    "directories": [ "src" ],
+    "finder": [{ "name": "*.php", "in": "vendor" }],
+    "git-version": "package_version",
+    "stub": true
+}

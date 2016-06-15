@@ -13,6 +13,6 @@ script:
   - php phpcs.phar --standard=./phpcs.xml --encoding=utf-8 --report-width=180 ./src
 notifications:
   email:
-    recipients: [ lee.saferite@aoe.com ]
+    recipients: [ travisci@fabrizio-branca.de ]
     on_success: always
     on_failure: always
