@@ -3,9 +3,11 @@
 namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\BlueprintFactory;
 use StackFormation\Config;
 use StackFormation\DependencyTracker;
 use StackFormation\PlaceholderResolver;
+use StackFormation\StackFactory;
 use StackFormation\SdkFactory;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,20 +17,24 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 
 abstract class AbstractCommand extends Command
 {
-
+    /* @var BlueprintFactory */
     protected $blueprintFactory;
+
+    /* @var StackFactory */
     protected $stackFactory;
+
+    /* @var DependencyTracker */
     protected $dependencyTracker;
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input, $output);
         $cfnClient = SdkFactory::getCfnClient();
-        $this->stackFactory = new \StackFormation\StackFactory($cfnClient);
+        $this->stackFactory = new StackFactory($cfnClient);
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
         $placeholderResolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory, $config);
-        $this->blueprintFactory = new \StackFormation\BlueprintFactory($cfnClient, $config, $placeholderResolver);
+        $this->blueprintFactory = new BlueprintFactory($cfnClient, $config, $placeholderResolver);
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)
