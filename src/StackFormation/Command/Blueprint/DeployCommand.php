@@ -131,7 +131,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $output->writeln("\n-> Run this to observe the stack creation/update:");
                 $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stackName\n");
             } else {
-                return $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
+                return $this->stackFactory->getStack($stackName, true)->observe($output, $this->stackFactory);
             }
         }
     }
