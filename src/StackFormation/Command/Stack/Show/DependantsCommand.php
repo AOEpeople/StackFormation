@@ -46,7 +46,7 @@ class DependantsCommand extends \StackFormation\Command\AbstractCommand
             ];
         }
 
-        $output->writeln("Following blueprints depend on stack '{$stack->getName()}:");
+        $output->writeln("Following blueprints depend on stack '{$stack->getName()}':");
 
         $table = new Table($output);
         $table->setHeaders(['Origin (Stack: '.$stack->getName() . ')', 'Blueprint'])

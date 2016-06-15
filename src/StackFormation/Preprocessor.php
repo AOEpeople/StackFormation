@@ -25,7 +25,7 @@ class Preprocessor
     public function processJson($json, $basePath=null)
     {
         $json = $this->stripComments($json);
-        $json = $this->parseRefs($json);
+        $json = $this->parseRefInDoubleQuotedStrings($json);
         $json = $this->expandPort($json);
         $json = $this->injectFilecontent($json, $basePath);
         $json = $this->replaceRef($json);
@@ -46,7 +46,7 @@ class Preprocessor
         return $json;
     }
 
-    protected function parseRefs($json)
+    protected function parseRefInDoubleQuotedStrings($json)
     {
         $json = preg_replace_callback(
             '/"([^"]*){Ref:(.+?)}([^"]*)"/',

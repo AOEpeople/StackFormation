@@ -1,9 +1,0 @@
-{
-  "Resources": {
-    "LaunchConfiguration": {
-      "Properties": {
-        "UserData": {"Fn::Base64": {"Fn::FileContent": "fileDoesNotExist.sh"}}
-      }
-    }
-  }
-}
