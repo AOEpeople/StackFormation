@@ -211,6 +211,9 @@ class Blueprint {
             'Key' => 'stackformation:blueprint',
             'Value' => base64_encode(http_build_query($blueprintReference))
         ];
+
+        Helper::validateTags($arguments['Tags']);
+
         return $arguments;
     }
 
