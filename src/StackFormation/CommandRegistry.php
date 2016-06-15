@@ -17,6 +17,7 @@ class CommandRegistry
             new Command\Stack\Show\OutputsCommand(),
             new Command\Stack\Show\ParametersCommand(),
             new Command\Stack\Show\ResourcesCommand(),
+            new Command\Stack\Show\DependantsCommand(),
 
             new Command\Blueprint\DeployCommand(),
             new Command\Blueprint\ValidateCommand(),
@@ -24,10 +25,7 @@ class CommandRegistry
             new Command\Blueprint\Show\ParametersCommand(),
             new Command\Blueprint\Show\DependenciesCommand(),
             new Command\Blueprint\Show\ChangesetCommand(),
-            new Command\Blueprint\Show\StacknameCommand(),
-            new Command\Blueprint\MigrateCommand()
-
-            //new Command\UpdateRoute53AliasCommand(),
+            new Command\Blueprint\Show\StacknameCommand()
         ];
     }
 }

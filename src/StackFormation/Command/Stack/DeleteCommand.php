@@ -38,7 +38,7 @@ class DeleteCommand extends \StackFormation\Command\AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output);
+        $this->interactAskForStack($input, $output);
 
         if (!$input->getOption('force')) {
             $stacks = $this->getResolvedStacks($input);
@@ -57,7 +57,7 @@ class DeleteCommand extends \StackFormation\Command\AbstractCommand
         $helper = new Helper();
         $stacks = $helper->find(
             (array)$input->getArgument('stack'),
-            $this->getRemoteStacks()
+            $this->getStacks()
         );
 
         $except = $input->getOption('except');
@@ -82,9 +82,9 @@ class DeleteCommand extends \StackFormation\Command\AbstractCommand
             $output->writeln("No stacks deleted.");
         }
 
-        foreach ($stacks as $stack) {
-            $this->stackManager->deleteStack($stack);
-            $output->writeln("Triggered deletion of stack '$stack'.");
+        foreach ($stacks as $stackName) {
+            $this->stackFactory->getStack($stackName)->delete();
+            $output->writeln("Triggered deletion of stack '$stackName'.");
         }
     }
 }

@@ -4,20 +4,18 @@ namespace StackFormation;
 
 class Terminator
 {
-    protected $currentStackName;
-    protected $stackManager;
+    protected $currentStack;
     protected $output;
 
-    public function __construct($currentStackName, \StackFormation\StackManager $stackManager, \Symfony\Component\Console\Output\OutputInterface $output)
+    public function __construct(Stack $stack, \Symfony\Component\Console\Output\OutputInterface $output)
     {
-        $this->currentStackName = $currentStackName;
-        $this->stackManager = $stackManager;
+        $this->currentStack = $stack;
         $this->output = $output;
     }
 
     public function setupSignalHandler()
     {
-        $this->output->writeln('Handling signals SIGTERM and SIGINT for stack ' . $this->currentStackName);
+        $this->output->writeln('Handling signals SIGTERM and SIGINT for stack ' . $this->currentStack->getName());
         declare(ticks = 1);
         pcntl_signal(SIGTERM, array($this, 'signalHandler')); // Jenkins: aborting a job
         pcntl_signal(SIGINT, array($this, 'signalHandler')); // CTRL+C on command line
@@ -30,8 +28,8 @@ class Terminator
             case SIGTERM: $this->output->writeln("Caught SIGTERM"); break;
             default: $this->output->writeln("Caught $signo"); break;
         }
-        $this->output->writeln("Deleting stack {$this->currentStackName}");
-        $this->stackManager->deleteStack($this->currentStackName);
+        $this->output->writeln("Deleting stack {$this->currentStack->getName()}");
+        $this->currentStack->delete();
         exit;
     }
 }

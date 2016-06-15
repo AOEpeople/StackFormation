@@ -2,10 +2,8 @@
 
 namespace StackFormation\Command\Blueprint\Show;
 
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class StacknameCommand extends \StackFormation\Command\AbstractCommand
@@ -30,8 +28,7 @@ class StacknameCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
-        $stackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
-        $output->writeln($stackName);
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
+        $output->writeln($blueprint->getStackName());
     }
 }

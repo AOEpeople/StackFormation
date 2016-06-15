@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Stack;
 
+use StackFormation\Diff;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,48 +26,23 @@ class DiffCommand extends \StackFormation\Command\AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output);
+        $this->interactAskForStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
-        $blueprint = $this->stackManager->getBlueprintNameForStack($stack);
-        if (empty($blueprint)) {
-            throw new \Exception('Could not find blueprint for stack ' . $stack);
-        }
+        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
+        $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
 
-        $parameters_live = $this->stackManager->getParameters($stack);
-        $parameters_local = $this->stackManager->getBlueprintParameters($blueprint, true, true);
-
+        $diff = new Diff($output);
+        $diff->setStack($stack)->setBlueprint($blueprint);
 
         $formatter = new FormatterHelper();
         $output->writeln("\n" . $formatter->formatBlock(['Parameters:'], 'error', true) . "\n");
+        $diff->diffParameters();
 
-        $returnVar = $this->printDiff(
-            $this->arrayToString($parameters_live),
-            $this->arrayToString($parameters_local)
-        );
-        if ($returnVar == 0) {
-            $output->writeln('No changes'."\n");
-        }
-
-        $formatter = new FormatterHelper();
         $output->writeln("\n" . $formatter->formatBlock(['Template:'], 'error', true) . "\n");
-
-        $template_live = trim($this->stackManager->getTemplate($stack));
-        $template_local = trim($this->stackManager->getPreprocessedTemplate($blueprint));
-
-        $template_live = $this->normalizeJson($template_live);
-        $template_local = $this->normalizeJson($template_local);
-
-        $returnVar = $this->printDiff(
-            $template_live,
-            $template_local
-        );
-        if ($returnVar == 0) {
-            $output->writeln('No changes'."\n");
-        }
+        $diff->diffTemplates();
     }
 
 }

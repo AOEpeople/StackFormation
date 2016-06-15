@@ -23,10 +23,16 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 'Blueprint'
             )
             ->addOption(
+                'no-observe',
+                'no',
+                InputOption::VALUE_NONE,
+                'Don\'t observe stack after deploying'
+            )
+            ->addOption(
                 'observe',
                 'o',
                 InputOption::VALUE_NONE,
-                'Observe stack after'
+                'Deprecated. Deployments are being observed by default now'
             )
             ->addOption(
                 'deleteOnTerminate',
@@ -55,54 +61,63 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
+        if ($input->getOption('observe')) {
+            $output->writeln('-/--observe is deprecated now. Deployments are being observed by default. Please remove this option.');
+        }
+
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
+        $stackName = $blueprint->getStackName();
+
         $dryRun = $input->getOption('dryrun');
         $deleteOnTerminate = $input->getOption('deleteOnTerminate');
-        $observe = $input->getOption('observe');
+        $noObserve = $input->getOption('no-observe');
 
-        if ($deleteOnTerminate && !$observe) {
-            throw new \Exception('--deleteOnTerminate can only be used with --observe');
+        if ($deleteOnTerminate && $noObserve) {
+            throw new \Exception('--deleteOnTerminate cannot be used with --no-observe');
         }
 
         try {
-            $this->stackManager->deployStack($blueprint, $dryRun);
+
+            $blueprint->deploy($dryRun, $this->stackFactory);
+
         } catch (CloudFormationException $exception) {
+
             $message = \StackFormation\Helper::extractMessage($exception);
+
+            if (strpos($message, 'No updates are to be performed.') !== false) {
+                $output->writeln('No updates are to be performed.');
+                return 0; // exit code
+            }
+
+            // TODO: we're already checking the status in deploy(). This should be handled there
             if (strpos($message, 'is in CREATE_FAILED state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
                 $question = new ConfirmationQuestion('Stack is in CREATE_FAILED state. Do you want to delete it first? [Y/n]');
                 $confirmed = $helper->ask($input, $output, $question);
                 if ($confirmed) {
-                    $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
-                    $output->writeln('Deleting failed stack ' . $effectiveStackName);
-                    $this->stackManager->deleteStack($effectiveStackName);
-                    $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
-
-                    $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
-                    $this->stackManager->deployStack($blueprint, $dryRun);
+                    $output->writeln('Deleting failed stack ' . $stackName);
+                    $this->stackFactory->getStack($stackName)->delete()->observe($output, $this->stackFactory);
+                    $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
+                    $blueprint->deploy($dryRun, $this->stackFactory);
                 }
             } elseif (strpos($message, 'is in DELETE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
                 $question = new ConfirmationQuestion('Stack is in DELETE_IN_PROGRESS state. Do you want to wait and deploy then? [Y/n]');
                 $confirmed = $helper->ask($input, $output, $question);
                 if ($confirmed) {
-                    $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
-                    $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
-
-                    $output->writeln('Deletion completed. Now deploying stack: ' . $effectiveStackName);
-                    $this->stackManager->deployStack($blueprint, $dryRun);
+                    $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
+                    $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
+                    $blueprint->deploy($dryRun, $this->stackFactory);
                 }
             } elseif (strpos($message, 'is in UPDATE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
                 $question = new ConfirmationQuestion('Stack is in UPDATE_IN_PROGRESS state. Do you want to cancel the current update and deploy then? [Y/n]');
                 $confirmed = $helper->ask($input, $output, $question);
                 if ($confirmed) {
-                    $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
-                    $this->stackManager->cancelUpdate($effectiveStackName);
-                    $this->stackManager->observeStackActivity($effectiveStackName, $output, 10);
-
-                    $output->writeln('Cancellation completed. Now deploying stack: ' . $effectiveStackName);
-                    $this->stackManager->deployStack($blueprint, $dryRun);
+                    $output->writeln('Cancelling update for ' . $stackName);
+                    $this->stackFactory->getStack($stackName)->cancelUpdate()->observe($output, $this->stackFactory);
+                    $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
+                    $blueprint->deploy($dryRun, $this->stackFactory);
                 }
             } else {
                 throw $exception;
@@ -110,14 +125,13 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
         }
 
         if (!$dryRun) {
-            $effectiveStackName = $this->stackManager->getConfig()->getEffectiveStackName($blueprint);
-            $output->writeln("Triggered deployment of stack '$effectiveStackName'.");
+            $output->writeln("Triggered deployment of stack '$stackName'.");
 
-            if ($observe) {
-                return $this->stackManager->observeStackActivity($effectiveStackName, $output, 10, $deleteOnTerminate);
-            } else {
+            if ($noObserve) {
                 $output->writeln("\n-> Run this to observe the stack creation/update:");
-                $output->writeln("{$GLOBALS['argv'][0]} stack:observe $effectiveStackName\n");
+                $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stackName\n");
+            } else {
+                return $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
             }
         }
     }

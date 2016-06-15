@@ -30,14 +30,13 @@ class ObserveCommand extends \StackFormation\Command\AbstractCommand
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output, null, '/IN_PROGRESS/');
+        $this->interactAskForStack($input, $output, null, '/IN_PROGRESS/');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
         $deleteOnTerminate = $input->getOption('deleteOnTerminate');
-
-        return $this->stackManager->observeStackActivity($stack, $output, 10, $deleteOnTerminate);
+        return $stack->observe($output, $this->stackFactory, $deleteOnTerminate);
     }
 }

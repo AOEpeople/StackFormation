@@ -20,19 +20,30 @@ class ParametersCommand extends \StackFormation\Command\AbstractCommand
                 'stack',
                 InputArgument::REQUIRED,
                 'Stack'
+            )
+            ->addArgument(
+                'key',
+                InputArgument::OPTIONAL,
+                'key'
             );
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForLiveStack($input, $output);
+        $this->interactAskForStack($input, $output);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $input->getArgument('stack');
+        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
 
-        $data = $this->stackManager->getParameters($stack);
+        $key = $input->getArgument('key');
+        if ($key) {
+            $output->writeln($stack->getParameter($key));
+            return;
+        }
+
+        $data = $stack->getParameters();
 
         $rows = [];
         foreach ($data as $k => $v) {

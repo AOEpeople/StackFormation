@@ -1,0 +1,12 @@
+{
+  "Resources": {
+    "LaunchConfiguration": {
+      "Properties": {
+        "UserData": {"Fn::Base64":  {"Fn::Join": ["", [
+            "#!\/usr\/bin\/env bash\n",
+            "echo \"Hello World\"\n"
+        ]]}}
+      }
+    }
+  }
+}

@@ -28,11 +28,7 @@
         "squizlabs/php_codesniffer": "^2.4"
     },
     "autoload": {
-        "psr-4": {
-            "StackFormation\\": "src/StackFormation/"
-        }
+        "psr-4": { "StackFormation\\": "src/StackFormation/" }
     },
-    "bin": [
-        "src/stackformation.php"
-    ]
+    "bin": [ "src/stackformation.php" ]
 }

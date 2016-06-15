@@ -3,7 +3,10 @@
 namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
-use StackFormation\StackManager;
+use StackFormation\Config;
+use StackFormation\DependencyTracker;
+use StackFormation\PlaceholderResolver;
+use StackFormation\SdkFactory;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,16 +16,19 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 abstract class AbstractCommand extends Command
 {
 
-    /**
-     * @var StackManager
-     */
-    protected $stackManager;
+    protected $blueprintFactory;
+    protected $stackFactory;
+    protected $dependencyTracker;
 
-    public function __construct($name = null)
+    protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->stackManager = new StackManager();
-
-        parent::__construct($name);
+        parent::initialize($input, $output);
+        $cfnClient = SdkFactory::getCfnClient();
+        $this->stackFactory = new \StackFormation\StackFactory($cfnClient);
+        $config = new Config();
+        $this->dependencyTracker = new DependencyTracker();
+        $placeholderResolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory, $config);
+        $this->blueprintFactory = new \StackFormation\BlueprintFactory($cfnClient, $config, $placeholderResolver);
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)
@@ -30,17 +36,7 @@ abstract class AbstractCommand extends Command
         $blueprint = $input->getArgument('blueprint');
         if (empty($blueprint) || strpos($blueprint, '*') !== false || strpos($blueprint, '?') !== false) {
 
-            try {
-                $config = $this->stackManager->getConfig();
-            } catch (\StackFormation\Exception\NoBlueprintsFoundException $e) {
-                if (count(\StackFormation\Config::findAllConfigurationFiles('stacks', 'stacks.yml')) > 0) {
-                    throw new \Exception('Old stacks.yml files detected. Please run blueprint:migrate.');
-                } else {
-                    throw $e;
-                }
-            }
-
-            $choices = $config->getBlueprintLabels($blueprint ? $blueprint : null);
+            $choices = $this->blueprintFactory->getBlueprintLabels($blueprint ? $blueprint : null);
             if (count($choices) == 0) {
                 throw new \Exception('No matching blueprints found');
             } elseif (count($choices) == 1) {
@@ -62,16 +58,16 @@ abstract class AbstractCommand extends Command
         return $blueprint;
     }
 
-    protected function getRemoteStacks($nameFilter=null, $statusFilter=null)
+    protected function getStacks($nameFilter=null, $statusFilter=null)
     {
-        return array_keys($this->stackManager->getStacksFromApi(false, $nameFilter, $statusFilter));
+        return array_keys($this->stackFactory->getStacksFromApi(false, $nameFilter, $statusFilter));
     }
 
-    public function interactAskForLiveStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)
+    public function interactAskForStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)
     {
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
-            $choices = $this->getRemoteStacks($nameFilter, $statusFilter);
+            $choices = $this->getStacks($nameFilter, $statusFilter);
 
             if (count($choices) == 0) {
                 throw new \Exception('No valid stacks found.');
@@ -120,40 +116,4 @@ abstract class AbstractCommand extends Command
         }
     }
 
-    protected function arrayToString(array $a)
-    {
-        ksort($a);
-        $lines = [];
-        foreach ($a as $key => $value) {
-            $lines[] = "$key: $value";
-        }
-        return implode("\n", $lines);
-    }
-
-    protected function printDiff($stringA, $stringB)
-    {
-        if ($stringA === $stringB) {
-            return 0; // that's what diff would return
-        }
-
-        $fileA = tempnam(sys_get_temp_dir(), 'sfn_a_');
-        file_put_contents($fileA, $stringA);
-
-        $fileB = tempnam(sys_get_temp_dir(), 'sfn_b_');
-        file_put_contents($fileB, $stringB);
-
-        $command = is_file('/usr/bin/colordiff') ? 'colordiff' : 'diff';
-        $command .= " -u $fileA $fileB";
-
-        passthru($command, $returnVar);
-
-        unlink($fileA);
-        unlink($fileB);
-        return $returnVar;
-    }
-
-    protected function normalizeJson($json)
-    {
-        return json_encode(json_decode($json, true), JSON_PRETTY_PRINT);
-    }
 }

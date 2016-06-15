@@ -14,7 +14,7 @@ class DependenciesCommand extends \StackFormation\Command\AbstractCommand
     {
         $this
             ->setName('blueprint:show:dependencies')
-            ->setDescription('Show dependencies to other stacks and environment variables')
+            ->setDescription('Show (incoming) dependencies to stacks and environment variables')
             ->addArgument(
                 'blueprint',
                 InputArgument::REQUIRED,
@@ -29,20 +29,23 @@ class DependenciesCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
 
-        $this->stackManager->getBlueprintParameters($blueprint);
-        $this->stackManager->getPreprocessedTemplate($blueprint);
+        // trigger resolving all placeholders
+        $this->dependencyTracker->reset();
+        $blueprint->gatherDependencies();
 
-        $table = new Table($output);
-        $table->setHeaders(['Type', 'Stack', 'Resource', 'Count'])
-            ->setRows($this->stackManager->getDependencyTracker()->getStackDependenciesAsFlatList())
-            ->render();
+        $output->writeln("Blueprint '{$blueprint->getName()} depends on following stack's resources/parameters/outputs:");
 
         $table = new Table($output);
-        $table->setHeaders(['Type', 'Var', 'Count'])
-            ->setRows($this->stackManager->getDependencyTracker()->getEnvDependenciesAsFlatList())
+        $table->setHeaders(['Origin ('.$blueprint->getName().')', 'Source Stack', 'Field'])
+            ->setRows($this->dependencyTracker->getStackDependenciesAsFlatList())
             ->render();
-        // var_dump($this->stackManager->getDependencyTracker()->getStacks());
+
+        $output->writeln("Blueprint '{$blueprint->getName()} depends on following environment variables:");
+        $table = new Table($output);
+        $table->setHeaders(['Origin ('.$blueprint->getName().')', 'Type', 'Var', 'Current Value'])
+            ->setRows($this->dependencyTracker->getEnvDependenciesAsFlatList())
+            ->render();
     }
 }

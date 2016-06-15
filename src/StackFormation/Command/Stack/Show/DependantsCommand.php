@@ -7,23 +7,18 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class OutputsCommand extends \StackFormation\Command\AbstractCommand
+class DependantsCommand extends \StackFormation\Command\AbstractCommand
 {
 
     protected function configure()
     {
         $this
-            ->setName('stack:show:outputs')
-            ->setDescription('Show a live stack\'s outputs')
+            ->setName('stack:show:dependants')
+            ->setDescription('Show (outgoing) dependencies to blueprints')
             ->addArgument(
                 'stack',
                 InputArgument::REQUIRED,
                 'Stack'
-            )
-            ->addArgument(
-                'key',
-                InputArgument::OPTIONAL,
-                'key'
             );
     }
 
@@ -36,22 +31,25 @@ class OutputsCommand extends \StackFormation\Command\AbstractCommand
     {
         $stack = $this->stackFactory->getStack($input->getArgument('stack'));
 
-        $key = $input->getArgument('key');
-        if ($key) {
-            $output->writeln($stack->getOutput($key));
-            return;
+        $this->dependencyTracker->reset();
+        foreach ($this->blueprintFactory->getAllBlueprints() as $blueprint) {
+            $blueprint->gatherDependencies();
         }
 
-        $data = $stack->getOutputs();
+        $dependants = $this->dependencyTracker->findDependantsForStack($stack->getName());
 
         $rows = [];
-        foreach ($data as $k => $v) {
-            $v = strlen($v) > 100 ? substr($v, 0, 100) . "..." : $v;
-            $rows[] = [$k, $v];
+        foreach ($dependants as $dependant) {
+            $rows[] = [
+                $dependant['targetType'] . ':' . $dependant['targetResource'],
+                $dependant['type'] . ':' . $dependant['blueprint'] . ':' . $dependant['key'],
+            ];
         }
 
+        $output->writeln("Following blueprints depend on stack '{$stack->getName()}':");
+
         $table = new Table($output);
-        $table->setHeaders(['Key', 'Value'])
+        $table->setHeaders(['Origin (Stack: '.$stack->getName() . ')', 'Blueprint'])
             ->setRows($rows)
             ->render();
     }

@@ -2,31 +2,38 @@
 
 namespace StackFormation;
 
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+
 class Preprocessor
 {
 
-    public function process($filepath)
+    public function processFile($filePath)
     {
-        if (!is_file($filepath)) {
-            throw new \Exception("File '$filepath' not found");
+        if (!is_file($filePath)) {
+            throw new FileNotFoundException("File '$filePath' not found");
         }
-        $json = file_get_contents($filepath);
-
+        $json = file_get_contents($filePath);
         try {
-            $json = $this->stripComments($json);
-            $json = $this->parseRefs($json);
-            $json = $this->expandPort($json);
-            $json = $this->injectFilecontent($json, dirname($filepath));
-            $json = $this->replaceRef($json);
-            $json = $this->replaceMarkers($json);
-        } catch(\Exception $e) {
-            // adding some more information to the exception message
-            throw new \Exception("Error processing $filepath ({$e->getMessage()})");
+            $json = $this->processJson($json, dirname($filePath));
+        } catch (\Exception $e) {
+            // wrapping exception in order to add some more information
+            throw new \Exception("Error processing $filePath", 0, $e);
         }
         return $json;
     }
+
+    public function processJson($json, $basePath=null)
+    {
+        $json = $this->stripComments($json);
+        $json = $this->parseRefInDoubleQuotedStrings($json);
+        $json = $this->expandPort($json);
+        $json = $this->injectFilecontent($json, $basePath);
+        $json = $this->replaceRef($json);
+        $json = $this->replaceMarkers($json);
+        return $json;
+    }
     
-    public function stripComments($json)
+    protected function stripComments($json)
     {
         // there's a problem with '"http://example.com"' being converted to '"http:'
         // $json = preg_replace('~//[^\r\n]*|/\*.*?\*/~s', '', $json);
@@ -39,7 +46,7 @@ class Preprocessor
         return $json;
     }
 
-    public function parseRefs($json)
+    protected function parseRefInDoubleQuotedStrings($json)
     {
         $json = preg_replace_callback(
             '/"([^"]*){Ref:(.+?)}([^"]*)"/',
@@ -65,7 +72,7 @@ class Preprocessor
         return $json;
     }
 
-    public function replaceMarkers($json)
+    protected function replaceMarkers($json)
     {
         $markers = [
             '###TIMESTAMP###' => date(\DateTime::ISO8601),
@@ -87,19 +94,19 @@ class Preprocessor
         return $json;
     }
 
-    public function expandPort($jsonString)
+    protected function expandPort($jsonString)
     {
         return preg_replace('/([\{,]\s*)"Port"\s*:\s*"(\d+)"/', '\1"FromPort": "\2", "ToPort": "\2"', $jsonString);
     }
 
-    public function injectFilecontent($jsonString, $basePath)
+    protected function injectFilecontent($jsonString, $basePath)
     {
         $jsonString = preg_replace_callback(
             '/(\s*)(.*){\s*"Fn::FileContent(Unpretty|TrimLines|Minify)?"\s*:\s*"(.+?)"\s*}/',
             function (array $matches) use ($basePath) {
                 $file = $basePath . '/' . end($matches);
                 if (!is_file($file)) {
-                    throw new \Exception("File $file not found");
+                    throw new FileNotFoundException("File $file not found");
                 }
 
                 $fileContent = file_get_contents($file);
@@ -166,14 +173,14 @@ class Preprocessor
         return $jsonString;
     }
 
-    public function injectInclude($string, $basePath)
+    protected function injectInclude($string, $basePath)
     {
         return preg_replace_callback(
             '/###INCLUDE:(.+)/',
             function (array $matches) use ($basePath) {
                 $file = $basePath . '/' . $matches[1];
                 if (!is_file($file)) {
-                    throw new \Exception("File $file not found");
+                    throw new FileNotFoundException("File $file not found");
                 }
 
                 $fileContent = file_get_contents($file);
@@ -185,7 +192,7 @@ class Preprocessor
         );
     }
 
-    public function replaceRef($jsonString)
+    protected function replaceRef($jsonString)
     {
         return preg_replace('/\{\s*Ref\s*:\s*([a-zA-Z0-9:]+?)\s*\}/', '", {"Ref": "$1"}, "', $jsonString);
     }

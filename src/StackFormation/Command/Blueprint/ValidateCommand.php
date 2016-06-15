@@ -29,8 +29,8 @@ class ValidateCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $blueprint = $input->getArgument('blueprint');
-        $this->stackManager->validateTemplate($blueprint);
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
+        $blueprint->validateTemplate();
         // will throw an exception if there's a problem
 
         $formatter = new FormatterHelper();
