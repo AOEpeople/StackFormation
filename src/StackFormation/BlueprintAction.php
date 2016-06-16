@@ -7,23 +7,27 @@ use StackFormation\Exception\StackNotFoundException;
 class BlueprintAction {
     
     protected $cfnClient;
-    protected $blueprint;
 
-    public function __construct(Blueprint $blueprint, \Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct(\Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
-        $this->blueprint = $blueprint;
         $this->cfnClient = $cfnClient;
     }
 
-    public function validateTemplate()
+    public function validateTemplate(Blueprint $blueprint)
     {
-        $this->cfnClient->validateTemplate(['TemplateBody' => $this->blueprint->getPreprocessedTemplate()]);
+        $this->cfnClient->validateTemplate(['TemplateBody' => $blueprint->getPreprocessedTemplate()]);
         // will throw an exception if there's a problem
     }
 
-    public function getChangeSet($verbose=true)
+    /**
+     * @param Blueprint $blueprint
+     * @param bool $verbose
+     * @return \Aws\Result
+     * @throws \Exception
+     */
+    public function getChangeSet(Blueprint $blueprint, $verbose=true)
     {
-        $arguments = $this->prepareArguments();
+        $arguments = $this->prepareArguments($blueprint);
         if (isset($arguments['StackPolicyBody'])) {
             unset($arguments['StackPolicyBody']);
         }
@@ -44,12 +48,12 @@ class BlueprintAction {
         return $result;
     }
 
-    public function deploy($dryRun=false, StackFactory $stackFactory)
+    public function deploy(Blueprint $blueprint, $dryRun=false, StackFactory $stackFactory)
     {
-        $arguments = $this->prepareArguments();
+        $arguments = $this->prepareArguments($blueprint);
 
         try {
-            $stackStatus = $stackFactory->getStack($this->blueprint->getStackName())->getStatus();
+            $stackStatus = $stackFactory->getStack($blueprint->getStackName())->getStatus();
         } catch (StackNotFoundException $e) {
             $stackStatus = false;
         }
@@ -61,32 +65,32 @@ class BlueprintAction {
                 $this->cfnClient->updateStack($arguments);
             }
         } else {
-            $arguments['OnFailure'] = $this->blueprint->getOnFailure();
+            $arguments['OnFailure'] = $blueprint->getOnFailure();
             if (!$dryRun) {
                 $this->cfnClient->createStack($arguments);
             }
         }
     }
 
-    protected function prepareArguments()
+    protected function prepareArguments(Blueprint $blueprint)
     {
         $arguments = [
-            'StackName' => $this->blueprint->getStackName(),
-            'Parameters' => $this->blueprint->getParameters(),
-            'TemplateBody' => $this->blueprint->getPreprocessedTemplate(),
-            'Tags' => $this->blueprint->getTags()
+            'StackName' => $blueprint->getStackName(),
+            'Parameters' => $blueprint->getParameters(),
+            'TemplateBody' => $blueprint->getPreprocessedTemplate(),
+            'Tags' => $blueprint->getTags()
         ];
-        if ($capabilities = $this->blueprint->getCapabilities()) {
+        if ($capabilities = $blueprint->getCapabilities()) {
             $arguments['Capabilities'] = $capabilities;
         }
-        if ($policy = $this->blueprint->getStackPolicy()) {
+        if ($policy = $blueprint->getStackPolicy()) {
             $arguments['StackPolicyBody'] = $policy;
         }
 
         // this is how we reference a stack back to its blueprint
         $arguments['Tags'][] = [
             'Key' => 'stackformation:blueprint',
-            'Value' => $this->blueprint->getBlueprintReference()
+            'Value' => $blueprint->getBlueprintReference()
         ];
 
         Helper::validateTags($arguments['Tags']);
