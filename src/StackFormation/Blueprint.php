@@ -105,28 +105,35 @@ class Blueprint {
 
         foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
 
-            if (!preg_match('/^[A-Za-z0-9]{1,255}$/', $parameterKey)) {
+            if (!preg_match('/^[\*A-Za-z0-9]{1,255}$/', $parameterKey)) {
                 throw new \Exception("Invalid parameter key '$parameterKey'.");
             }
 
             if (is_array($parameterValue)) {
                 $parameterValue = $this->conditionalValueResolver->resolveConditionalValue($parameterValue, $this);
             }
-
+            if (is_null($parameterValue)) {
+                throw new \Exception("Parameter $parameterKey is null.");
+            }
             if (!is_string($parameterValue)) {
                 throw new \Exception('Invalid type for value');
             }
 
-            $tmp = ['ParameterKey' => $parameterKey];
-            if (is_null($parameterValue)) {
-                $tmp['UsePreviousValue'] = true;
-            } else {
-                if ($resolvePlaceholders) {
-                    $parameterValue = $this->placeholderResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
-                }
-                $tmp['ParameterValue'] = $parameterValue;
+            if ($resolvePlaceholders) {
+                $parameterValue = $this->placeholderResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
             }
+
+            $tmp = [
+                'ParameterKey' => $parameterKey,
+                'ParameterValue' => $parameterValue
+            ];
+
             if (strpos($tmp['ParameterKey'], '*') !== false) {
+                // resolve the '*' when using multiple templates with prefixes
+                if (!is_array($this->blueprintConfig['template'])) {
+                    throw new \Exception("Found placeholder ('*') in parameter key but only a single template is used.");
+                }
+
                 $count = 0;
                 foreach (array_keys($this->blueprintConfig['template']) as $key) {
                     if (!is_int($key)) {
