@@ -88,23 +88,6 @@ class Config
         return isset($this->conf['vars']) ? $this->conf['vars'] : [];
     }
 
-    /**
-     * @param $blueprint
-     * @throws \Exception
-     * @deprecated
-     */
-    public function getBlueprintVars($blueprint)
-    {
-        throw new \Exception('Use $blueprint->getVars() instead');
-
-        //if (!is_string($blueprint)) {
-        //    throw new \InvalidArgumentException('Invalid blueprint name');
-        //}
-        //$blueprintConfig = $this->getBlueprintConfig($blueprint);
-        //$localVars = isset($blueprintConfig['vars']) ? $blueprintConfig['vars'] : [];
-        //return array_merge($this->getGlobalVars(), $localVars);
-    }
-
     public function getBlueprintConfig($blueprint)
     {
         if (!is_string($blueprint)) {
