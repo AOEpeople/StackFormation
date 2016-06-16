@@ -4,6 +4,7 @@ namespace StackFormation\Command\Stack;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Diff;
+use StackFormation\Exception\BlueprintNotFoundException;
 use StackFormation\Stack;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
@@ -41,8 +42,10 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                 $diff->setBlueprint($blueprint);
                 $tmp['blueprintName'] = $blueprint->getName();
                 $tmp = array_merge($tmp, $diff->compare());
-            } catch (\Exception $e) {
+            } catch (BlueprintNotFoundException $e) {
                 $tmp['blueprintName'] = '<fg=red>Not found</>';
+            } catch (\Exception $e) {
+                $tmp['blueprintName'] = '<fg=red>Exception: '.$e->getMessage().'</>';
             }
             $data[] = $tmp;
         }

@@ -28,6 +28,21 @@ class StackFactory {
         return $stacksFromApi[$stackName];
     }
 
+    public function getStackResource($stackName, $key)
+    {
+        return $this->getStack($stackName)->getResource($key);
+    }
+
+    public function getStackOutput($stackName, $key)
+    {
+        return $this->getStack($stackName)->getOutput($key);
+    }
+
+    public function getStackParameter($stackName, $key)
+    {
+        return $this->getStack($stackName)->getParameter($key);
+    }
+
     /**
      * Resolve wildcard
      *

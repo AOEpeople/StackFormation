@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Blueprint;
 
+use StackFormation\BlueprintAction;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,7 +31,7 @@ class ValidateCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
-        $blueprint->validateTemplate();
+        $this->blueprintAction->validateTemplate($blueprint);
         // will throw an exception if there's a problem
 
         $formatter = new FormatterHelper();

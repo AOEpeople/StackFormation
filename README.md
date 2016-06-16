@@ -150,6 +150,60 @@ blueprints:
     [...]
 ```
 
+### Conditional parameter values
+
+You might end up deploying the same stacks to multiple environments or accounts. Instead of duplicating the blueprints (or using YAML reference) you'll probably
+want to parameterize your blueprints like this 
+```
+blueprints:
+  - stackname: 'app-{env:Environment}-build'
+    template: 'build.template'
+    parameters:
+      KeyPair: 'MyKeyPair'
+    [...]
+```
+
+... and then before deploying (locally or from your CI server) you'd set the env var first and then deploy:
+```
+export Environment=prod
+bin/stackformation.php blueprint:deploy 'app-{env:Environment}-build'
+```
+
+But in many cases those stacks do have some minor differences in some of the parameters (e.g. different VPCs or KeyNames,...)
+You could solve it like this with nested placeholders:
+```
+blueprints:
+  - stackname: 'app-{env:Environment}-build'
+    template: 'build.template'
+    vars:
+      prod-KeyName: MyProdKey
+      stage-KeyName: MyStageKey
+    parameters:
+      KeyPair: '{var:{env:Environment}-KeyName}'
+```
+
+While this is perfectly possible this gets very confusing soon. Plus you'll have to mention every variation of the variable explicitely.
+ 
+Instead you can use a conditional value:
+```
+blueprints:
+  - stackname: 'app-{env:Environment}-build'
+    template: 'build.template'
+    parameters:
+      KeyPair: 
+        '{env:Environment}==prod': MyProdKey
+        '{env:Environment}==stage': MyStageKey
+        'default': MyDevKey
+```
+
+StackFormation will evaluate all keys from top to bottom and the first key that evaluates to true will be returned. 
+Allowed conditions:
+- 'A==B'
+- 'A!=B'
+- 'default' (will always evaluate to true. Make sure you put this at the very end since everything after this will be ignored).
+Placeholders will be resolved before the conditions are evaluated.
+
+
 ### Wildcards
 
 When referencing a stack in `{output:<stack>:<output>}`, `{resource:<stack>:<logicalResource>}`, or `{parameter:<stack>:<logicalResource>}` you can use a wildcard

@@ -2,6 +2,8 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\TagNotFoundException;
+
 class Stack {
     
     /**
@@ -49,11 +51,9 @@ class Stack {
     {
         //return StaticCache::get('stack-parameters-'.$this->name, function(){
             $parameters = [];
-            $res = $this->data['Parameters'];
-            if (is_array($res)) {
-                foreach ($res as $parameter) {
-                    $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
-                }
+            $res = isset($this->data['Parameters']) ? $this->data['Parameters'] : [];
+            foreach ($res as $parameter) {
+                $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
             }
             return $parameters;
         //});
@@ -75,11 +75,9 @@ class Stack {
     {
         //return StaticCache::get('stack-outputs-' . $this->name, function () {
             $outputs = [];
-            $res = $this->data['Outputs'];
-            if (is_array($res)) {
-                foreach ($res as $output) {
-                    $outputs[$output['OutputKey']] = $output['OutputValue'];
-                }
+            $res = isset($this->data['Outputs']) ? $this->data['Outputs'] : [];
+            foreach ($res as $output) {
+                $outputs[$output['OutputKey']] = $output['OutputValue'];
             }
             return $outputs;
         //});
@@ -112,7 +110,7 @@ class Stack {
     {
         $tags = $this->getTags();
         if (!isset($tags[$key])) {
-            throw new \Exception("Tag '$key' not found in stack '{$this->name}'");
+            throw new TagNotFoundException("Tag '$key' not found in stack '{$this->name}'");
         }
         return $tags[$key];
     }
@@ -173,11 +171,19 @@ class Stack {
 
     public function getUsedEnvVars()
     {
-        $reference = $this->getBlueprintReference();
-        unset($reference['Name']);
+        try {
+            $reference = $this->getBlueprintReference();
+            unset($reference['Name']);
+        } catch (TagNotFoundException $e) {
+            $reference = [];
+        }
         return $reference;
     }
 
+    /**
+     * @return array
+     * @throws TagNotFoundException
+     */
     public function getBlueprintReference()
     {
         $data = [];

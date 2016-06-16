@@ -2,27 +2,36 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\BlueprintNotFoundException;
+use StackFormation\Exception\TagNotFoundException;
+
 class BlueprintFactory {
 
     protected $config;
+    protected $placeholderResolver;
+    protected $conditionalValueResolver;
 
-    public function __construct(\Aws\CloudFormation\CloudFormationClient $cfnClient, Config $config, PlaceholderResolver $resolver)
+    public function __construct(
+        Config $config,
+        PlaceholderResolver $placeholderResolver,
+        ConditionalValueResolver $conditionalValueResolver
+    )
     {
-        $this->cfnClient = $cfnClient;
         $this->config = $config;
-        $this->resolver = $resolver;
+        $this->placeholderResolver = $placeholderResolver;
+        $this->conditionalValueResolver = $conditionalValueResolver;
     }
 
     public function getBlueprint($blueprintName)
     {
         if (!$this->blueprintExists($blueprintName)) {
-            throw new \Exception("Blueprint '$blueprintName' does not exist'");
+            throw new BlueprintNotFoundException("Blueprint '$blueprintName' does not exist'");
         }
         $blueprint = new Blueprint(
             $blueprintName,
             $this->config->getBlueprintConfig($blueprintName),
-            $this->resolver,
-            $this->cfnClient
+            $this->placeholderResolver,
+            $this->conditionalValueResolver
         );
         return $blueprint;
     }
@@ -32,13 +41,9 @@ class BlueprintFactory {
         try {
             $blueprintName = $stack->getBlueprintName();
             return $this->getBlueprint($blueprintName);
-        } catch (\Exception $e) {
-            try {
-                // let's try if there's a blueprint with the same name
-                return $this->getBlueprint($stack->getName());
-            } catch (\Exception $e) {
-                throw new \Exception('No blueprint found for stack ' . $stack->getName());
-            }
+        } catch (TagNotFoundException $e) {
+            // let's try if there's a blueprint with the same name
+            return $this->getBlueprint($stack->getName());
         }
     }
 

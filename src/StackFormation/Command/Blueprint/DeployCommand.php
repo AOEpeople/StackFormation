@@ -78,7 +78,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
 
         try {
 
-            $blueprint->deploy($dryRun, $this->stackFactory);
+            $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
 
         } catch (CloudFormationException $exception) {
 
@@ -98,7 +98,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $output->writeln('Deleting failed stack ' . $stackName);
                     $this->stackFactory->getStack($stackName)->delete()->observe($output, $this->stackFactory);
                     $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
-                    $blueprint->deploy($dryRun, $this->stackFactory);
+                    $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
                 }
             } elseif (strpos($message, 'is in DELETE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
@@ -107,7 +107,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 if ($confirmed) {
                     $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
                     $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
-                    $blueprint->deploy($dryRun, $this->stackFactory);
+                    $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
                 }
             } elseif (strpos($message, 'is in UPDATE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
@@ -117,7 +117,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $output->writeln('Cancelling update for ' . $stackName);
                     $this->stackFactory->getStack($stackName)->cancelUpdate()->observe($output, $this->stackFactory);
                     $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
-                    $blueprint->deploy($dryRun, $this->stackFactory);
+                    $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
                 }
             } else {
                 throw $exception;

@@ -32,7 +32,7 @@ class ChangesetCommand extends \StackFormation\Command\AbstractCommand
     {
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
 
-        $changeSetResult = $blueprint->getChangeSet(true);
+        $changeSetResult = $this->blueprintAction->getChangeSet($blueprint, true);
 
         $rows = [];
         foreach ($changeSetResult->search('Changes[]') as $change) {

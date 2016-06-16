@@ -1,0 +1,9 @@
+blueprints:
+
+  - stackname: 'conditional_value'
+    template: 'dummy.template'
+    parameters:
+      CondValue:
+        '{env:Foo}==Val1': a
+        '{env:Foo}==Val2': b
+        'default': c

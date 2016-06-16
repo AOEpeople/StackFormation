@@ -3,7 +3,9 @@
 namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\BlueprintAction;
 use StackFormation\BlueprintFactory;
+use StackFormation\ConditionalValueResolver;
 use StackFormation\Config;
 use StackFormation\DependencyTracker;
 use StackFormation\PlaceholderResolver;
@@ -26,6 +28,9 @@ abstract class AbstractCommand extends Command
     /* @var DependencyTracker */
     protected $dependencyTracker;
 
+    /* @var BlueprintAction */
+    protected $blueprintAction;
+
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input, $output);
@@ -34,7 +39,9 @@ abstract class AbstractCommand extends Command
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
         $placeholderResolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory, $config);
-        $this->blueprintFactory = new BlueprintFactory($cfnClient, $config, $placeholderResolver);
+        $conditionalValueResolver = new ConditionalValueResolver($placeholderResolver);
+        $this->blueprintFactory = new BlueprintFactory($config, $placeholderResolver, $conditionalValueResolver);
+        $this->blueprintAction = new BlueprintAction($cfnClient);
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)

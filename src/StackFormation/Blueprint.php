@@ -2,8 +2,6 @@
 
 namespace StackFormation;
 
-use StackFormation\Exception\StackNotFoundException;
-
 class Blueprint {
     
     /**
@@ -11,15 +9,23 @@ class Blueprint {
      */
     protected $name;
     protected $blueprintConfig;
-    protected $resolver;
-    protected $cfnClient;
+    protected $placeholderResolver;
+    protected $conditionalValueResolver;
 
-    public function __construct($name, array $blueprintConfig, PlaceholderResolver $resolver, \Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct(
+        $name,
+        array $blueprintConfig,
+        PlaceholderResolver $placeholderResolver,
+        ConditionalValueResolver $conditionalValueResolver
+    )
     {
+        if (!is_string($name)) {
+            throw new \InvalidArgumentException('Name must be a string');
+        }
         $this->name = $name;
         $this->blueprintConfig = $blueprintConfig;
-        $this->resolver = $resolver;
-        $this->cfnClient = $cfnClient;
+        $this->placeholderResolver = $placeholderResolver;
+        $this->conditionalValueResolver = $conditionalValueResolver;
     }
 
     public function getName()
@@ -33,7 +39,7 @@ class Blueprint {
         if (isset($this->blueprintConfig['tags'])) {
             foreach ($this->blueprintConfig['tags'] as $key => $value) {
                 if ($resolvePlaceholders) {
-                    $value = $this->resolver->resolvePlaceholders($value, $this, 'tag', $key);
+                    $value = $this->placeholderResolver->resolvePlaceholders($value, $this, 'tag', $key);
                 }
                 $tags[] = ['Key' => $key, 'Value' => $value];
             }
@@ -43,14 +49,14 @@ class Blueprint {
 
     public function getStackName()
     {
-        return $this->resolver->resolvePlaceholders($this->name, $this, 'stackname');
+        return $this->placeholderResolver->resolvePlaceholders($this->name, $this, 'stackname');
     }
 
     public function enforceProfile()
     {
         // TODO: loading profiles shouldn't be done within a blueprint!
         if (isset($this->blueprintConfig['profile'])) {
-            $profile = $this->resolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
+            $profile = $this->placeholderResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
@@ -93,33 +99,55 @@ class Blueprint {
 
         $this->enforceProfile();
 
-        if (isset($this->blueprintConfig['parameters'])) {
-            foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
-                $tmp = ['ParameterKey' => $parameterKey];
-                if (is_null($parameterValue)) {
-                    $tmp['UsePreviousValue'] = true;
-                } else {
-                    if ($resolvePlaceholders) {
-                        $parameterValue = $this->resolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
-                    }
-                    $tmp['ParameterValue'] = $parameterValue;
+        if (!isset($this->blueprintConfig['parameters'])) {
+            return [];
+        }
+
+        foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
+
+            if (!preg_match('/^[\*A-Za-z0-9]{1,255}$/', $parameterKey)) {
+                throw new \Exception("Invalid parameter key '$parameterKey'.");
+            }
+
+            if (is_array($parameterValue)) {
+                $parameterValue = $this->conditionalValueResolver->resolveConditionalValue($parameterValue, $this);
+            }
+            if (is_null($parameterValue)) {
+                throw new \Exception("Parameter $parameterKey is null.");
+            }
+            if (!is_string($parameterValue)) {
+                throw new \Exception('Invalid type for value');
+            }
+
+            if ($resolvePlaceholders) {
+                $parameterValue = $this->placeholderResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
+            }
+
+            $tmp = [
+                'ParameterKey' => $parameterKey,
+                'ParameterValue' => $parameterValue
+            ];
+
+            if (strpos($tmp['ParameterKey'], '*') !== false) {
+                // resolve the '*' when using multiple templates with prefixes
+                if (!is_array($this->blueprintConfig['template'])) {
+                    throw new \Exception("Found placeholder ('*') in parameter key but only a single template is used.");
                 }
-                if (strpos($tmp['ParameterKey'], '*') !== false) {
-                    $count = 0;
-                    foreach (array_keys($this->blueprintConfig['template']) as $key) {
-                        if (!is_int($key)) {
-                            $count++;
-                            $newParameter = $tmp;
-                            $newParameter['ParameterKey'] = str_replace('*', $key, $tmp['ParameterKey']);
-                            $parameters[] = $newParameter;
-                        }
+
+                $count = 0;
+                foreach (array_keys($this->blueprintConfig['template']) as $key) {
+                    if (!is_int($key)) {
+                        $count++;
+                        $newParameter = $tmp;
+                        $newParameter['ParameterKey'] = str_replace('*', $key, $tmp['ParameterKey']);
+                        $parameters[] = $newParameter;
                     }
-                    if ($count == 0) {
-                        throw new \Exception('Found placeholder \'*\' in parameter key but the templates don\'t use prefixes');
-                    }
-                } else {
-                    $parameters[] = $tmp;
                 }
+                if ($count == 0) {
+                    throw new \Exception('Found placeholder \'*\' in parameter key but the templates don\'t use prefixes');
+                }
+            } else {
+                $parameters[] = $tmp;
             }
         }
 
@@ -142,7 +170,7 @@ class Blueprint {
         }
         if ($resolvePlaceholders) {
             foreach ($scripts as &$script) {
-                $script = $this->resolver->resolvePlaceholders($script, $this, 'script');
+                $script = $this->placeholderResolver->resolvePlaceholders($script, $this, 'script');
             }
         }
         return $scripts;
@@ -186,37 +214,6 @@ class Blueprint {
         return isset($this->blueprintConfig['vars']) ? $this->blueprintConfig['vars'] : [];
     }
 
-    public function prepareArguments()
-    {
-        $arguments = [
-            'StackName' => $this->getStackName(),
-            'Parameters' => $this->getParameters(),
-            'TemplateBody' => $this->getPreprocessedTemplate(),
-            'Tags' => $this->getTags()
-        ];
-        if ($capabilities = $this->getCapabilities()) {
-            $arguments['Capabilities'] = $capabilities;
-        }
-        if ($policy = $this->getStackPolicy()) {
-            $arguments['StackPolicyBody'] = $this->getStackPolicy();
-        }
-
-        // this is how we reference a stack back to its blueprint
-        $blueprintReference = array_merge(
-            ['Name' => $this->name],
-            $this->resolver->getDependencyTracker()->getUsedEnvironmentVariables()
-        );
-
-        $arguments['Tags'][] = [
-            'Key' => 'stackformation:blueprint',
-            'Value' => base64_encode(http_build_query($blueprintReference))
-        ];
-
-        Helper::validateTags($arguments['Tags']);
-
-        return $arguments;
-    }
-
     public function executeBeforeScripts()
     {
         $scripts = $this->getBeforeScripts();
@@ -234,57 +231,15 @@ class Blueprint {
         chdir($cwd);
     }
 
-    public function validateTemplate()
+    public function getBlueprintReference()
     {
-        $this->cfnClient->validateTemplate(['TemplateBody' => $this->getPreprocessedTemplate()]);
-        // will throw an exception if there's a problem
-    }
+        // this is how we reference a stack back to its blueprint
+        $blueprintReference = array_merge(
+            ['Name' => $this->name],
+            $this->placeholderResolver->getDependencyTracker()->getUsedEnvironmentVariables()
+        );
 
-    public function getChangeSet($verbose=true)
-    {
-        $arguments = $this->prepareArguments();
-        if (isset($arguments['StackPolicyBody'])) {
-            unset($arguments['StackPolicyBody']);
-        }
-        $arguments['ChangeSetName'] = 'stackformation' . time();
-
-        $res = $this->cfnClient->createChangeSet($arguments);
-        $changeSetId = $res->get('Id');
-        $result = Poller::poll(function() use ($changeSetId, $verbose) {
-            $result = $this->cfnClient->describeChangeSet(['ChangeSetName' => $changeSetId]);
-            if ($verbose) {
-                echo "Status: {$result['Status']}\n";
-            }
-            if ($result['Status'] == 'FAILED') {
-                throw new \Exception($result['StatusReason']);
-            }
-            return ($result['Status'] != 'CREATE_COMPLETE') ? false : $result;
-        });
-        return $result;
-    }
-
-    public function deploy($dryRun=false, StackFactory $stackFactory)
-    {
-        $arguments = $this->prepareArguments();
-
-        try {
-            $stackStatus = $stackFactory->getStack($this->getStackName())->getStatus();
-        } catch (StackNotFoundException $e) {
-            $stackStatus = false;
-        }
-
-        if (strpos($stackStatus, 'IN_PROGRESS') !== false) {
-            throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
-        } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
-            if (!$dryRun) {
-                $this->cfnClient->updateStack($arguments);
-            }
-        } else {
-            $arguments['OnFailure'] = $this->getOnFailure();
-            if (!$dryRun) {
-                $this->cfnClient->createStack($arguments);
-            }
-        }
+        return base64_encode(http_build_query($blueprintReference));
     }
 
     public function gatherDependencies()
