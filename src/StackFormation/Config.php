@@ -63,14 +63,14 @@ class Config
         );
     }
 
-    public static function findAllConfigurationFiles($dirname='blueprints', $filename='blueprints.yml')
+    public static function findAllConfigurationFiles()
     {
         $files = array_merge(
-            glob($dirname.'/*/*/*/'.$filename),
-            glob($dirname.'/*/*/'.$filename),
-            glob($dirname.'/*/'.$filename),
-            glob($dirname.'/'.$filename),
-            glob($filename)
+            glob('blueprints/*/*/*/blueprints.yml'),
+            glob('blueprints/*/*/blueprints.yml'),
+            glob('blueprints/*/blueprints.yml'),
+            glob('blueprints/blueprints.yml'),
+            glob('blueprints.yml')
         );
         return $files;
     }
