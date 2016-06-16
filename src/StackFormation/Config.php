@@ -2,6 +2,8 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\BlueprintNotFoundException;
+
 class Config
 {
 
@@ -96,7 +98,7 @@ class Config
             throw new \InvalidArgumentException('Invalid stack name');
         }
         if (!$this->blueprintExists($blueprint)) {
-            throw new \Exception("Blueprint '$blueprint' not found.");
+            throw new BlueprintNotFoundException("Blueprint '$blueprint' not found.");
         }
 
         return $this->conf['blueprints'][$blueprint];

@@ -2,6 +2,9 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\BlueprintNotFoundException;
+use StackFormation\Exception\TagNotFoundException;
+
 class BlueprintFactory {
 
     protected $config;
@@ -22,7 +25,7 @@ class BlueprintFactory {
     public function getBlueprint($blueprintName)
     {
         if (!$this->blueprintExists($blueprintName)) {
-            throw new \Exception("Blueprint '$blueprintName' does not exist'");
+            throw new BlueprintNotFoundException("Blueprint '$blueprintName' does not exist'");
         }
         $blueprint = new Blueprint(
             $blueprintName,
@@ -38,13 +41,9 @@ class BlueprintFactory {
         try {
             $blueprintName = $stack->getBlueprintName();
             return $this->getBlueprint($blueprintName);
-        } catch (\Exception $e) {
-            try {
-                // let's try if there's a blueprint with the same name
-                return $this->getBlueprint($stack->getName());
-            } catch (\Exception $e) {
-                throw new \Exception('No blueprint found for stack ' . $stack->getName());
-            }
+        } catch (TagNotFoundException $e) {
+            // let's try if there's a blueprint with the same name
+            return $this->getBlueprint($stack->getName());
         }
     }
 
