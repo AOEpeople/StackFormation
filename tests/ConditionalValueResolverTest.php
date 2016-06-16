@@ -121,7 +121,16 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
     public function resolveDataProvider() {
         return [
             [['default' => 42], 42],
+            [['default' => '{env:FOO}'], '{env:FOO}', 'FOO=lala'],
+            [['default' => '{var:GlobalFoo}'], '{var:GlobalFoo}'],
+            [['default' => '{env:FOO}{var:GlobalFoo}'], '{env:FOO}{var:GlobalFoo}', 'FOO=lala'],
             [['1==0' => 41, 'default' => 42], 42],
+            [['1==0' => 41, 'default' => '{env:FOO}'], '{env:FOO}', 'FOO=lala'],
+            [['1==0' => 41, 'default' => '{var:GlobalFoo}'], '{var:GlobalFoo}'],
+            [['1==0' => '{env:FOO}{var:GlobalFoo}'], '', 'FOO=lala'],
+            [['1==1' => '{env:FOO}'], '{env:FOO}', 'FOO=lala'],
+            [['1==1' => '{var:GlobalFoo}'], '{var:GlobalFoo}'],
+            [['1==1' => '{env:FOO}{var:GlobalFoo}'], '{env:FOO}{var:GlobalFoo}', 'FOO=lala'],
             [['default' => 42, '1==0' => 41], 42],
             [['default' => 42, '1==1' => 41], 42],
             [['1==2' => 42, '1==0' => 41], ''], // nothing matched
