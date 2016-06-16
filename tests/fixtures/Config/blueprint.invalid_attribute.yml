@@ -1,0 +1,7 @@
+blueprints:
+
+  - stackname: 'invalid_attribute'
+    template: 'dummy.template'
+    # this is 'parameters' not 'parameter'
+    parameter:
+      Foo: Bar

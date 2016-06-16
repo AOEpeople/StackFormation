@@ -1,0 +1,18 @@
+vars:
+  GlobalFoo: GlobalBar
+
+blueprints:
+
+  - stackname: 'fixture1'
+    template: 'dummy.template'
+    vars:
+      BlueprintFoo: 'BlueprintBar'
+    parameters:
+      ParamFoo: ParamBar
+    tags:
+      TagFoo: TagBar
+
+
+  - stackname: 'fixture2'
+    template: 'dummy.template'
+

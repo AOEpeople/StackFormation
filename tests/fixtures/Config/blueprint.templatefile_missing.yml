@@ -1,0 +1,5 @@
+blueprints:
+
+  - stackname: 'a'
+    template: 'doesnotexist.template'
+

@@ -1,0 +1,8 @@
+blueprints:
+
+  - stackname: 'a'
+    template: 'dummy.template'
+  - stackname: 'b'
+    template: 'dummy.template'
+  - stackname: 'a'
+    template: 'dummy.template'

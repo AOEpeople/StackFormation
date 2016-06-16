@@ -2,24 +2,22 @@
 
 namespace StackFormation;
 
-use Symfony\Component\Config\Definition\Processor;
-use Symfony\Component\Yaml\Parser;
-
 class Config
 {
 
+    /**
+     * @var array
+     */
     protected $conf;
 
-    protected $stackManager;
-
-    public function __construct()
+    public function __construct(array $files=null)
     {
-        $files = $this->findAllConfigurationFiles();
+        $files = is_null($files) ? $this->findAllConfigurationFiles() : $files;
         if (count($files) == 0) {
             throw new \StackFormation\Exception\NoBlueprintsFoundException("Could not find any blueprints.yml configuration files");
         }
-        $processor = new Processor();
-        $yamlParser = new Parser();
+
+        $yamlParser = new \Symfony\Component\Yaml\Parser();
 
         $config = [];
         $stacknames = [];
@@ -34,14 +32,20 @@ class Config
                     if (in_array($stackname, $stacknames)) {
                         throw new \Exception("Stackname '$stackname' was declared more than once.");
                     }
+                    if (empty($blueprintConfig['template'])) {
+                        throw new \Exception("Stackname '$stackname' does not specify a template.");
+                    }
+
                     $stacknames[] = $stackname;
 
                     $blueprintConfig['basepath'] = $basePath;
                     $blueprintConfig['template'] = (array)$blueprintConfig['template'];
+
+                    // convert relative paths into absolute paths
                     foreach ($blueprintConfig['template'] as &$template) {
                         $realPathFile = realpath($basePath . '/' . $template);
                         if ($realPathFile === false) {
-                            throw new \Exception('Could not find template file ' . $template);
+                            throw new \Exception('Could not find template file ' . $template . ' referenced in stack ' . $stackname);
                         }
                         $template = $realPathFile;
                     }
@@ -57,10 +61,8 @@ class Config
             $config[] = $tmp;
         }
 
-        $this->conf = $processor->processConfiguration(
-            new ConfigTreeBuilder(),
-            $config
-        );
+        $processor = new \Symfony\Component\Config\Definition\Processor();
+        $this->conf = $processor->processConfiguration(new ConfigTreeBuilder(), $config);
     }
 
     public static function findAllConfigurationFiles()
