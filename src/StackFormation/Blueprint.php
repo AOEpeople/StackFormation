@@ -102,6 +102,10 @@ class Blueprint {
         if (isset($this->blueprintConfig['parameters'])) {
             foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
 
+                if (!preg_match('/^[A-Za-z0-9]{1,255}$/', $parameterKey)) {
+                    throw new \Exception("Invalid parameter key '$parameterKey'.");
+                }
+
                 if (is_array($parameterValue)) {
                     $parameterValue = $this->conditionalValueResolver->resolveConditionalValue($parameterValue, $this);
                 }
