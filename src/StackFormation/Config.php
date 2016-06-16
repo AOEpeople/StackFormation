@@ -48,7 +48,7 @@ class Config
                     if (isset($blueprintConfig['stackPolicy'])) {
                         $realPathFile = realpath($basePath . '/' . $blueprintConfig['stackPolicy']);
                         if ($realPathFile === false) {
-                            throw new \Exception('Could not find stack policy '.$blueprintConfig['stackPolicy'].' referenced in file ' . $template, 1452679777);
+                            throw new \Exception('Could not find stack policy '.$blueprintConfig['stackPolicy'].' referenced in stack ' . $stackname);
                         }
                         $blueprintConfig['stackPolicy'] = $realPathFile;
                     }
