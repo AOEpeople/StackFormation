@@ -99,46 +99,48 @@ class Blueprint {
 
         $this->enforceProfile();
 
-        if (isset($this->blueprintConfig['parameters'])) {
-            foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
+        if (!isset($this->blueprintConfig['parameters'])) {
+            return [];
+        }
 
-                if (!preg_match('/^[A-Za-z0-9]{1,255}$/', $parameterKey)) {
-                    throw new \Exception("Invalid parameter key '$parameterKey'.");
+        foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
+
+            if (!preg_match('/^[A-Za-z0-9]{1,255}$/', $parameterKey)) {
+                throw new \Exception("Invalid parameter key '$parameterKey'.");
+            }
+
+            if (is_array($parameterValue)) {
+                $parameterValue = $this->conditionalValueResolver->resolveConditionalValue($parameterValue, $this);
+            }
+
+            if (!is_string($parameterValue)) {
+                throw new \Exception('Invalid type for value');
+            }
+
+            $tmp = ['ParameterKey' => $parameterKey];
+            if (is_null($parameterValue)) {
+                $tmp['UsePreviousValue'] = true;
+            } else {
+                if ($resolvePlaceholders) {
+                    $parameterValue = $this->placeholderResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
                 }
-
-                if (is_array($parameterValue)) {
-                    $parameterValue = $this->conditionalValueResolver->resolveConditionalValue($parameterValue, $this);
-                }
-
-                if (!is_string($parameterValue)) {
-                    throw new \Exception('Invalid type for value');
-                }
-
-                $tmp = ['ParameterKey' => $parameterKey];
-                if (is_null($parameterValue)) {
-                    $tmp['UsePreviousValue'] = true;
-                } else {
-                    if ($resolvePlaceholders) {
-                        $parameterValue = $this->placeholderResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
+                $tmp['ParameterValue'] = $parameterValue;
+            }
+            if (strpos($tmp['ParameterKey'], '*') !== false) {
+                $count = 0;
+                foreach (array_keys($this->blueprintConfig['template']) as $key) {
+                    if (!is_int($key)) {
+                        $count++;
+                        $newParameter = $tmp;
+                        $newParameter['ParameterKey'] = str_replace('*', $key, $tmp['ParameterKey']);
+                        $parameters[] = $newParameter;
                     }
-                    $tmp['ParameterValue'] = $parameterValue;
                 }
-                if (strpos($tmp['ParameterKey'], '*') !== false) {
-                    $count = 0;
-                    foreach (array_keys($this->blueprintConfig['template']) as $key) {
-                        if (!is_int($key)) {
-                            $count++;
-                            $newParameter = $tmp;
-                            $newParameter['ParameterKey'] = str_replace('*', $key, $tmp['ParameterKey']);
-                            $parameters[] = $newParameter;
-                        }
-                    }
-                    if ($count == 0) {
-                        throw new \Exception('Found placeholder \'*\' in parameter key but the templates don\'t use prefixes');
-                    }
-                } else {
-                    $parameters[] = $tmp;
+                if ($count == 0) {
+                    throw new \Exception('Found placeholder \'*\' in parameter key but the templates don\'t use prefixes');
                 }
+            } else {
+                $parameters[] = $tmp;
             }
         }
 
