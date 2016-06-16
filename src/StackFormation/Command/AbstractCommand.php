@@ -4,6 +4,7 @@ namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\BlueprintFactory;
+use StackFormation\ConditionalValueResolver;
 use StackFormation\Config;
 use StackFormation\DependencyTracker;
 use StackFormation\PlaceholderResolver;
@@ -34,7 +35,8 @@ abstract class AbstractCommand extends Command
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
         $placeholderResolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory, $config);
-        $this->blueprintFactory = new BlueprintFactory($cfnClient, $config, $placeholderResolver);
+        $conditionalValueResolver = new ConditionalValueResolver($placeholderResolver);
+        $this->blueprintFactory = new BlueprintFactory($config, $placeholderResolver, $conditionalValueResolver);
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)

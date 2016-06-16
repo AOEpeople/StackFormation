@@ -2,16 +2,30 @@
 
 class BlueprintTest extends PHPUnit_Framework_TestCase {
 
+    protected function getMockedBlueprintFactory(\StackFormation\Config $config)
+    {
+        $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
+        $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutput');
+        $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
+        $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
+
+        $placeholderResolver = new \StackFormation\PlaceholderResolver(
+            new \StackFormation\DependencyTracker(),
+            $stackFactoryMock,
+            $config
+        );
+
+        $conditionalValueResolver = new \StackFormation\ConditionalValueResolver($placeholderResolver);
+        return new \StackFormation\BlueprintFactory($config, $placeholderResolver, $conditionalValueResolver);
+    }
+
     /**
      * @test
      */
     public function getVariable()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.1.yml']);
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', [], [], '', false);
-        $resolverMock = $this->getMock('\StackFormation\PlaceholderResolver', [], [], '', false);
-        $blueprintFactory = new \StackFormation\BlueprintFactory($cfnClientMock, $config, $resolverMock);
-        $blueprintVars = $blueprintFactory->getBlueprint('fixture1')->getVars();
+        $blueprintVars = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getVars();
         $this->assertArrayHasKey('BlueprintFoo', $blueprintVars);
         $this->assertEquals('BlueprintBar', $blueprintVars['BlueprintFoo']);
     }
@@ -22,10 +36,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     public function getConditionalParameterValueDefault()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.conditional_value.yml']);
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', [], [], '', false);
-        $resolverMock = $this->getMock('\StackFormation\PlaceholderResolver', [], [], '', false);
-        $blueprintFactory = new \StackFormation\BlueprintFactory($cfnClientMock, $config, $resolverMock);
-        $blueprint = $blueprintFactory->getBlueprint('conditional_value');
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
         $parameters = $blueprint->getParameters(true, true);
         $this->assertArrayHasKey('CondValue', $parameters);
         $this->assertEquals('c', $parameters['CondValue']);
@@ -38,10 +49,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     {
         putenv('Foo=Val1');
         $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.conditional_value.yml']);
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', [], [], '', false);
-        $resolverMock = $this->getMock('\StackFormation\PlaceholderResolver', [], [], '', false);
-        $blueprintFactory = new \StackFormation\BlueprintFactory($cfnClientMock, $config, $resolverMock);
-        $blueprint = $blueprintFactory->getBlueprint('conditional_value');
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
         $parameters = $blueprint->getParameters(true, true);
         $this->assertArrayHasKey('CondValue', $parameters);
         $this->assertEquals('a', $parameters['CondValue']);
@@ -54,10 +62,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     {
         putenv('Foo=Val2');
         $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.conditional_value.yml']);
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', [], [], '', false);
-        $resolverMock = $this->getMock('\StackFormation\PlaceholderResolver', [], [], '', false);
-        $blueprintFactory = new \StackFormation\BlueprintFactory($cfnClientMock, $config, $resolverMock);
-        $blueprint = $blueprintFactory->getBlueprint('conditional_value');
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
         $parameters = $blueprint->getParameters(true, true);
         $this->assertArrayHasKey('CondValue', $parameters);
         $this->assertEquals('b', $parameters['CondValue']);

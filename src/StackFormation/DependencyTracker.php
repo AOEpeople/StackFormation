@@ -14,7 +14,7 @@ class DependencyTracker
         $this->envVars = [];
     }
 
-    public function trackEnvUsage($envVar, $withDefault=false, $value, Blueprint $sourceBlueprint, $sourceType, $sourceKey)
+    public function trackEnvUsage($envVar, $withDefault=false, $value, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null)
     {
         $type = $withDefault ? 'env_with_default' : 'env';
         if (!isset($this->envVars[$type])) {

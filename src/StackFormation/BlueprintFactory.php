@@ -5,12 +5,18 @@ namespace StackFormation;
 class BlueprintFactory {
 
     protected $config;
+    protected $placeholderResolver;
+    protected $conditionalValueResolver;
 
-    public function __construct(\Aws\CloudFormation\CloudFormationClient $cfnClient, Config $config, PlaceholderResolver $resolver)
+    public function __construct(
+        Config $config,
+        PlaceholderResolver $placeholderResolver,
+        ConditionalValueResolver $conditionalValueResolver
+    )
     {
-        $this->cfnClient = $cfnClient;
         $this->config = $config;
-        $this->resolver = $resolver;
+        $this->placeholderResolver = $placeholderResolver;
+        $this->conditionalValueResolver = $conditionalValueResolver;
     }
 
     public function getBlueprint($blueprintName)
@@ -21,8 +27,8 @@ class BlueprintFactory {
         $blueprint = new Blueprint(
             $blueprintName,
             $this->config->getBlueprintConfig($blueprintName),
-            $this->resolver,
-            $this->cfnClient
+            $this->placeholderResolver,
+            $this->conditionalValueResolver
         );
         return $blueprint;
     }
