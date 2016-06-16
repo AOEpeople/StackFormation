@@ -68,7 +68,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
             ['{var:GlobalFoo}=={var:GlobalFoo}', true],
             ['{env:FOO}==42', true, 'FOO=42'],
             ['{env:VARWITHOUTVALUE:42}==42', true],
-            ['{env:VARWITHOUTVALUE:42}==41', true],
+            ['{env:VARWITHOUTVALUE:42}==41', false],
             ['42=={env:FOO}', true, 'FOO=42'],
             ['{env:FOO}==43', false, 'FOO=42'],
             ['43=={env:FOO}', false, 'FOO=42'],

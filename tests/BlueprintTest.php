@@ -35,6 +35,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
      */
     public function getConditionalParameterValueDefault()
     {
+        putenv('Foo=Val5');
         $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.conditional_value.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
         $parameters = $blueprint->getParameters(true, true);
