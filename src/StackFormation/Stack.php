@@ -75,11 +75,9 @@ class Stack {
     {
         //return StaticCache::get('stack-outputs-' . $this->name, function () {
             $outputs = [];
-            $res = $this->data['Outputs'];
-            if (is_array($res)) {
-                foreach ($res as $output) {
-                    $outputs[$output['OutputKey']] = $output['OutputValue'];
-                }
+            $res = isset($this->data['Outputs']) ? $this->data['Outputs'] : [];
+            foreach ($res as $output) {
+                $outputs[$output['OutputKey']] = $output['OutputValue'];
             }
             return $outputs;
         //});
