@@ -2,16 +2,9 @@
 
 namespace AwsInspector\Command\CloudwatchLogs;
 
-use AwsInspector\Finder;
-use AwsInspector\Model\Ec2\Instance;
-use AwsInspector\Model\Ec2\Repository;
-use AwsInspector\Ssh\Agent;
-use AwsInspector\Ssh\Identity;
-use AwsInspector\Ssh\PrivateKey;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DeleteLogGroupCommand extends Command

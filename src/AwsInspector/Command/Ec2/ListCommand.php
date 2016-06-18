@@ -2,11 +2,8 @@
 
 namespace AwsInspector\Command\Ec2;
 
-use AwsInspector\Finder;
 use AwsInspector\Model\Ec2\Instance;
 use AwsInspector\Model\Ec2\Repository;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
