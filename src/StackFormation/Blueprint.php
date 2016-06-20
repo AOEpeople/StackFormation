@@ -251,7 +251,17 @@ class Blueprint {
             $this->placeholderResolver->getDependencyTracker()->getUsedEnvironmentVariables()
         );
 
-        return base64_encode(http_build_query($blueprintReference));
+        $encodedValues = http_build_query($blueprintReference);
+
+        $reference = base64_encode($encodedValues);
+        if (strlen($reference) > 255) {
+            $encodedValues = 'gz:'.gzencode($encodedValues, 9);
+            $reference = base64_encode($encodedValues);
+        }
+        if (strlen($reference) > 255) {
+            throw new \Exception('Blueprint reference too long (even after compression)');
+        }
+        return $reference;
     }
 
     public function gatherDependencies()
