@@ -9,8 +9,6 @@ class Stack {
     /**
      * @var string
      */
-    protected $name;
-    protected $status;
     protected $data;
 
     /**
@@ -18,23 +16,27 @@ class Stack {
      */
     protected $cfnClient;
 
-    public function __construct($name, $data, \Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct($data, \Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
-        $this->name = $name;
-        $this->cfnClient = $cfnClient;
         $this->data = $data;
+        $this->cfnClient = $cfnClient;
     }
 
     public function getName()
     {
-        return $this->name;
+        return $this->data['StackName'];
+    }
+
+    public function getDescription()
+    {
+        return $this->data['Description'];
     }
 
     public function getParameter($key)
     {
         $parameters = $this->getParameters();
         if (!isset($parameters[$key])) {
-            throw new \Exception("Parameter '$key' not found in stack '{$this->name}'");
+            throw new \Exception("Parameter '$key' not found in stack '{$this->getName()}'");
         }
         if ($parameters[$key] == '****') {
             throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
@@ -49,7 +51,7 @@ class Stack {
      */
     public function getParameters()
     {
-        //return StaticCache::get('stack-parameters-'.$this->name, function(){
+        //return StaticCache::get('stack-parameters-'.$this->getName(), function(){
             $parameters = [];
             $res = isset($this->data['Parameters']) ? $this->data['Parameters'] : [];
             foreach ($res as $parameter) {
@@ -63,7 +65,7 @@ class Stack {
     {
         $outputs = $this->getOutputs();
         if (!isset($outputs[$key])) {
-            throw new \Exception("Output '$key' not found in stack '{$this->name}'");
+            throw new \Exception("Output '$key' not found in stack '{$this->getName()}'");
         }
         if ($outputs[$key] == '****') {
             throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
@@ -73,7 +75,7 @@ class Stack {
 
     public function getOutputs()
     {
-        //return StaticCache::get('stack-outputs-' . $this->name, function () {
+        //return StaticCache::get('stack-outputs-' . $this->getName(), function () {
             $outputs = [];
             $res = isset($this->data['Outputs']) ? $this->data['Outputs'] : [];
             foreach ($res as $output) {
@@ -87,16 +89,17 @@ class Stack {
     {
         $resources = $this->getResources();
         if (!isset($resources[$key])) {
-            throw new \Exception("Resource '$key' not found in stack '{$this->name}'");
+            throw new \Exception("Resource '$key' not found in stack '{$this->getName()}'");
         }
         return $resources[$key];
     }
 
     public function getResources()
     {
-        return StaticCache::get('stack-resources-' . $this->name, function () {
+        return StaticCache::get('stack-resources-' . $this->getName(), function () {
             $resources = [];
-            $res = $this->cfnClient->describeStackResources(['StackName' => $this->name])->search('StackResources[]');
+
+            $res = $this->cfnClient->describeStackResources(['StackName' => $this->getName()])->search('StackResources[]');
             if (is_array($res)) {
                 foreach ($res as $resource) {
                     $resources[$resource['LogicalResourceId']] = isset($resource['PhysicalResourceId']) ? $resource['PhysicalResourceId'] : '';
@@ -110,14 +113,14 @@ class Stack {
     {
         $tags = $this->getTags();
         if (!isset($tags[$key])) {
-            throw new TagNotFoundException("Tag '$key' not found in stack '{$this->name}'");
+            throw new TagNotFoundException("Tag '$key' not found in stack '{$this->getName()}'");
         }
         return $tags[$key];
     }
 
     public function getTags()
     {
-        //return StaticCache::get('stack-tags-' . $this->name, function () {
+        //return StaticCache::get('stack-tags-' . $this->getName(), function () {
             $tags = [];
             $res = $this->data['Tags'];
             if (is_array($res)) {
@@ -136,7 +139,7 @@ class Stack {
 
     public function getEvents()
     {
-        $res = $this->cfnClient->describeStackEvents(['StackName' => $this->name]);
+        $res = $this->cfnClient->describeStackEvents(['StackName' => $this->getName()]);
         $events = [];
         foreach ($res->search('StackEvents[]') as $event) {
             $events[$event['EventId']] = [
@@ -153,13 +156,13 @@ class Stack {
 
     public function cancelUpdate()
     {
-        $this->cfnClient->cancelUpdateStack(['StackName' => $this->name]);
+        $this->cfnClient->cancelUpdateStack(['StackName' => $this->getName()]);
         return $this;
     }
 
     public function delete()
     {
-        $this->cfnClient->deleteStack(['StackName' => $this->name]);
+        $this->cfnClient->deleteStack(['StackName' => $this->getName()]);
         return $this;
     }
 
@@ -201,8 +204,8 @@ class Stack {
 
     public function getTemplate()
     {
-        echo "Get Template {$this->name}\n";
-        $res = $this->cfnClient->getTemplate(['StackName' => $this->name]);
+        echo "Get Template {$this->getName()}\n";
+        $res = $this->cfnClient->getTemplate(['StackName' => $this->getName()]);
         return $res->get("TemplateBody");
     }
 

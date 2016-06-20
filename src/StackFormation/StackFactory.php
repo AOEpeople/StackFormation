@@ -67,18 +67,6 @@ class StackFactory {
         return end($stacks);
     }
 
-
-
-    protected function getDataFromApi()
-    {
-        return StaticCache::get('describe-all-stacks', function() {
-            $data = $this->cfnClient->describeStacks(['StackName' => $this->name]);
-            var_dump($data->search("Stacks[?StackName == 'demo-global-s3-artifacts']"));
-            exit;
-            return $data;
-        });
-    }
-
     /**
      * @param bool $fresh
      * @param null $nameFilter
@@ -112,7 +100,7 @@ class StackFactory {
             $res = $this->cfnClient->describeStacks();
             $stacks = [];
             foreach ($res->get('Stacks') as $stack) {
-                $stacks[$stack['StackName']] = new Stack($stack['StackName'], $stack, $this->cfnClient);
+                $stacks[$stack['StackName']] = new Stack($stack, $this->cfnClient);
             }
             return $stacks;
         }, $fresh);
