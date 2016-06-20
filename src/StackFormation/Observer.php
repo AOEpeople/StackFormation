@@ -5,6 +5,7 @@ namespace StackFormation;
 use Aws\CloudFormation\Exception\CloudFormationException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class Observer
 {
@@ -81,18 +82,20 @@ class Observer
                             );
                         } elseif (preg_match('/WaitCondition received failed message:.*for uniqueId: (i-[0-9a-f]+)/', $event['ResourceStatusReason'], $matches)) {
                             $instanceId = $matches[1];
-                            if (class_exists('\AwsInspector\Model\Ec2\Repository')) {
-                                $ec2Repo = new \AwsInspector\Model\Ec2\Repository();
-                                $instance = $ec2Repo->findEc2InstanceBy('instance-id', $instanceId);
-                                if ($instance) {
+                            $ec2Repo = new \AwsInspector\Model\Ec2\Repository();
+                            $instance = $ec2Repo->findEc2InstanceBy('instance-id', $instanceId);
+                            if ($instance) {
+                                try {
                                     $res = $instance->exec('tail -50 /var/log/cloud-init-output.log');
                                     $logMessages = array_merge(
                                         ["==> Showing last 50 lines in /var/log/cloud-init-output.log"],
                                         $res['output']
                                     );
-                                } else {
-                                    $logMessages = ["Could not find instance $instance"];
+                                } catch (FileNotFoundException $e) {
+                                    $logMessages = ["Could not log in to instance $instance because the pem file could not be found"];
                                 }
+                            } else {
+                                $logMessages = ["Could not find instance $instance"];
                             }
                         }
                     }

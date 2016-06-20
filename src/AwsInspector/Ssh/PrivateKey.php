@@ -2,6 +2,7 @@
 
 namespace AwsInspector\Ssh;
 
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Vault\Vault;
 
 class PrivateKey {
@@ -36,7 +37,7 @@ class PrivateKey {
                     throw new \Exception('Please install aoepeople/vault');
                 }
             } else {
-                throw new \Exception('Could not find private key file ' . $privateKeyFile);
+                throw new FileNotFoundException('Could not find private key file ' . $privateKeyFile);
             }
         }
         $this->privateKeyFile = realpath($this->privateKeyFile);
