@@ -1,0 +1,22 @@
+{
+  "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack\/test-stack1\/037063f1-2dfa-11e6-a4dd-50a686be73f2",
+  "StackName": "test-stack1",
+  "Description": "Test Description",
+  "Parameters": [
+    {"ParameterKey": "Foo", "ParameterValue": "Bar"},
+    {"ParameterKey": "Foo2","ParameterValue": "Bar2"}
+  ],
+  "CreationTime": "2016-06-09T04:24:10+00:00",
+  "LastUpdatedTime": "2016-06-19T06:23:36+00:00",
+  "StackStatus": "UPDATE_COMPLETE",
+  "DisableRollback": true,
+  "NotificationARNs": [],
+  "Outputs": [
+    {"OutputKey": "OutputFoo", "OutputValue": "OutputBar"},
+    {"OutputKey": "OutputFoo2","OutputValue": "OutputBar2"}
+  ],
+  "Tags": [
+    {"Key": "FooTag", "Value": "BarTag"},
+    {"Key": "stackformation:blueprint", "Value": "TmFtZT1kZW1vLWplbmtpbnM="}
+  ]
+}

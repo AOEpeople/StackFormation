@@ -29,7 +29,8 @@
         "aoepeople/awsinspector": "*"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "^2.4"
+        "squizlabs/php_codesniffer": "^2.4",
+        "phpunit/phpunit": "~4.0"
     },
     "autoload": {
         "psr-4": {

@@ -1,0 +1,53 @@
+{
+  "StackResources": [
+    {
+      "StackName": "test-stack1",
+      "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack\/test-stack1\/037063f1-2dfa-11e6-a4dd-50a686be73f2",
+      "LogicalResourceId": "AutoScalingGroup",
+      "PhysicalResourceId": "test-stack1-AutoScalingGroup-ELHRZ3CQ5KTD",
+      "ResourceType": "AWS::AutoScaling::AutoScalingGroup",
+      "Timestamp": "2016-06-19T06:26:50+00:00",
+      "ResourceStatus": "UPDATE_COMPLETE"
+    }, {
+      "StackName": "test-stack1",
+      "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack\/test-stack1\/037063f1-2dfa-11e6-a4dd-50a686be73f2",
+      "LogicalResourceId": "Dns",
+      "PhysicalResourceId": "jenkins.example.net",
+      "ResourceType": "AWS::Route53::RecordSet",
+      "Timestamp": "2016-06-09T04:25:13+00:00",
+      "ResourceStatus": "CREATE_COMPLETE"
+    }, {
+      "StackName": "test-stack1",
+      "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack\/test-stack1\/037063f1-2dfa-11e6-a4dd-50a686be73f2",
+      "LogicalResourceId": "InstanceSg",
+      "PhysicalResourceId": "sg-de4494b8",
+      "ResourceType": "AWS::EC2::SecurityGroup",
+      "Timestamp": "2016-06-11T04:43:44+00:00",
+      "ResourceStatus": "UPDATE_COMPLETE"
+    }, {
+      "StackName": "test-stack1",
+      "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack\/test-stack1\/037063f1-2dfa-11e6-a4dd-50a686be73f2",
+      "LogicalResourceId": "LaunchConfiguration",
+      "PhysicalResourceId": "test-stack1-LaunchConfiguration-22VBM2XN6V32",
+      "ResourceType": "AWS::AutoScaling::LaunchConfiguration",
+      "Timestamp": "2016-06-19T06:23:45+00:00",
+      "ResourceStatus": "UPDATE_COMPLETE"
+    }, {
+      "StackName": "test-stack1",
+      "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack\/test-stack1\/037063f1-2dfa-11e6-a4dd-50a686be73f2",
+      "LogicalResourceId": "LoadBalancer",
+      "PhysicalResourceId": "demo-jenk-LoadBala-11B79X246A9EJ",
+      "ResourceType": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Timestamp": "2016-06-11T04:43:29+00:00",
+      "ResourceStatus": "UPDATE_COMPLETE"
+    }, {
+      "StackName": "test-stack1",
+      "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack\/test-stack1\/037063f1-2dfa-11e6-a4dd-50a686be73f2",
+      "LogicalResourceId": "LoadBalancerSg",
+      "PhysicalResourceId": "sg-e3449485",
+      "ResourceType": "AWS::EC2::SecurityGroup",
+      "Timestamp": "2016-06-11T04:43:25+00:00",
+      "ResourceStatus": "UPDATE_COMPLETE"
+    }
+  ]
+}
