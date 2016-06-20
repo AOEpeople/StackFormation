@@ -37,51 +37,10 @@ class TemplateMerger
 
             if (!is_int($key)) {
                 $prefix = $key;
-
-                // Update all { "Ref": "..." }
-                $template = preg_replace_callback(
-                    '/\{\s*"Ref"\s*:\s*"([a-zA-Z0-9:]+?)"\s*\}/',
-                    function ($matches) use ($prefix) {
-                        return '{"Ref":"' . $prefix . $matches[1] . '"}';
-                    },
-                    $template
-                );
-
-                // Update all { "DependsOn": "..." }
-                $template = preg_replace_callback(
-                    '/\"DependsOn"\s*:\s*"([a-zA-Z0-9:]+?)"/',
-                    function ($matches) use ($prefix) {
-                        return '"DependsOn":"' . $prefix . $matches[1] . '"';
-                    },
-                    $template
-                );
-
-                // Update all { "DependsOn": ["...", "...", ...] }
-                $template = preg_replace_callback(
-                    '/\"DependsOn"\s*:\s*\[(.*)\]/s',
-                    function ($matches) use ($prefix) {
-                        $dependencies = $matches[1];
-                        $dependencies = preg_replace_callback(
-                            '/"([a-zA-Z0-9:]+?)"/',
-                            function ($matches) use ($prefix) {
-                                return '"' . $prefix . $matches[1] . '"';
-                            },
-                            $dependencies
-                        );
-
-                        return '"DependsOn":[' . $dependencies . ']';
-                    },
-                    $template
-                );
-
-                //  Update all "Fn::GetAtt": ["...", "..."] }
-                $template = preg_replace_callback(
-                    '/\"Fn::GetAtt"\s*:\s*\[s*"([a-zA-Z0-9:]+?)"/',
-                    function ($matches) use ($prefix) {
-                        return '"Fn::GetAtt": ["' . $prefix . $matches[1] . '"';
-                    },
-                    $template
-                );
+                $template = $this->updateRef($prefix, $template);
+                $template = $this->updateDependsOn($prefix, $template);
+                $template = $this->updateDependsOnMultiple($prefix, $template);
+                $template = $this->updateFnGetAtt($prefix, $template);
             }
 
             $array = json_decode($template, true);
@@ -126,5 +85,86 @@ class TemplateMerger
             throw new \Exception('Template too big. (Must be smaller than 51200 bytes)');
         }
         return $json;
+    }
+
+    /**
+     * @param $prefix
+     * @param $template
+     * @return mixed
+     */
+    public function updateRef($prefix, $template)
+    {
+        // Update all { "Ref": "..." }
+        $template = preg_replace_callback(
+            '/\{\s*"Ref"\s*:\s*"([a-zA-Z0-9:]+?)"\s*\}/',
+            function ($matches) use ($prefix) {
+                return '{"Ref":"' . $prefix . $matches[1] . '"}';
+            },
+            $template
+        );
+        return $template;
+    }
+
+    /**
+     * @param $prefix
+     * @param $template
+     * @return mixed
+     */
+    public function updateDependsOn($prefix, $template)
+    {
+        // Update all { "DependsOn": "..." }
+        $template = preg_replace_callback(
+            '/\"DependsOn"\s*:\s*"([a-zA-Z0-9:]+?)"/',
+            function ($matches) use ($prefix) {
+                return '"DependsOn":"' . $prefix . $matches[1] . '"';
+            },
+            $template
+        );
+        return $template;
+    }
+
+    /**
+     * @param $prefix
+     * @param $template
+     * @return mixed
+     */
+    public function updateDependsOnMultiple($prefix, $template)
+    {
+        // Update all { "DependsOn": ["...", "...", ...] }
+        $template = preg_replace_callback(
+            '/\"DependsOn"\s*:\s*\[(.*)\]/s',
+            function ($matches) use ($prefix) {
+                $dependencies = $matches[1];
+                $dependencies = preg_replace_callback(
+                    '/"([a-zA-Z0-9:]+?)"/',
+                    function ($matches) use ($prefix) {
+                        return '"' . $prefix . $matches[1] . '"';
+                    },
+                    $dependencies
+                );
+
+                return '"DependsOn":[' . $dependencies . ']';
+            },
+            $template
+        );
+        return $template;
+    }
+
+    /**
+     * @param $prefix
+     * @param $template
+     * @return mixed
+     */
+    public function updateFnGetAtt($prefix, $template)
+    {
+        //  Update all "Fn::GetAtt": ["...", "..."] }
+        $template = preg_replace_callback(
+            '/\"Fn::GetAtt"\s*:\s*\[s*"([a-zA-Z0-9:]+?)"/',
+            function ($matches) use ($prefix) {
+                return '"Fn::GetAtt": ["' . $prefix . $matches[1] . '"';
+            },
+            $template
+        );
+        return $template;
     }
 }
