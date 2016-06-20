@@ -200,6 +200,10 @@ class Stack {
         $reference = $this->getTag('stackformation:blueprint');
         $reference = base64_decode($reference);
 
+        if (strpos($reference, 'gz:') === 0) {
+            $reference = gzdecode(substr($reference, 3));
+        }
+
         if (substr($reference, 0, 5) == 'Name=') {
             parse_str($reference, $data);
         } else {
