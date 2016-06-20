@@ -187,7 +187,10 @@ class Blueprint {
 
     public function getBasePath()
     {
-        if (!isset($this->blueprintConfig['basepath']) || !is_dir($this->blueprintConfig['basepath'])) {
+        if (empty($this->blueprintConfig['basepath'])) {
+            throw new \Exception("No basepath set");
+        }
+        if (!is_dir($this->blueprintConfig['basepath'])) {
             throw new \Exception("Invalid basepath '{$this->blueprintConfig['basepath']}'");
         }
         return $this->blueprintConfig['basepath'];
