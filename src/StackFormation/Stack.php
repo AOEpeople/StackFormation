@@ -32,6 +32,11 @@ class Stack {
         return $this->data['Description'];
     }
 
+    public function getStatus()
+    {
+        return $this->data['StackStatus'];
+    }
+
     public function getParameter($key)
     {
         $parameters = $this->getParameters();
@@ -47,20 +52,26 @@ class Stack {
     /**
      * Get parameter values
      *
+     * @return array
      * @throws \Exception
      */
     public function getParameters()
     {
-        //return StaticCache::get('stack-parameters-'.$this->getName(), function(){
-            $parameters = [];
-            $res = isset($this->data['Parameters']) ? $this->data['Parameters'] : [];
-            foreach ($res as $parameter) {
-                $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
-            }
-            return $parameters;
-        //});
+        $parameters = [];
+        $res = isset($this->data['Parameters']) ? $this->data['Parameters'] : [];
+        foreach ($res as $parameter) {
+            $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
+        }
+        return $parameters;
     }
 
+    /**
+     * Get output
+     *
+     * @param $key
+     * @return string
+     * @throws \Exception
+     */
     public function getOutput($key)
     {
         $outputs = $this->getOutputs();
@@ -73,18 +84,28 @@ class Stack {
         return $outputs[$key];
     }
 
+    /**
+     * Get outputs
+     *
+     * @return array
+     */
     public function getOutputs()
     {
-        //return StaticCache::get('stack-outputs-' . $this->getName(), function () {
-            $outputs = [];
-            $res = isset($this->data['Outputs']) ? $this->data['Outputs'] : [];
-            foreach ($res as $output) {
-                $outputs[$output['OutputKey']] = $output['OutputValue'];
-            }
-            return $outputs;
-        //});
+        $outputs = [];
+        $res = isset($this->data['Outputs']) ? $this->data['Outputs'] : [];
+        foreach ($res as $output) {
+            $outputs[$output['OutputKey']] = $output['OutputValue'];
+        }
+        return $outputs;
     }
 
+    /**
+     * Get resource
+     *
+     * @param $key
+     * @return string
+     * @throws \Exception
+     */
     public function getResource($key)
     {
         $resources = $this->getResources();
@@ -94,11 +115,16 @@ class Stack {
         return $resources[$key];
     }
 
+    /**
+     * Ger resources
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function getResources()
     {
         return StaticCache::get('stack-resources-' . $this->getName(), function () {
             $resources = [];
-
             $res = $this->cfnClient->describeStackResources(['StackName' => $this->getName()])->search('StackResources[]');
             if (is_array($res)) {
                 foreach ($res as $resource) {
@@ -120,21 +146,14 @@ class Stack {
 
     public function getTags()
     {
-        //return StaticCache::get('stack-tags-' . $this->getName(), function () {
-            $tags = [];
-            $res = $this->data['Tags'];
-            if (is_array($res)) {
-                foreach ($res as $tag) {
-                    $tags[$tag['Key']] = $tag['Value'];
-                }
+        $tags = [];
+        $res = $this->data['Tags'];
+        if (is_array($res)) {
+            foreach ($res as $tag) {
+                $tags[$tag['Key']] = $tag['Value'];
             }
-            return $tags;
-        //});
-    }
-
-    public function getStatus()
-    {
-        return $this->data['StackStatus'];
+        }
+        return $tags;
     }
 
     public function getEvents()
@@ -152,18 +171,6 @@ class Stack {
             ];
         }
         return array_reverse($events, true);
-    }
-
-    public function cancelUpdate()
-    {
-        $this->cfnClient->cancelUpdateStack(['StackName' => $this->getName()]);
-        return $this;
-    }
-
-    public function delete()
-    {
-        $this->cfnClient->deleteStack(['StackName' => $this->getName()]);
-        return $this;
     }
 
     public function getBlueprintName()
@@ -204,9 +211,8 @@ class Stack {
 
     public function getTemplate()
     {
-        echo "Get Template {$this->getName()}\n";
         $res = $this->cfnClient->getTemplate(['StackName' => $this->getName()]);
-        return $res->get("TemplateBody");
+        return $res->get('TemplateBody');
     }
 
     public function observe(
@@ -219,6 +225,18 @@ class Stack {
             $observer->deleteOnSignal();
         }
         return $observer->observeStackActivity();
+    }
+
+    public function cancelUpdate()
+    {
+        $this->cfnClient->cancelUpdateStack(['StackName' => $this->getName()]);
+        return $this;
+    }
+
+    public function delete()
+    {
+        $this->cfnClient->deleteStack(['StackName' => $this->getName()]);
+        return $this;
     }
 
 }

@@ -33,7 +33,7 @@ class StackTest extends PHPUnit_Framework_TestCase
     }
 
     public function testStatus() {
-        $this->assertEquals('test-stack1', $this->stack->getName());
+        $this->assertEquals('UPDATE_COMPLETE', $this->stack->getStatus());
     }
 
     public function testParameter() {
