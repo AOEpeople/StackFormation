@@ -87,6 +87,7 @@ class Connection
         $parts[] = '-o ConnectTimeout=5';
         //$parts[] = '-o LogLevel=QUIET';
         $parts[] = '-o StrictHostKeyChecking=no';
+        $parts[] = '-o UserKnownHostsFile=/dev/null'; // avoid "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"
         // $parts[] = '-t'; // Force pseudo-tty allocation.
         $parts[] = "{$this->username}@{$this->host}";
 
