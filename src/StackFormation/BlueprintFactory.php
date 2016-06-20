@@ -3,6 +3,7 @@
 namespace StackFormation;
 
 use StackFormation\Exception\BlueprintNotFoundException;
+use StackFormation\Exception\MissingEnvVarException;
 use StackFormation\Exception\TagNotFoundException;
 
 class BlueprintFactory {
@@ -71,8 +72,8 @@ class BlueprintFactory {
         foreach ($this->config->getBlueprintNames() as $blueprintName) {
             try {
                 $effectiveStackName = $this->getBlueprint($blueprintName)->getStackName();
-            } catch (\Exception $e) {
-                $effectiveStackName = '[Missing env var] Error: ' . $e->getMessage();
+            } catch (MissingEnvVarException $e) {
+                $effectiveStackName = '<fg=red>[Missing env var "'.$e->getEnvVar().'"]</>';
             }
             $label = $blueprintName;
 

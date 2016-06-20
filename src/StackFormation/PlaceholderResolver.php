@@ -3,6 +3,7 @@
 namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\Exception\MissingEnvVarException;
 
 class PlaceholderResolver {
 
@@ -84,7 +85,7 @@ class PlaceholderResolver {
             function ($matches) use ($exceptionMessageAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 $value = getenv($matches[1]);
                 if (!$value) {
-                    throw new \Exception("Environment variable '{$matches[1]}' not found$exceptionMessageAppendix");
+                    throw new MissingEnvVarException($matches[1], $exceptionMessageAppendix);
                 }
                 $this->dependencyTracker->trackEnvUsage($matches[1], false, $value, $sourceBlueprint, $sourceType, $sourceKey);
                 return getenv($matches[1]);
