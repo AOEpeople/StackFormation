@@ -12,7 +12,10 @@ blueprints:
     tags:
       TagFoo: TagBar
 
-
   - stackname: 'fixture2'
     template: 'dummy.template'
 
+  - stackname: 'fixture3'
+    template: 'dummy.template'
+    tags:
+      TagFoo: '{env:Foo}'

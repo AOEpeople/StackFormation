@@ -84,4 +84,18 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         ];
     }
 
+
+
+    /**
+     * @test
+     */
+    public function getUnsresolvedParameter()
+    {
+        $blueprint = $this->getMockedBlueprint([ 'parameters' => [
+            'Foo' => '{env:DONTRESOVLE}'
+        ]]);
+        $parameters = $blueprint->getParameters(false, true);
+        $this->assertEquals('{env:DONTRESOVLE}', $parameters['Foo']);
+    }
+
 }

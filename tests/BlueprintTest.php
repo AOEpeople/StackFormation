@@ -69,4 +69,49 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('b', $parameters['CondValue']);
     }
 
+    /**
+     * @test
+     */
+    public function getFlattenedTags()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.1.yml']);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true, true);
+        $this->assertArrayHasKey('TagFoo', $blueprintTags);
+        $this->assertEquals('TagBar', $blueprintTags['TagFoo']);
+    }
+
+    /**
+     * @test
+     */
+    public function getUnflattenedTags()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.1.yml']);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true, false);
+        $this->assertEquals([['Key' => 'TagFoo', 'Value' => 'TagBar']], $blueprintTags);
+    }
+
+    /**
+     * @test
+     */
+    public function getTagsWithResolvedPlaceholder()
+    {
+        $value = 'Value_'.time();
+        putenv('Foo='.$value);
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.1.yml']);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(true, true);
+        $this->assertEquals($value, $blueprintTags['TagFoo']);
+    }
+
+    /**
+     * @test
+     */
+    public function getTagsWithUnresolvedPlaceholder()
+    {
+        $value = 'Value_'.time();
+        putenv('Foo='.$value);
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.1.yml']);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(false, true);
+        $this->assertEquals('{env:Foo}', $blueprintTags['TagFoo']);
+    }
+
 }
