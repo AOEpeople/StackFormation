@@ -19,3 +19,11 @@ blueprints:
     template: 'dummy.template'
     tags:
       TagFoo: '{env:Foo}'
+
+  - stackname: 'fixture4'
+    template: 'dummy.template'
+    Capabilities: 'FOO'
+
+  - stackname: 'fixture5'
+    template: 'dummy.template'
+    Capabilities: 'FOO,BAR'

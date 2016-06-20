@@ -98,4 +98,38 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('{env:DONTRESOVLE}', $parameters['Foo']);
     }
 
+
+    /**
+     * @test
+     */
+    public function basePathNotSet()
+    {
+        $this->setExpectedException('Exception', "No basepath set");
+        $blueprint = $this->getMockedBlueprint([]);
+        $basePath = $blueprint->getBasePath();
+    }
+
+
+    /**
+     * @test
+     */
+    public function invalidBasePath()
+    {
+        $this->setExpectedException('Exception', "Invalid basepath '/does/not/exist'");
+        $blueprint = $this->getMockedBlueprint(['basepath' => '/does/not/exist']);
+        $basePath = $blueprint->getBasePath();
+    }
+
+
+    /**
+     * @test
+     */
+    public function getBasePath()
+    {
+        $blueprint = $this->getMockedBlueprint(['basepath' => FIXTURE_ROOT.'Config']);
+        $basePath = $blueprint->getBasePath();
+        $this->assertEquals(FIXTURE_ROOT.'Config', $basePath);
+    }
+
+
 }
