@@ -33,11 +33,6 @@ class Helper
         return $found;
     }
 
-    public static function isValidArn($arn)
-    {
-        return preg_match('/a-zA-Z][-a-zA-Z0-9]*|arn:[-a-zA-Z0-9:/._+]*/', $arn);
-    }
-
     public static function extractMessage(\Aws\CloudFormation\Exception\CloudFormationException $exception)
     {
         $message = (string)$exception->getResponse()->getBody();
