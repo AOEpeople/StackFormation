@@ -259,8 +259,7 @@ class Blueprint {
             $reference = base64_encode($encodedValues);
         }
         if (strlen($reference) > 255) {
-            $reference = '';
-            // throw new \Exception('Blueprint reference too long (even after compression): ' . strlen($reference) . ' chars');
+            throw new \Exception('Blueprint reference too long (even after compression): ' . strlen($reference) . ' chars');
         }
         return $reference;
     }

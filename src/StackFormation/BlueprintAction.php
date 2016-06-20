@@ -88,10 +88,14 @@ class BlueprintAction {
         }
 
         // this is how we reference a stack back to its blueprint
-        $arguments['Tags'][] = [
-            'Key' => 'stackformation:blueprint',
-            'Value' => $blueprint->getBlueprintReference()
-        ];
+        try {
+            $arguments['Tags'][] = [
+                'Key' => 'stackformation:blueprint',
+                'Value' => $blueprint->getBlueprintReference()
+            ];
+        } catch (\Exception $e) {
+            // TODO: ignoring this for now...
+        }
 
         Helper::validateTags($arguments['Tags']);
 
