@@ -124,7 +124,7 @@ class Blueprint {
             if (is_null($parameterValue)) {
                 throw new \Exception("Parameter $parameterKey is null.");
             }
-            if (!is_string($parameterValue)) {
+            if (!is_scalar($parameterValue)) {
                 throw new \Exception('Invalid type for value');
             }
 
