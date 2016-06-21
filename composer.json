@@ -30,7 +30,8 @@
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^2.4",
-        "phpunit/phpunit": "~4.0"
+        "phpunit/phpunit": "~4.0",
+        "codeclimate/php-test-reporter": "dev-master"
     },
     "autoload": {
         "psr-4": {
