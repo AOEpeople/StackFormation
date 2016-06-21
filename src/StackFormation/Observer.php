@@ -92,10 +92,10 @@ class Observer
                                         $res['output']
                                     );
                                 } catch (FileNotFoundException $e) {
-                                    $logMessages = ["Could not log in to instance $instance because the pem file could not be found"];
+                                    $logMessages = ["Could not log in to instance '$instanceId' because the pem file could not be found"];
                                 }
                             } else {
-                                $logMessages = ["Could not find instance $instance"];
+                                $logMessages = ["Could not find instance '$instanceId'"];
                             }
                         }
                     }
