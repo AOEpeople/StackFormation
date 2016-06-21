@@ -37,7 +37,8 @@ abstract class AbstractResource
                 return null;
             }
         }
-        throw new \Exception('Invalid method');
+        $class = get_class($this);
+        throw new \Exception("Invalid method '$method' (class: $class)");
     }
 
     public function getAssocTags()
