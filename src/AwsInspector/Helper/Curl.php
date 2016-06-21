@@ -24,18 +24,12 @@ class Curl
         $this->doRequest();
     }
 
-    protected function getHeaderParams() {
-        $params=[];
-        foreach ($this->headers as $header) {
-            $params[] = "--header '$header'";
-        }
-        return implode(' ', $params);
-    }
-
     protected function getCurlCommand() {
         $command = [];
         $command[] = 'curl';
-        $command[] = $this->getHeaderParams();
+        foreach ($this->headers as $header) {
+            $command[] = "--header '$header'";
+        }
         $command[] = '--insecure';
         $command[] = '--silent';
         if ($this->maxTime) {
@@ -132,7 +126,15 @@ class Curl
         return $this->responseBody;
     }
 
-    public function getCurleMap()
+    protected function getCurlError($exitCode)
+    {
+        $map = $this->getCurleMap();
+        $errorMessage = isset($map[$exitCode]) ? $map[$exitCode] : 'undefined';
+        $errorMessage .= ' (Code: ' . $exitCode . ')';
+        return $errorMessage;
+    }
+
+    protected function getCurleMap()
     {
         $map = [];
         $constants = get_defined_constants(true);
@@ -143,14 +145,6 @@ class Curl
             }
         }
         return $map;
-    }
-
-    public function getCurlError($exitCode)
-    {
-        $map = $this->getCurleMap();
-        $errorMessage = isset($map[$exitCode]) ? $map[$exitCode] : 'undefined';
-        $errorMessage .= ' (Code: ' . $exitCode . ')';
-        return $errorMessage;
     }
 
 }
