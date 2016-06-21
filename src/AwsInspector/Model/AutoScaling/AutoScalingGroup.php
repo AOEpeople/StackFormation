@@ -24,8 +24,6 @@ namespace AwsInspector\Model\AutoScaling;
  * @method getTags()
  * @method getTerminationPolicies()
  * @method getNewInstancesProtectedFromScaleIn()
-
- *
  */
 class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
 {
@@ -41,30 +39,8 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
         'AddToLoadBalancer'
     ];
 
-    //protected $tags;
-    //
-    //public function getTags()
-    //{
-    //    if (is_null($this->tags)) {
-    //        $elbClient = \AwsInspector\SdkFactory::getClient('ElasticLoadBalancing');
-    //        /* @var $elbClient \Aws\ElasticLoadBalancing\ElasticLoadBalancingClient */
-    //        $result = $elbClient->describeTags(['LoadBalancerNames' => [$this->getLoadBalancerName()]]);
-    //        $this->tags = $result->search('TagDescriptions[0].Tags');
-    //    }
-    //    return $this->tags;
-    //}
-
     public function attachLoadBalancers(array $loadBalancers) {
-        $loadBalancerNames = [];
-        foreach ($loadBalancers as $loadBalancer) {
-            if (is_string($loadBalancer)) {
-                $loadBalancerNames[] = $loadBalancer;
-            } elseif (is_object($loadBalancer) && $loadBalancer instanceof \AwsInspector\Model\Elb\Elb) {
-                $loadBalancerNames[] = $loadBalancer->getLoadBalancerName();
-            } else {
-                throw new \InvalidArgumentException('Argument must be an array of strings or \AwsInspector\Model\Elb\Elb objects');
-            }
-        }
+        $loadBalancerNames = $this->validateElbParam($loadBalancers);
         $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
         $result = $asgClient->attachLoadBalancers([
             'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
@@ -74,6 +50,16 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
     }
 
     public function detachLoadBalancers(array $loadBalancers) {
+        $loadBalancerNames = $this->validateElbParam($loadBalancers);
+        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+        $result = $asgClient->detachLoadBalancers([
+            'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
+            'LoadBalancerNames' => $loadBalancerNames,
+        ]);
+        return $result;
+    }
+
+    protected function validateElbParam(array $loadBalancers) {
         $loadBalancerNames = [];
         foreach ($loadBalancers as $loadBalancer) {
             if (is_string($loadBalancer)) {
@@ -84,12 +70,7 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
                 throw new \InvalidArgumentException('Argument must be an array of strings or \AwsInspector\Model\Elb\Elb objects');
             }
         }
-        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
-        $result = $asgClient->detachLoadBalancers([
-            'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
-            'LoadBalancerNames' => $loadBalancerNames,
-        ]);
-        return $result;
+        return $loadBalancerNames;
     }
 
     public function suspendProcesses($processes) {
@@ -106,7 +87,7 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
         }
 
         $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
-        $result = $asgClient->suspendProcesses([
+        $asgClient->suspendProcesses([
             'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
             'ScalingProcesses' => $processes,
         ]);
