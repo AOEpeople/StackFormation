@@ -9,11 +9,13 @@ branches:
     - /^(\d+\.)+\d+$/
 before_script:
   #- curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-  - composer install
+  - composer install --no-progress --no-interaction
 script:
   # Code Style
   #- php phpcs.phar --standard=./phpcs.xml --encoding=utf-8 --report-width=180 ./src
   - phpunit --debug --coverage-clover build/logs/clover.xml --log-junit build/logs/junit.xml
+after_script:
+  - vendor/bin/test-reporter
 notifications:
   email:
     recipients: [ travisci@fabrizio-branca.de ]
