@@ -55,6 +55,12 @@ class Connection
      */
     public function __construct($username, $host, PrivateKey $privateKey = null, \AwsInspector\Model\Ec2\Instance $jumpHost = null, $multiplex=false)
     {
+        if (empty($username)) {
+            throw new \InvalidArgumentException("Username can't be empty");
+        }
+        if (empty($host)) {
+            throw new \InvalidArgumentException("Host can't be empty");
+        }
         $this->username = $username;
         $this->host = $host;
         $this->privateKey = $privateKey;
