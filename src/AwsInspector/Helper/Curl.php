@@ -69,6 +69,9 @@ class Curl
         if ($result['returnVar'] != 0) {
             throw new \Exception('Curl error: ' . $this->getCurlError($result['returnVar']));
         }
+        if (!isset($result['output'])) {
+            throw new \Exception('No output found');
+        }
 
         // the command FIRST returns the body and THEN the headers (I tried many different ways and no matter
         // what's redirected to what curl alwyas seems to dump the headers last
