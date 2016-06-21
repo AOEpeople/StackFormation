@@ -5,6 +5,8 @@
 **Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor**
 
 [![Build Status](https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master)](https://travis-ci.org/AOEpeople/StackFormation)
+[![Code Climate](https://codeclimate.com/github/AOEpeople/StackFormation/badges/gpa.svg)](https://codeclimate.com/github/AOEpeople/StackFormation)
+[![Test Coverage](https://codeclimate.com/github/AOEpeople/StackFormation/badges/coverage.svg)](https://codeclimate.com/github/AOEpeople/StackFormation/coverage)
 
 Author: 
  - [Fabrizio Branca](https://twitter.com/fbrnc)
