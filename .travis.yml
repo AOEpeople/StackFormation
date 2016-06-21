@@ -13,7 +13,7 @@ before_script:
 script:
   # Code Style
   #- php phpcs.phar --standard=./phpcs.xml --encoding=utf-8 --report-width=180 ./src
-  - phpunit --debug
+  - phpunit --debug --coverage-clover build/logs/clover.xml --log-junit build/logs/junit.xml
 notifications:
   email:
     recipients: [ travisci@fabrizio-branca.de ]
