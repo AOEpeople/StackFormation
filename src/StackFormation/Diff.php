@@ -91,11 +91,7 @@ class Diff
             }
             $parametersStack = $this->stack->getParameters();
             $parametersBlueprint = $this->blueprint->getParameters(true, true);
-            if ($this->parametersAreEqual($parametersStack, $parametersBlueprint)) {
-                $tmp['parameters'] = "<fg=green>equal</>";
-            } else {
-                $tmp['parameters'] = "<fg=red>different</>";
-            }
+            $tmp['parameters'] = $this->parametersAreEqual($parametersStack, $parametersBlueprint) ? "<fg=green>equal</>" : "<fg=red>different</>";
 
             // template
             if (!$this->output->isQuiet()) {
@@ -106,12 +102,7 @@ class Diff
 
             $templateStack = $this->normalizeJson($templateStack);
             $templateBlueprint = $this->normalizeJson($templateBlueprint);
-
-            if ($templateStack === $templateBlueprint) {
-                $tmp['template'] = "<fg=green>equal</>";
-            } else {
-                $tmp['template'] = "<fg=red>different</>";
-            }
+            $tmp['template'] = $templateStack === $templateBlueprint ? "<fg=green>equal</>" : "<fg=red>different</>";
         } catch (CloudFormationException $e) {
             $tmp['parameters'] = 'Stack not found';
             $tmp['template'] = 'Stack not found';
@@ -132,32 +123,32 @@ class Diff
         }
     }
     
-    protected function parametersAreEqual(array $a, array $b)
+    protected function parametersAreEqual(array $paramA, array $paramB)
     {
         // skip password fields
-        while (($passWordKeyInA = array_search('****', $a)) !== false) {
-            unset($a[$passWordKeyInA]);
-            unset($b[$passWordKeyInA]);
+        while (($passWordKeyInA = array_search('****', $paramA)) !== false) {
+            unset($paramA[$passWordKeyInA]);
+            unset($paramB[$passWordKeyInA]);
         }
-        while (($passWordKeyInB = array_search('****', $b)) !== false) {
-            unset($a[$passWordKeyInB]);
-            unset($b[$passWordKeyInB]);
+        while (($passWordKeyInB = array_search('****', $paramB)) !== false) {
+            unset($paramA[$passWordKeyInB]);
+            unset($paramB[$passWordKeyInB]);
         }
 
-        foreach ($a as $key => $value) {
-            if (isset($b[$key]) && $a[$key] != $b[$key]) {
+        foreach ($paramA as $key => $value) {
+            if (isset($paramB[$key]) && $paramA[$key] != $paramB[$key]) {
                 // try removing timestamps
-                $normalizedValueA = preg_replace('/1[0-9]{9}/', '{tstamp}', $a[$key]);
-                $normalizedValueB = preg_replace('/1[0-9]{9}/', '{tstamp}', $b[$key]);
+                $normalizedValueA = preg_replace('/1[0-9]{9}/', '{tstamp}', $paramA[$key]);
+                $normalizedValueB = preg_replace('/1[0-9]{9}/', '{tstamp}', $paramB[$key]);
                 // and check again
                 if ($normalizedValueA == $normalizedValueB) {
-                    unset($a[$key]);
-                    unset($b[$key]);
+                    unset($paramA[$key]);
+                    unset($paramB[$key]);
                 }
             }
         }
 
-        return $this->arrayToString($a) == $this->arrayToString($b);
+        return $this->arrayToString($paramA) == $this->arrayToString($paramB);
     }
 
     protected function arrayToString(array $a)
