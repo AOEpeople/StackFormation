@@ -59,6 +59,41 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
         return $result;
     }
 
+    public function suspendProcesses($processes='all') {
+        $processes = $this->validateProcessesParam($processes);
+        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+        $asgClient->suspendProcesses([
+            'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
+            'ScalingProcesses' => $processes,
+        ]);
+        // will throw exception if it didn't work
+    }
+
+    public function resumeProcesses($processes='all') {
+        $processes = $this->validateProcessesParam($processes);
+        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+        $asgClient->resumeProcesses([
+            'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
+            'ScalingProcesses' => $processes,
+        ]);
+        // will throw exception if it didn't work
+    }
+
+    protected function validateProcessesParam($processes) {
+        if (is_string($processes) && $processes == 'all') {
+            $processes = $this->availableProcesses;
+        }
+        if (!is_array($processes)) {
+            throw new \InvalidArgumentException('Argument must be "all" or an array of processes');
+        }
+        foreach ($processes as $process) {
+            if (!in_array($process, $this->availableProcesses)) {
+                throw new \InvalidArgumentException("Process '$processes' is invalid'");
+            }
+        }
+        return $processes;
+    }
+
     protected function validateElbParam(array $loadBalancers) {
         $loadBalancerNames = [];
         foreach ($loadBalancers as $loadBalancer) {
@@ -71,48 +106,6 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
             }
         }
         return $loadBalancerNames;
-    }
-
-    public function suspendProcesses($processes) {
-        if (is_string($processes) && $processes == 'all') {
-            $processes = $this->availableProcesses;
-        }
-        if (!is_array($processes)) {
-            throw new \InvalidArgumentException('Argument must be "all" or an array of processes');
-        }
-        foreach ($processes as $process) {
-            if (!in_array($process, $this->availableProcesses)) {
-                throw new \InvalidArgumentException("Process '$processes' is invalid'");
-            }
-        }
-
-        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
-        $asgClient->suspendProcesses([
-            'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
-            'ScalingProcesses' => $processes,
-        ]);
-        // will throw exception if it didn't work
-    }
-
-    public function resumeProcesses($processes) {
-        if (is_string($processes) && $processes == 'all') {
-            $processes = $this->availableProcesses;
-        }
-        if (!is_array($processes)) {
-            throw new \InvalidArgumentException('Argument must be "all" or an array of processes');
-        }
-        foreach ($processes as $process) {
-            if (!in_array($process, $this->availableProcesses)) {
-                throw new \InvalidArgumentException("Process '$processes' is invalid'");
-            }
-        }
-
-        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
-        $result = $asgClient->resumeProcesses([
-            'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
-            'ScalingProcesses' => $processes,
-        ]);
-        // will throw exception if it didn't work
     }
 
 }
