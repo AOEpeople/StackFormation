@@ -44,15 +44,15 @@ class PlaceholderResolver {
 
         $originalString = $string;
 
-        $exceptionMessageAppendix = $this->getExceptionMessageAppendix($sourceBlueprint, $sourceType, $sourceKey);
+        $exceptionMsgAppendix = $this->getExceptionMessageAppendix($sourceBlueprint, $sourceType, $sourceKey);
 
-        $string = $this->resolveEnv($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMessageAppendix);
+        $string = $this->resolveEnv($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
         $string = $this->resolveEnvWithFallback($string, $sourceBlueprint, $sourceType, $sourceKey);
-        $string = $this->resolveVar($string, $sourceBlueprint, $exceptionMessageAppendix);
+        $string = $this->resolveVar($string, $sourceBlueprint, $exceptionMsgAppendix);
         $string = $this->resolveTstamp($string);
-        $string = $this->resolveOutput($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMessageAppendix);
-        $string = $this->resolveResource($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMessageAppendix);
-        $string = $this->resolveParameter($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMessageAppendix);
+        $string = $this->resolveOutput($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
+        $string = $this->resolveResource($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
+        $string = $this->resolveParameter($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
         $string = $this->resolveClean($string);
 
         // recursively continue until everything is replaced
@@ -75,17 +75,17 @@ class PlaceholderResolver {
      * @param Blueprint $sourceBlueprint
      * @param $sourceType
      * @param $sourceKey
-     * @param $exceptionMessageAppendix
+     * @param $exceptionMsgAppendix
      * @return mixed
      */
-    protected function resolveEnv($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMessageAppendix)
+    protected function resolveEnv($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMsgAppendix)
     {
         $string = preg_replace_callback(
             '/\{env:([^:\}\{]+?)\}/',
-            function ($matches) use ($exceptionMessageAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
+            function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 $value = getenv($matches[1]);
                 if (!$value) {
-                    throw new MissingEnvVarException($matches[1], $exceptionMessageAppendix);
+                    throw new MissingEnvVarException($matches[1], $exceptionMsgAppendix);
                 }
                 $this->dependencyTracker->trackEnvUsage($matches[1], false, $value, $sourceBlueprint, $sourceType, $sourceKey);
                 return getenv($matches[1]);
@@ -124,20 +124,20 @@ class PlaceholderResolver {
      *
      * @param $string
      * @param Blueprint $sourceBlueprint
-     * @param $exceptionMessageAppendix
+     * @param $exceptionMsgAppendix
      * @return mixed
      */
-    protected function resolveVar($string, Blueprint $sourceBlueprint=null, $exceptionMessageAppendix)
+    protected function resolveVar($string, Blueprint $sourceBlueprint=null, $exceptionMsgAppendix)
     {
         $string = preg_replace_callback(
             '/\{var:([^:\}\{]+?)\}/',
-            function ($matches) use ($sourceBlueprint, $exceptionMessageAppendix) {
+            function ($matches) use ($sourceBlueprint, $exceptionMsgAppendix) {
                 $vars = $this->config->getGlobalVars();
                 if ($sourceBlueprint) {
                     $vars = array_merge($vars, $sourceBlueprint->getVars());
                 }
                 if (!isset($vars[$matches[1]])) {
-                    throw new \Exception("Variable '{$matches[1]}' not found$exceptionMessageAppendix");
+                    throw new \Exception("Variable '{$matches[1]}' not found$exceptionMsgAppendix");
                 }
                 return $vars[$matches[1]];
             },
@@ -169,20 +169,20 @@ class PlaceholderResolver {
      * @param Blueprint $sourceBlueprint
      * @param $sourceType
      * @param $sourceKey
-     * @param $exceptionMessageAppendix
+     * @param $exceptionMsgAppendix
      * @return mixed
      */
-    protected function resolveOutput($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMessageAppendix)
+    protected function resolveOutput($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMsgAppendix)
     {
         $string = preg_replace_callback(
             '/\{output:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($exceptionMessageAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
+            function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('output', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
                     return $this->stackFactory->getStackOutput($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMessageAppendix (CloudFormation error: $extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -197,20 +197,20 @@ class PlaceholderResolver {
      * @param Blueprint $sourceBlueprint
      * @param $sourceType
      * @param $sourceKey
-     * @param $exceptionMessageAppendix
+     * @param $exceptionMsgAppendix
      * @return mixed
      */
-    protected function resolveResource($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMessageAppendix)
+    protected function resolveResource($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMsgAppendix)
     {
         $string = preg_replace_callback(
             '/\{resource:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($exceptionMessageAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
+            function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('resource', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
                     return $this->stackFactory->getStackResource($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMessageAppendix (CloudFormation error: $extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -225,20 +225,20 @@ class PlaceholderResolver {
      * @param Blueprint $sourceBlueprint
      * @param $sourceType
      * @param $sourceKey
-     * @param $exceptionMessageAppendix
+     * @param $exceptionMsgAppendix
      * @return mixed
      */
-    protected function resolveParameter($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMessageAppendix)
+    protected function resolveParameter($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMsgAppendix)
     {
         $string = preg_replace_callback(
             '/\{parameter:([^:\}\{]+?):([^:\}\{]+?)\}/',
-            function ($matches) use ($exceptionMessageAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
+            function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('parameter', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
                     return $this->stackFactory->getStackParameter($matches[1], $matches[2]);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
-                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMessageAppendix (CloudFormation error: $extractedMessage)");
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
                 }
             },
             $string
@@ -274,23 +274,14 @@ class PlaceholderResolver {
      */
     protected function getExceptionMessageAppendix(Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null)
     {
-        $exceptionMessageAppendix = [];
-        if ($sourceBlueprint) {
-            $exceptionMessageAppendix[] = 'Blueprint: ' . $sourceBlueprint->getName();
+        $tmp = [];
+        if ($sourceBlueprint) { $tmp[] = 'Blueprint: ' . $sourceBlueprint->getName(); }
+        if ($sourceType) { $tmp[] = 'Type:' . $sourceType; }
+        if ($sourceKey) { $tmp[] = 'Key:' . $sourceKey; }
+        if (count($tmp)) {
+            return ' (' . implode(', ', $tmp) . ')';
         }
-        if ($sourceType) {
-            $exceptionMessageAppendix[] = 'Type:' . $sourceType;
-        }
-        if ($sourceKey) {
-            $exceptionMessageAppendix[] = 'Key:' . $sourceKey;
-        }
-        if (count($exceptionMessageAppendix)) {
-            $exceptionMessageAppendix = ' (' . implode(', ', $exceptionMessageAppendix) . ')';
-            return $exceptionMessageAppendix;
-        } else {
-            $exceptionMessageAppendix = '';
-            return $exceptionMessageAppendix;
-        }
+        return '';
     }
 
 }
