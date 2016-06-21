@@ -85,7 +85,7 @@ class Connection
         }
 
         $parts[] = '-o ConnectTimeout=5';
-        //$parts[] = '-o LogLevel=QUIET';
+        $parts[] = '-o LogLevel=ERROR';
         $parts[] = '-o StrictHostKeyChecking=no';
         $parts[] = '-o UserKnownHostsFile=/dev/null'; // avoid "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"
         // $parts[] = '-t'; // Force pseudo-tty allocation.
@@ -99,9 +99,13 @@ class Connection
      */
     public static function closeMuxConnections()
     {
-        foreach (self::$multiplexedConnections as $key => $connection) {
-            exec("ssh -O stop -o LogLevel=QUIET -S $connection > /dev/null 2>&1");
-            unset(self::$multiplexedConnections[$key]);
+        $count = count(self::$multiplexedConnections);
+        if ($count) {
+            echo "Closing $count multiplexed connections...\n";
+            foreach (self::$multiplexedConnections as $key => $connection) {
+                exec("ssh -O stop -o LogLevel=QUIET -S $connection > /dev/null 2>&1");
+                unset(self::$multiplexedConnections[$key]);
+            }
         }
     }
 

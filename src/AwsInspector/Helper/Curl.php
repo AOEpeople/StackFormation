@@ -2,6 +2,8 @@
 
 namespace AwsInspector\Helper;
 
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+
 class Curl
 {
 
@@ -30,7 +32,7 @@ class Curl
         return implode(' ', $params);
     }
 
-    protected function getCurlCommand($params=[]) {
+    protected function getCurlCommand() {
         $command = [];
         $command[] = 'curl';
         $command[] = $this->getHeaderParams();
@@ -39,38 +41,47 @@ class Curl
         if ($this->maxTime) {
             $command[] = '--max-time '.$this->maxTime;
         }
-        $command = array_merge($command, $params);
+        $command[] = '--dump-header /dev/stdout';
+        $command[] = escapeshellarg($this->url);
         return implode(' ', $command);
     }
 
-    protected function parseHeaders($tmpfile) {
-        $file = file($tmpfile);
-        $this->responseStatus = trim(array_shift($file));
-        foreach ($file as $line) {
-            $line = trim($line);
-            if (empty($line)) {
-                return;
-            }
-            if (strpos($line, ':') === false) {
-                throw new \Exception('Header without colon found: ' . $line);
-            }
-            list($headername, $headervalue) = explode(":", $line, 2);
-            $this->responseHeaders[trim($headername)] = trim($headervalue);
+    protected function parseHeader($line) {
+        $line = trim($line);
+        if (empty($line)) {
+            return;
         }
+        if (strpos($line, ':') === false) {
+            throw new \Exception('Header without colon found: ' . $line);
+        }
+        list($headername, $headervalue) = explode(":", $line, 2);
+        $headername = trim($headername);
+        if (isset($this->responseHeaders[$headername])) {
+            throw new \Exception("Duplicate header '$headername' found'");
+        }
+        $this->responseHeaders[$headername] = trim($headervalue);
     }
 
     public function doRequest() {
-        $tmpfile = tempnam(sys_get_temp_dir(), 'curl_headerdump_');
-        $command = $this->getCurlCommand([
-            '--dump-header ' . $tmpfile,
-            escapeshellarg($this->url)
-        ]);
+        $command = $this->getCurlCommand();
+
         $result = $this->connection->exec($command);
         if ($result['returnVar'] != 0) {
             throw new \Exception('Curl error: ' . $this->getCurlError($result['returnVar']));
         }
-        $this->parseHeaders($tmpfile);
-        unlink($tmpfile);
+
+        // the command FIRST returns the body and THEN the headers (I tried many different ways and no matter
+        // what's redirected to what curl alwyas seems to dump the headers last
+        do {
+            $line = array_pop($result['output']);
+            $httpLine = (strpos($line, 'HTTP/') === 0);
+            if ($httpLine) {
+                $this->responseStatus = $line;
+            } elseif (!empty($line)) {
+                $this->parseHeader($line);
+            }
+        } while(!$httpLine);
+
         $this->responseBody = implode("\n", $result['output']);
         return $this;
     }
@@ -84,6 +95,9 @@ class Curl
     }
 
     public function getResponseCode() {
+        if (empty($this->responseStatus)) {
+            throw new \Exception('No response status found');
+        }
         $matches = [];
         preg_match('|HTTP/\d\.\d\s+(\d+)\s+.*|', $this->responseStatus, $matches);
         return $matches[1];
