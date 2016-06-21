@@ -56,10 +56,16 @@ class Curl
         }
         list($headername, $headervalue) = explode(":", $line, 2);
         $headername = trim($headername);
+        $headervalue = trim($headervalue);
         if (isset($this->responseHeaders[$headername])) {
-            throw new \Exception("Duplicate header '$headername' found'");
+            if (!is_array($this->responseHeaders[$headername])) {
+                // convert to array
+                $this->responseHeaders[$headername] = [ $this->responseHeaders[$headername] ];
+            }
+            $this->responseHeaders[$headername][] = $headervalue;
+        } else {
+            $this->responseHeaders[$headername] = $headervalue;
         }
-        $this->responseHeaders[$headername] = trim($headervalue);
     }
 
     public function doRequest() {
