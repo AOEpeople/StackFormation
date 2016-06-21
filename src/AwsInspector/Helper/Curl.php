@@ -78,12 +78,24 @@ class Curl
 
         // the command FIRST returns the body and THEN the headers (I tried many different ways and no matter
         // what's redirected to what curl alwyas seems to dump the headers last
+        $httpLine = false;
         do {
             $line = array_pop($result['output']);
-            $httpLine = (strpos($line, 'HTTP/') === 0);
-            if ($httpLine) {
-                $this->responseStatus = $line;
-            } elseif (!empty($line)) {
+
+            // yes, this is really ugly...
+            // I wish we'd be able to separate header and body in a cleaner way
+            // but we can't do this with exec(), and proc_open also doesn't make things easier
+            if (preg_match('|HTTP/\d\.\d\s+(\d+)\s+.*|', $line, $matches)) {
+                $this->responseStatus = $matches[0];
+                $httpLine = true;
+
+                // put the rest back since it belongs to the response body
+                $restOfThatLine = preg_replace('|HTTP/\d\.\d\s+(\d+)\s+.*|', '', $line);
+                if ($restOfThatLine) {
+                    array_push($result['output'], $restOfThatLine);
+                }
+            }
+            if (!$httpLine && !empty($line)) {
                 $this->parseHeader($line);
             }
         } while(!$httpLine);
