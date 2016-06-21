@@ -49,10 +49,13 @@ class Instance extends \AwsInspector\Model\AbstractResource
     public function getDefaultUsername()
     {
         if (is_null($this->username)) {
-            if ($this->getTag('inspector:user')) {
-                $this->username = $this->getTag('inspector:user');
-            } elseif (getenv('AWSINSPECTOR_DEFAULT_EC2_USER')) {
-                $this->username = getenv('AWSINSPECTOR_DEFAULT_EC2_USER');
+            if ($user = $this->getInspectorConfiguration('user')) {
+                $this->username = $user;
+            } elseif ($user = $this->getTag('inspector:user')) {
+                // deprecated!
+                $this->username = $user;
+            } elseif ($user = getenv('AWSINSPECTOR_DEFAULT_EC2_USER')) {
+                $this->username = $user;
             } else {
                 $this->username = 'ec2-user';
                 $ami = $this->getImageId();
@@ -83,17 +86,35 @@ class Instance extends \AwsInspector\Model\AbstractResource
      */
     public function getJumpHost()
     {
-        if ($jumpHostTags = $this->getTag('inspector:jump')) {
+        if ($config = $this->getInspectorConfiguration('jumptags')) {
             $ec2Repository = new Repository();
-            $tagPairs = explode(',', $jumpHostTags);
-            $tags = [];
-            foreach ($tagPairs as $tagPair) {
-                list($key, $value) = explode(':', $tagPair);
-                $tags[trim($key)] = trim($value);
-            }
-            return $ec2Repository->findEc2InstancesByTags($tags)->getFirst();
+            return $ec2Repository->findEc2InstancesByTags($config)->getFirst();
         }
         return null;
+    }
+
+    protected function getInspectorConfiguration($type)
+    {
+        $configString = $this->getTag('inspector') ? $this->getTag('inspector') : $this->getTag('inspector:jump');
+        if (!$configString) {
+            return false;
+        }
+        $tagPairs = explode(',', $configString);
+        $config = [];
+        foreach ($tagPairs as $tagPair) {
+            list($key, $value) = explode(':', $tagPair);
+            $config[trim($key)] = trim($value);
+        }
+        if ($type == 'user') {
+            return isset($config['User']) ?  $config['User'] : false;
+        }
+        if ($type == 'jumptags') {
+            if (isset($config['User'])) {
+                unset($config['User']);
+            }
+            return count($config) ? $config : false;
+        }
+        throw new \InvalidArgumentException("Invalid type: $type");
     }
 
     public function getConnectionIp()
