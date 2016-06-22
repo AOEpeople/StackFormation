@@ -28,6 +28,9 @@ class BlueprintAction {
     public function getChangeSet(Blueprint $blueprint, $verbose=true)
     {
         $arguments = $this->prepareArguments($blueprint);
+
+        $blueprint->executeBeforeScripts();
+
         if (isset($arguments['StackPolicyBody'])) {
             unset($arguments['StackPolicyBody']);
         }
@@ -51,6 +54,10 @@ class BlueprintAction {
     public function deploy(Blueprint $blueprint, $dryRun=false, StackFactory $stackFactory)
     {
         $arguments = $this->prepareArguments($blueprint);
+
+        if (!$dryRun) {
+            $blueprint->executeBeforeScripts();
+        }
 
         try {
             $stackStatus = $stackFactory->getStackStatus($blueprint->getStackName());
