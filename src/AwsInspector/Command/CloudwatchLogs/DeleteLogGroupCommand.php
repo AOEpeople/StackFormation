@@ -37,7 +37,7 @@ class DeleteLogGroupCommand extends Command
             $result = $cloudwatchLogsClient->describeLogGroups($params);
             foreach ($result->get('logGroups') as $logGroup) {
                 $name = $logGroup['logGroupName'];
-                if (preg_match('/'.$groupPattern.'/', $name)) {
+                if (preg_match('#'.$groupPattern.'#', $name)) {
                     $output->writeln('Deleting ' . $logGroup['logGroupName']);
                     $cloudwatchLogsClient->deleteLogGroup([
                         'logGroupName' => $name
