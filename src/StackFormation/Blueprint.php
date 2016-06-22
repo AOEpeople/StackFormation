@@ -52,11 +52,18 @@ class Blueprint {
         return $this->placeholderResolver->resolvePlaceholders($this->name, $this, 'stackname');
     }
 
+    public function getProfile()
+    {
+        if (isset($this->blueprintConfig['profile'])) {
+            return $this->placeholderResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
+        }
+        return false;
+    }
+
     public function enforceProfile()
     {
         // TODO: loading profiles shouldn't be done within a blueprint!
-        if (isset($this->blueprintConfig['profile'])) {
-            $profile = $this->placeholderResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
+        if ($profile = $this->getProfile()) {
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
