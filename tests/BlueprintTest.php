@@ -169,5 +169,16 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         unlink($testfile);
     }
 
+    /**
+     * @test
+     */
+    public function loadStackPolicy()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture7');
+
+        $this->assertContains('"Action" : "Update:Delete"', $blueprint->getStackPolicy());
+    }
+
 
 }
