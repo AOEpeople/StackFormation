@@ -43,6 +43,11 @@ class StackFactory {
         return $this->getStack($stackName)->getParameter($key);
     }
 
+    public function getStackStatus($stackName)
+    {
+        return $this->getStack($stackName)->getStatus();
+    }
+
     /**
      * Resolve wildcard
      *
