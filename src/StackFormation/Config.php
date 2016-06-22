@@ -79,12 +79,12 @@ class Config
         return $files;
     }
 
-    public function blueprintExists($blueprint)
+    public function blueprintExists($blueprintName)
     {
-        if (!is_string($blueprint)) {
+        if (!is_string($blueprintName)) {
             throw new \InvalidArgumentException('Invalid blueprint name');
         }
-        return isset($this->conf['blueprints'][$blueprint]);
+        return isset($this->conf['blueprints'][$blueprintName]);
     }
 
     public function getGlobalVars()
@@ -92,16 +92,12 @@ class Config
         return isset($this->conf['vars']) ? $this->conf['vars'] : [];
     }
 
-    public function getBlueprintConfig($blueprint)
+    public function getBlueprintConfig($blueprintName)
     {
-        if (!is_string($blueprint)) {
-            throw new \InvalidArgumentException('Invalid stack name');
+        if (!$this->blueprintExists($blueprintName)) {
+            throw new BlueprintNotFoundException("Blueprint '$blueprintName' not found.");
         }
-        if (!$this->blueprintExists($blueprint)) {
-            throw new BlueprintNotFoundException("Blueprint '$blueprint' not found.");
-        }
-
-        return $this->conf['blueprints'][$blueprint];
+        return $this->conf['blueprints'][$blueprintName];
     }
 
     public function getBlueprintNames()
@@ -116,6 +112,11 @@ class Config
         return '/^'.preg_replace('/\{[^\}]+?\}/', '(.*)', $blueprintName) .'$/';
     }
 
+    /**
+     * TODO: this should not be here...
+     *
+     * @return mixed
+     */
     public function getCurrentUsersAccountId()
     {
         $iamClient = SdkFactory::getClient('Iam'); /* @var $iamClient \Aws\Iam\IamClient */
