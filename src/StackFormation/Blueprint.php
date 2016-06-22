@@ -10,13 +10,13 @@ class Blueprint {
     protected $name;
     protected $blueprintConfig;
     protected $placeholderResolver;
-    protected $conditionalValueResolver;
+    protected $valueResolver;
 
     public function __construct(
         $name,
         array $blueprintConfig,
         PlaceholderResolver $placeholderResolver,
-        ConditionalValueResolver $conditionalValueResolver
+        ConditionalValueResolver $valueResolver
     )
     {
         if (!is_string($name)) {
@@ -25,7 +25,7 @@ class Blueprint {
         $this->name = $name;
         $this->blueprintConfig = $blueprintConfig;
         $this->placeholderResolver = $placeholderResolver;
-        $this->conditionalValueResolver = $conditionalValueResolver;
+        $this->valueResolver = $valueResolver;
     }
 
     public function getName()
@@ -69,7 +69,6 @@ class Blueprint {
             if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
                 echo "Using IAM instance profile\n";
             } else {
-                // TODO: dependency to AwsInspector!
                 $profileManager = new \AwsInspector\ProfileManager();
                 $profileManager->loadProfile($profile);
                 echo "Loading Profile: $profile\n";
@@ -119,7 +118,7 @@ class Blueprint {
             }
 
             if (is_array($parameterValue)) {
-                $parameterValue = $this->conditionalValueResolver->resolveConditionalValue($parameterValue, $this);
+                $parameterValue = $this->valueResolver->resolveConditionalValue($parameterValue, $this);
             }
             if (is_null($parameterValue)) {
                 throw new \Exception("Parameter $parameterKey is null.");
@@ -171,16 +170,14 @@ class Blueprint {
         return $parameters;
     }
     
-    public function getBeforeScripts($resolvePlaceholders = true)
+    public function getBeforeScripts()
     {
         $scripts = [];
         if (isset($this->blueprintConfig['before']) && is_array($this->blueprintConfig['before']) && count($this->blueprintConfig['before']) > 0) {
             $scripts = $this->blueprintConfig['before'];
         }
-        if ($resolvePlaceholders) {
-            foreach ($scripts as &$script) {
-                $script = $this->placeholderResolver->resolvePlaceholders($script, $this, 'script');
-            }
+        foreach ($scripts as &$script) {
+            $script = $this->placeholderResolver->resolvePlaceholders($script, $this, 'script');
         }
         return $scripts;
     }
@@ -205,7 +202,7 @@ class Blueprint {
     {
         if (isset($this->blueprintConfig['stackPolicy'])) {
             if (!is_file($this->blueprintConfig['stackPolicy'])) {
-                throw new \Exception('Stack policy "' . $this->blueprintConfig['stackPolicy'] . '" not found');
+                throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException('Stack policy "' . $this->blueprintConfig['stackPolicy'] . '" not found');
             }
             return file_get_contents($this->blueprintConfig['stackPolicy']);
         }
