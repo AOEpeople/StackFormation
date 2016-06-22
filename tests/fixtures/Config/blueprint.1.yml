@@ -27,3 +27,8 @@ blueprints:
   - stackname: 'fixture5'
     template: 'dummy.template'
     Capabilities: 'FOO,BAR'
+
+  - stackname: 'fixture6'
+    template: 'dummy.template'
+    before:
+    - 'echo -n "HELLO WORLD" > {env:TESTFILE}'
