@@ -42,7 +42,8 @@ class Diff
     public function diffParameters()
     {
         $parametersStack = $this->stack->getParameters();
-        $parametersBlueprint = $this->blueprint->getParameters(true, true);
+        $parametersBlueprint = $this->blueprint->getParameters(true);
+        $parametersBlueprint = Helper::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
         if ($this->parametersAreEqual($parametersStack, $parametersBlueprint)) { // normalizes passwords!
             $this->output->writeln('No changes'."\n");
             return;
@@ -90,7 +91,9 @@ class Diff
                 $this->output->writeln($this->stack->getName(). ': Comparing parameters');
             }
             $parametersStack = $this->stack->getParameters();
-            $parametersBlueprint = $this->blueprint->getParameters(true, true);
+            $parametersBlueprint = $this->blueprint->getParameters(true);
+            $parametersBlueprint = Helper::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
+
             $tmp['parameters'] = $this->parametersAreEqual($parametersStack, $parametersBlueprint) ? "<fg=green>equal</>" : "<fg=red>different</>";
 
             // template

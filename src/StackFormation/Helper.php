@@ -131,4 +131,13 @@ class Helper
         }
     }
 
+    public static function flatten(array $array, $keyKey='Key', $valueKey='Value')
+    {
+        $tmp = [];
+        foreach ($array as $item) {
+            $tmp[$item[$keyKey]] = $item[$valueKey];
+        }
+        return $tmp;
+    }
+
 }

@@ -38,7 +38,8 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         putenv('Foo=Val5');
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_value.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
-        $parameters = $blueprint->getParameters(true, true);
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertArrayHasKey('CondValue', $parameters);
         $this->assertEquals('c', $parameters['CondValue']);
     }
@@ -51,7 +52,8 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         putenv('Foo=Val1');
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_value.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
-        $parameters = $blueprint->getParameters(true, true);
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertArrayHasKey('CondValue', $parameters);
         $this->assertEquals('a', $parameters['CondValue']);
     }
@@ -64,7 +66,8 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         putenv('Foo=Val2');
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_value.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
-        $parameters = $blueprint->getParameters(true, true);
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertArrayHasKey('CondValue', $parameters);
         $this->assertEquals('b', $parameters['CondValue']);
     }
@@ -75,7 +78,8 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     public function getFlattenedTags()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
-        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true, true);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true);
+        $blueprintTags = \StackFormation\Helper::flatten($blueprintTags);
         $this->assertArrayHasKey('TagFoo', $blueprintTags);
         $this->assertEquals('TagBar', $blueprintTags['TagFoo']);
     }
@@ -86,7 +90,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     public function getUnflattenedTags()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
-        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true, false);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true);
         $this->assertEquals([['Key' => 'TagFoo', 'Value' => 'TagBar']], $blueprintTags);
     }
 
@@ -98,7 +102,8 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $value = 'Value_'.time();
         putenv('Foo='.$value);
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
-        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(true, true);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(true);
+        $blueprintTags = \StackFormation\Helper::flatten($blueprintTags);
         $this->assertEquals($value, $blueprintTags['TagFoo']);
     }
 
@@ -110,7 +115,8 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $value = 'Value_'.time();
         putenv('Foo='.$value);
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
-        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(false, true);
+        $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(false);
+        $blueprintTags = \StackFormation\Helper::flatten($blueprintTags);
         $this->assertEquals('{env:Foo}', $blueprintTags['TagFoo']);
     }
 

@@ -37,7 +37,8 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $blueprint = $this->getMockedBlueprint([ 'parameters' => [
             'Foo' => $rawParameterValue
         ]]);
-        $parameters = $blueprint->getParameters(true, true);
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertEquals($expectedResolvedValue, $parameters['Foo']);
     }
 
@@ -67,7 +68,7 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $blueprint = $this->getMockedBlueprint([ 'parameters' => [
             $invalidKey => 'asdsad'
         ]]);
-        $blueprint->getParameters(true, true);
+        $blueprint->getParameters(true);
     }
 
     public function invalidKeyProvider()
@@ -94,7 +95,8 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $blueprint = $this->getMockedBlueprint([ 'parameters' => [
             'Foo' => '{env:DONTRESOVLE}'
         ]]);
-        $parameters = $blueprint->getParameters(false, true);
+        $parameters = $blueprint->getParameters(false);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertEquals('{env:DONTRESOVLE}', $parameters['Foo']);
     }
 

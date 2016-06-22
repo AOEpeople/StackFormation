@@ -33,7 +33,7 @@ class Blueprint {
         return $this->name;
     }
 
-    public function getTags($resolvePlaceholders=true, $flatten=false)
+    public function getTags($resolvePlaceholders=true)
     {
         $tags = [];
         if (isset($this->blueprintConfig['tags'])) {
@@ -44,15 +44,6 @@ class Blueprint {
                 $tags[] = ['Key' => $key, 'Value' => $value];
             }
         }
-
-        if ($flatten) {
-            $tmp = [];
-            foreach ($tags as $tag) {
-                $tmp[$tag['Key']] = $tag['Value'];
-            }
-            return $tmp;
-        }
-
         return $tags;
     }
 
@@ -101,7 +92,7 @@ class Blueprint {
         return $this->blueprintConfig;
     }
 
-    public function getParameters($resolvePlaceholders=true, $flatten=false)
+    public function getParameters($resolvePlaceholders=true)
     {
         $parameters = [];
 
@@ -157,14 +148,6 @@ class Blueprint {
             } else {
                 $parameters[] = $tmp;
             }
-        }
-
-        if ($flatten) {
-            $tmp = [];
-            foreach ($parameters as $parameter) {
-                $tmp[$parameter['ParameterKey']] = $parameter['ParameterValue'];
-            }
-            return $tmp;
         }
 
         return $parameters;
