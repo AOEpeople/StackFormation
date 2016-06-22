@@ -2,8 +2,6 @@
 
 namespace AwsInspector\Model\AutoScaling;
 
-use AwsInspector\Model\Collection;
-
 class Repository
 {
 
@@ -36,15 +34,13 @@ class Repository
      */
     public function findAutoScalingGroupsByTags(array $tags = array())
     {
-        $autoScalingGroups = $this->findAutoScalingGroups();
-        $matchingElbs = new Collection();
-        foreach ($autoScalingGroups as $autoScalingGroup) { /* @var $autoScalingGroup AutoScalingGroup */
-            /* @var $autoScalingGroup AutoScalingGroup */
+        $collection = new \AwsInspector\Model\Collection();
+        foreach ($this->findAutoScalingGroups() as $autoScalingGroup) { /* @var $autoScalingGroup AutoScalingGroup */
             if ($autoScalingGroup->matchesTags($tags)) {
-                $matchingElbs->attach($autoScalingGroup);
+                $collection->attach($autoScalingGroup);
             }
         }
-        return $matchingElbs;
+        return $collection;
     }
 
     public function findByAutoScalingGroupName($regex)
