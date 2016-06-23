@@ -237,7 +237,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     {
         putenv('Foo='.$foo);
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_vars.yml']);
-        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional');
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional_global');
         $parameters = $blueprint->getParameters(true);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertEquals($expectedValue, $parameters['Parameter1']);
@@ -250,6 +250,21 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
             ['somethingelse', 'c'],
         ];
     }
+
+    /**
+     * @test
+     * @dataProvider testConditionalGlobalProvider
+     */
+    public function testConditionalLocalVar($foo, $expectedValue)
+    {
+        putenv('Foo='.$foo);
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_vars.yml']);
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional_local');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+        $this->assertEquals($expectedValue, $parameters['Parameter1']);
+    }
+
 
 
 }
