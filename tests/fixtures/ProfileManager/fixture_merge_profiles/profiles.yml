@@ -1,0 +1,14 @@
+profiles:
+  test-personal:
+    region: 'us-east-1'
+    access_key: 'TESTACCESSKEY1'
+    secret_key: 'TESTSECRETKEY1'
+  prod-personal:
+    region: 'us-east-1'
+    access_key: 'TESTACCESSKEY2'
+    secret_key: 'TESTSECRETKEY2'
+  test-personal-assume:
+    region: 'us-east-1'
+    access_key: 'TESTACCESSKEY3'
+    secret_key: 'TESTSECRETKEY3'
+    assume_role: 'arn:aws:iam::0123456789012:role/p-magento-iam-DeployRole'

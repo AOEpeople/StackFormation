@@ -5,40 +5,10 @@ namespace AwsInspector;
 class ProfileManager {
 
     protected $config;
+    protected $loadedFiles = [];
 
-    protected function loadFromConfig() {
-        if (!is_file('profiles.yml')) {
-            if (is_file('profiles.yml.encrypted')) {
-                if (class_exists('\Vault\Vault')) {
-                    try {
-                        $configYaml = \Vault\Vault::open('profiles.yml.encrypted');
-                    } catch (\Exception $e) {
-                        throw new \Exception('Error decrypting profiles.yml.encrypted', 0, $e);
-                    }
-                } else {
-                    throw new \Exception('Please install aoepeople/vault');
-                }
-            } else {
-                throw new \Exception('Could not find profiles.yml or profiles.yml.encrypted');
-            }
-        } else {
-            $configYaml = file_get_contents('profiles.yml');
-        }
-        $config = \Symfony\Component\Yaml\Yaml::parse($configYaml);
-        if (!isset($config['profiles'])) {
-            throw new \Exception('Could not find "profiles" key');
-        }
-        if (!is_array($config['profiles']) || count($config['profiles']) == 0) {
-            throw new \Exception('Could not find any profiles "profiles"');
-        }
-        return $config['profiles'];
-    }
-
-    protected function getConfig() {
-        if (is_null($this->config)) {
-            $this->config = $this->loadFromConfig();
-        }
-        return $this->config;
+    public function listAllProfiles() {
+        return array_keys($this->getConfig());
     }
 
     public function getProfileConfig($profile) {
@@ -49,13 +19,66 @@ class ProfileManager {
         return $config[$profile];
     }
 
-    public function listAllProfiles() {
-        return array_keys($this->getConfig());
-    }
-
     public function isValidProfile($profile) {
         $config = $this->getConfig();
         return isset($config[$profile]);
+    }
+
+    public function loadProfile($profile) {
+        foreach ($this->getEnvVars($profile) as $envVar) {
+            putenv($envVar);
+        }
+    }
+
+    public function getLoadedFiles() {
+        return $this->loadedFiles;
+    }
+
+    public function writeProfileToDotEnv($profile, $file='.env') {
+        $tmp = $this->getEnvVars($profile);
+
+        $res = file_put_contents($file, implode("\n", $tmp));
+        if ($res === false) {
+            throw new \Exception('Error while writing file .env');
+        }
+        return $file;
+    }
+
+    protected function loadFromConfig($filename='profiles.yml') {
+        if (!is_file($filename)) {
+            $encryptedFilename = $filename.'.encrypted';
+            if (is_file($encryptedFilename)) {
+                if (class_exists('\Vault\Vault')) {
+                    try {
+                        $configYaml = \Vault\Vault::open($encryptedFilename);
+                    } catch (\Exception $e) {
+                        throw new \Exception('Error decrypting '.$encryptedFilename, 0, $e);
+                    }
+                } else {
+                    throw new \Exception('Please install aoepeople/vault');
+                }
+            } else {
+                throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException("Could not find $filename or $encryptedFilename");
+            }
+        } else {
+            $this->loadedFiles[] = $filename;
+            $configYaml = file_get_contents($filename);
+        }
+        $config = \Symfony\Component\Yaml\Yaml::parse($configYaml);
+        if (!isset($config['profiles'])) {
+            throw new \Exception('Could not find "profiles" key');
+        }
+        if (!is_array($config['profiles']) || count($config['profiles']) == 0) {
+            throw new \Exception('Could not find any profiles');
+        }
+        return $config['profiles'];
+    }
+
+    protected function getConfig() {
+        if (is_null($this->config)) {
+            $this->config = $this->loadFromConfig();
+        }
+        return $this->config;
     }
 
     protected function getEnvVars($profile) {
@@ -79,22 +102,6 @@ class ProfileManager {
             $tmp[] = $mapping[$key].'='.$profileConfig[$key];
         }
         return $tmp;
-    }
-
-    public function loadProfile($profile) {
-        foreach ($this->getEnvVars($profile) as $envVar) {
-            putenv($envVar);
-        }
-    }
-
-    public function writeProfileToDotEnv($profile, $file='.env') {
-        $tmp = $this->getEnvVars($profile);
-
-        $res = file_put_contents($file, implode("\n", $tmp));
-        if ($res === false) {
-            throw new \Exception('Error while writing file .env');
-        }
-        return $file;
     }
 
 }
