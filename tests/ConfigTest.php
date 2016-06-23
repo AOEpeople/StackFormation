@@ -64,4 +64,12 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.invalid_attribute.yml']);
     }
 
+    //public function testDuplicateGlobalVar()
+    //{
+    //    $this->markTestSkipped('This is not so trivial :)');
+    //    $this->setExpectedException('Exception');
+    //    $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.duplicateglobalvar.yml']);
+    //    $vars = $config->getGlobalVars();
+    //}
+
 }

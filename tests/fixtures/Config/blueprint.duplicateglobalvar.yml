@@ -1,0 +1,5 @@
+vars:
+  GlobalFoo: GlobalBar
+  GlobalFoo: GlobalBar2
+
+blueprints:
