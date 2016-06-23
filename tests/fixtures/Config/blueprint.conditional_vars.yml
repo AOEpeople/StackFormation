@@ -1,0 +1,13 @@
+vars:
+
+  FooVar:
+    '{env:Foo}==Val1': a
+    '{env:Foo}==Val2': b
+    'default': c
+
+blueprints:
+
+  - stackname: 'fixture_var_conditional'
+    template: 'dummy.template'
+    parameters:
+      Parameter1: '{var:FooVar}'

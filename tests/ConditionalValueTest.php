@@ -1,15 +1,15 @@
 <?php
 
-class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
+class ConditionalValueTest extends PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var \StackFormation\ConditionalValueResolver
+     * @var \StackFormation\ValueResolver
      */
-    protected $conditionalValueResolver;
+    protected $valueResolver;
 
     public function setUp() {
-        $this->conditionalValueResolver = new \StackFormation\ConditionalValueResolver($this->getMockedPlaceholderResolver());
+        $this->valueResolver = $this->getMockedPlaceholderResolver();
         parent::setUp();
     }
 
@@ -22,7 +22,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
-        $placeholderResolver = new \StackFormation\PlaceholderResolver(
+        $placeholderResolver = new \StackFormation\ValueResolver(
             new \StackFormation\DependencyTracker(),
             $stackFactoryMock,
             $config
@@ -35,7 +35,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
      */
     public function defaultIsTrue()
     {
-        $this->assertTrue($this->conditionalValueResolver->isTrue('default'));
+        $this->assertTrue($this->valueResolver->isTrue('default'));
     }
 
     /**
@@ -49,7 +49,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
         if ($putenv) {
             putenv($putenv);
         }
-        $actualValue = $this->conditionalValueResolver->isTrue($key, $blueprint);
+        $actualValue = $this->valueResolver->isTrue($key, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
@@ -91,7 +91,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
      */
     public function invalidCondition($key) {
         $this->setExpectedException('Exception', 'Invalid condition');
-        $this->conditionalValueResolver->isTrue($key);
+        $this->valueResolver->isTrue($key);
     }
 
     public function invalidConditionProvider() {
@@ -114,7 +114,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
         }
         $blueprint = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprint->method('getVars')->willReturn(['BlueprintFoo' => 'BlueprintBar']);
-        $actualValue = $this->conditionalValueResolver->resolveConditionalValue($conditions, $blueprint);
+        $actualValue = $this->valueResolver->resolveConditionalValue($conditions, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
@@ -148,7 +148,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
     public function missingEnv()
     {
         $this->setExpectedException('Exception', "Environment variable 'DDD' not found");
-        $actualValue = $this->conditionalValueResolver->resolveConditionalValue(['{env:DDD}' => 13]);
+        $actualValue = $this->valueResolver->resolveConditionalValue(['{env:DDD}' => 13]);
     }
 
 }

@@ -8,7 +8,7 @@ use StackFormation\BlueprintFactory;
 use StackFormation\ConditionalValueResolver;
 use StackFormation\Config;
 use StackFormation\DependencyTracker;
-use StackFormation\PlaceholderResolver;
+use StackFormation\ValueResolver;
 use StackFormation\StackFactory;
 use StackFormation\SdkFactory;
 use Symfony\Component\Console\Helper\FormatterHelper;
@@ -38,9 +38,8 @@ abstract class AbstractCommand extends Command
         $this->stackFactory = new StackFactory($cfnClient);
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
-        $placeholderResolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory, $config);
-        $conditionalValueResolver = new ConditionalValueResolver($placeholderResolver);
-        $this->blueprintFactory = new BlueprintFactory($config, $placeholderResolver, $conditionalValueResolver);
+        $placeholderResolver = new ValueResolver($this->dependencyTracker, $this->stackFactory, $config);
+        $this->blueprintFactory = new BlueprintFactory($config, $placeholderResolver);
         $this->blueprintAction = new BlueprintAction($cfnClient);
     }
 

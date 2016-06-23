@@ -9,14 +9,12 @@ class Blueprint {
      */
     protected $name;
     protected $blueprintConfig;
-    protected $placeholderResolver;
     protected $valueResolver;
 
     public function __construct(
         $name,
         array $blueprintConfig,
-        PlaceholderResolver $placeholderResolver,
-        ConditionalValueResolver $valueResolver
+        ValueResolver $valueResolver
     )
     {
         if (!is_string($name)) {
@@ -24,7 +22,6 @@ class Blueprint {
         }
         $this->name = $name;
         $this->blueprintConfig = $blueprintConfig;
-        $this->placeholderResolver = $placeholderResolver;
         $this->valueResolver = $valueResolver;
     }
 
@@ -39,7 +36,7 @@ class Blueprint {
         if (isset($this->blueprintConfig['tags'])) {
             foreach ($this->blueprintConfig['tags'] as $key => $value) {
                 if ($resolvePlaceholders) {
-                    $value = $this->placeholderResolver->resolvePlaceholders($value, $this, 'tag', $key);
+                    $value = $this->valueResolver->resolvePlaceholders($value, $this, 'tag', $key);
                 }
                 $tags[] = ['Key' => $key, 'Value' => $value];
             }
@@ -49,17 +46,13 @@ class Blueprint {
 
     public function getStackName()
     {
-        return $this->placeholderResolver->resolvePlaceholders($this->name, $this, 'stackname');
+        return $this->valueResolver->resolvePlaceholders($this->name, $this, 'stackname');
     }
 
     public function getProfile()
     {
         if (isset($this->blueprintConfig['profile'])) {
-            $value = $this->blueprintConfig['profile'];
-            if (is_array($value)) {
-                $value = $this->valueResolver->resolveConditionalValue($value, $this);
-            }
-            $value = $this->placeholderResolver->resolvePlaceholders($value, $this, 'profile');
+            $value = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
             return $value;
         }
         return false;
@@ -120,18 +113,15 @@ class Blueprint {
                 throw new \Exception("Invalid parameter key '$parameterKey'.");
             }
 
-            if (is_array($parameterValue)) {
-                $parameterValue = $this->valueResolver->resolveConditionalValue($parameterValue, $this);
-            }
             if (is_null($parameterValue)) {
                 throw new \Exception("Parameter $parameterKey is null.");
             }
-            if (!is_scalar($parameterValue)) {
-                throw new \Exception('Invalid type for value');
-            }
 
             if ($resolvePlaceholders) {
-                $parameterValue = $this->placeholderResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
+                $parameterValue = $this->valueResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
+            }
+            if (!is_scalar($parameterValue)) {
+                throw new \Exception('Invalid type for value');
             }
 
             $tmp = [
@@ -172,7 +162,7 @@ class Blueprint {
             $scripts = $this->blueprintConfig['before'];
         }
         foreach ($scripts as &$script) {
-            $script = $this->placeholderResolver->resolvePlaceholders($script, $this, 'script');
+            $script = $this->valueResolver->resolvePlaceholders($script, $this, 'script');
         }
         return $scripts;
     }
@@ -240,7 +230,7 @@ class Blueprint {
         // this is how we reference a stack back to its blueprint
         $blueprintReference = array_merge(
             ['Name' => $this->name],
-            $this->placeholderResolver->getDependencyTracker()->getUsedEnvironmentVariables()
+            $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables()
         );
 
         $encodedValues = http_build_query($blueprintReference);

@@ -87,6 +87,15 @@ class Config
         return isset($this->conf['blueprints'][$blueprintName]);
     }
 
+    public function getGlobalVar($var)
+    {
+        $vars = $this->getGlobalVars();
+        if (!isset($vars[$var])) {
+            throw new \Exception("Variable '$var' not found");
+        }
+        return $vars[$var];
+    }
+
     public function getGlobalVars()
     {
         return isset($this->conf['vars']) ? $this->conf['vars'] : [];

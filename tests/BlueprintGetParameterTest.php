@@ -11,18 +11,16 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
-        $placeholderResolver = new \StackFormation\PlaceholderResolver(
+        $placeholderResolver = new \StackFormation\ValueResolver(
             new \StackFormation\DependencyTracker(),
             $stackFactoryMock,
             $configMock
         );
 
-        $conditionalValueResolver = new \StackFormation\ConditionalValueResolver($placeholderResolver);
-
         if (is_null($name)) {
             $name = 'blueprint_mock_'.time();
         }
-        return new \StackFormation\Blueprint($name, $blueprintConfig, $placeholderResolver, $conditionalValueResolver);
+        return new \StackFormation\Blueprint($name, $blueprintConfig, $placeholderResolver);
     }
 
     /**

@@ -9,18 +9,12 @@ use StackFormation\Exception\TagNotFoundException;
 class BlueprintFactory {
 
     protected $config;
-    protected $placeholderResolver;
-    protected $conditionalValueResolver;
+    protected $valueResolver;
 
-    public function __construct(
-        Config $config,
-        PlaceholderResolver $placeholderResolver,
-        ConditionalValueResolver $conditionalValueResolver
-    )
+    public function __construct(Config $config, ValueResolver $valueResolver)
     {
         $this->config = $config;
-        $this->placeholderResolver = $placeholderResolver;
-        $this->conditionalValueResolver = $conditionalValueResolver;
+        $this->valueResolver = $valueResolver;
     }
 
     public function getBlueprint($blueprintName)
@@ -31,8 +25,7 @@ class BlueprintFactory {
         $blueprint = new Blueprint(
             $blueprintName,
             $this->config->getBlueprintConfig($blueprintName),
-            $this->placeholderResolver,
-            $this->conditionalValueResolver
+            $this->valueResolver
         );
         return $blueprint;
     }

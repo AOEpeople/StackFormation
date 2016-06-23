@@ -9,14 +9,13 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
-        $placeholderResolver = new \StackFormation\PlaceholderResolver(
+        $placeholderResolver = new \StackFormation\ValueResolver(
             new \StackFormation\DependencyTracker(),
             $stackFactoryMock,
             $config
         );
 
-        $conditionalValueResolver = new \StackFormation\ConditionalValueResolver($placeholderResolver);
-        return new \StackFormation\BlueprintFactory($config, $placeholderResolver, $conditionalValueResolver);
+        return new \StackFormation\BlueprintFactory($config, $placeholderResolver);
     }
 
     /**
@@ -28,6 +27,11 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $blueprintVars = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getVars();
         $this->assertArrayHasKey('BlueprintFoo', $blueprintVars);
         $this->assertEquals('BlueprintBar', $blueprintVars['BlueprintFoo']);
+    }
+
+    public function testBlueprintVarOverridesGlobalVar()
+    {
+        $this->markTestIncomplete();
     }
 
     /**
@@ -218,6 +222,28 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testselectProfileConditionalProvider() {
+        return [
+            ['Val1', 'a'],
+            ['Val2', 'b'],
+            ['somethingelse', 'c'],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider testConditionalGlobalProvider
+     */
+    public function testConditionalGlobalVar($foo, $expectedValue)
+    {
+        putenv('Foo='.$foo);
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_vars.yml']);
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+        $this->assertEquals($expectedValue, $parameters['Parameter1']);
+    }
+
+    public function testConditionalGlobalProvider() {
         return [
             ['Val1', 'a'],
             ['Val2', 'b'],
