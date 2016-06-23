@@ -1,13 +1,13 @@
 profiles:
-  test-personal:
+  test1:
     region: 'us-east-1'
     access_key: 'TESTACCESSKEY1'
     secret_key: 'TESTSECRETKEY1'
-  prod-personal:
+  test2:
     region: 'us-east-1'
     access_key: 'TESTACCESSKEY2'
     secret_key: 'TESTSECRETKEY2'
-  test-personal-assume:
+  test3:
     region: 'us-east-1'
     access_key: 'TESTACCESSKEY3'
     secret_key: 'TESTSECRETKEY3'

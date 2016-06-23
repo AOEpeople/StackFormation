@@ -44,26 +44,41 @@ class ProfileManager {
         return $file;
     }
 
-    protected function loadFromConfig($filename='profiles.yml') {
-        if (!is_file($filename)) {
-            $encryptedFilename = $filename.'.encrypted';
-            if (is_file($encryptedFilename)) {
-                if (class_exists('\Vault\Vault')) {
-                    try {
-                        $configYaml = \Vault\Vault::open($encryptedFilename);
-                    } catch (\Exception $e) {
-                        throw new \Exception('Error decrypting '.$encryptedFilename, 0, $e);
-                    }
-                } else {
-                    throw new \Exception('Please install aoepeople/vault');
-                }
-            } else {
-                throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException("Could not find $filename or $encryptedFilename");
-            }
-        } else {
-            $this->loadedFiles[] = $filename;
-            $configYaml = file_get_contents($filename);
+    protected function getDecryptedFilecontent($encryptedFilename) {
+        if (!is_file($encryptedFilename)) {
+            throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException("Could not find encrypted file $encryptedFilename");
         }
+        if (!class_exists('\Vault\Vault')) {
+            throw new \Exception('Please install aoepeople/vault');
+        }
+        try {
+            return \Vault\Vault::open($encryptedFilename);
+        } catch (\Exception $e) {
+            throw new \Exception('Error decrypting '.$encryptedFilename, 0, $e);
+        }
+    }
+
+    protected function isEncryptedFile($filename) {
+        return substr($filename, -10) == '.encrypted';
+    }
+
+    protected function getEncryptedFileName($filename) {
+        return $filename . '.encrypted';
+    }
+
+    protected function getFileContent($filename) {
+        if ($this->isEncryptedFile($filename)) {
+            return $this->getDecryptedFilecontent($filename);
+        }
+        if (!is_file($filename)) {
+            // try if there's an encrpyted version of this file
+            return $this->getDecryptedFilecontent($this->getEncryptedFileName($filename));
+        }
+        return file_get_contents($filename);
+    }
+
+    protected function loadFile($filename) {
+        $configYaml = $this->getFileContent($filename);
         $config = \Symfony\Component\Yaml\Yaml::parse($configYaml);
         if (!isset($config['profiles'])) {
             throw new \Exception('Could not find "profiles" key');
@@ -71,12 +86,29 @@ class ProfileManager {
         if (!is_array($config['profiles']) || count($config['profiles']) == 0) {
             throw new \Exception('Could not find any profiles');
         }
+        $this->loadedFiles[] = $filename;
         return $config['profiles'];
+    }
+
+    protected function findAllProfileFiles()
+    {
+        $files = array_merge(
+            ['profiles.yml'],
+            glob('profiles.*.yml'),
+            glob('profiles.*.yml.encrypted')
+        );
+        return $files;
     }
 
     protected function getConfig() {
         if (is_null($this->config)) {
-            $this->config = $this->loadFromConfig();
+            $this->config = [];
+            foreach ($this->findAllProfileFiles() as $file) {
+                $this->config = array_merge(
+                    $this->config,
+                    $this->loadFile($file)
+                );
+            }
         }
         return $this->config;
     }

@@ -1,0 +1,9 @@
+profiles:
+  test1-personal:
+    region: 'us-east-1'
+    access_key: 'TESTPERSONALACCESSKEY1'
+    secret_key: 'TESTPERSONALSECRETKEY1'
+  test2-personal:
+    region: 'us-east-1'
+    access_key: 'TESTPERSONALACCESSKEY2'
+    secret_key: 'TESTPERSONALSECRETKEY2'
