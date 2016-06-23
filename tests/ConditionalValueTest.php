@@ -75,12 +75,18 @@ class ConditionalValueTest extends PHPUnit_Framework_TestCase
             ['{env:FOO}=={var:GlobalFoo}', true, 'FOO=GlobalBar'],
             ['GlobalBar=={var:{env:FOO}}', true, 'FOO=GlobalFoo'],
             ['{var:BlueprintFoo}==BlueprintBar', true],
+            ['prod~=/^prod$/', true],
+            ['prod~=/^(prod|qa)$/', true],
+            ['prd~=/^(prod|qa)$/', false],
+            ['test1~=/^test.$/', true],
         ];
         $invertedValues = [];
         foreach ($values as $value) {
-            $value[0] = str_replace('==', '!=', $value[0]);
-            $value[1] = !$value[1];
-            $invertedValues[] = $value;
+            if (strpos($value[0], '==') !== false) {
+                $value[0] = str_replace('==', '!=', $value[0]);
+                $value[1] = !$value[1];
+                $invertedValues[] = $value;
+            }
         }
         return array_merge($values, $invertedValues);
     }

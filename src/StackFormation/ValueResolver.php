@@ -316,6 +316,11 @@ class ValueResolver {
             $left = trim($left);
             $right = trim($right);
             return ($left != $right);
+        } elseif (strpos($condition, '~=') !== false) {
+            list($subject, $pattern) = explode('~=', $condition, 2);
+            $subject = trim($subject);
+            $pattern = trim($pattern);
+            return preg_match($pattern, $subject);
         } else {
             throw new \Exception('Invalid condition: ' . $condition);
         }
