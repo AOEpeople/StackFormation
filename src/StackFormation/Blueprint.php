@@ -55,7 +55,12 @@ class Blueprint {
     public function getProfile()
     {
         if (isset($this->blueprintConfig['profile'])) {
-            return $this->placeholderResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
+            $value = $this->blueprintConfig['profile'];
+            if (is_array($value)) {
+                $value = $this->valueResolver->resolveConditionalValue($value, $this);
+            }
+            $value = $this->placeholderResolver->resolvePlaceholders($value, $this, 'profile');
+            return $value;
         }
         return false;
     }

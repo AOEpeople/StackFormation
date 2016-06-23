@@ -1,0 +1,12 @@
+blueprints:
+
+  - stackname: 'fixture_selectprofile'
+    template: 'dummy.template'
+    profile: 'myprofile'
+
+  - stackname: 'fixture_selectprofile_conditional'
+    template: 'dummy.template'
+    profile:
+        '{env:Foo}==Val1': a
+        '{env:Foo}==Val2': b
+        'default': c

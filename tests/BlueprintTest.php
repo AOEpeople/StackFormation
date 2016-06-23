@@ -182,8 +182,47 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture7');
-
         $this->assertContains('"Action" : "Update:Delete"', $blueprint->getStackPolicy());
+    }
+
+    /**
+     * @test
+     */
+    public function testGetProfile()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.select_profile.yml']);
+        $profile = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_selectprofile')->getProfile();
+        $this->assertEquals('myprofile', $profile);
+    }
+
+    /**
+     * @test
+     */
+    public function testselectProfile()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.select_profile.yml']);
+        $profile = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_selectprofile')->getProfile();
+        $this->assertEquals('myprofile', $profile);
+    }
+
+    /**
+     * @test
+     * @dataProvider testselectProfileConditionalProvider
+     */
+    public function testselectProfileConditional($foo, $expectedProfile)
+    {
+        putenv('Foo='.$foo);
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.select_profile.yml']);
+        $profile = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_selectprofile_conditional')->getProfile();
+        $this->assertEquals($expectedProfile, $profile);
+    }
+
+    public function testselectProfileConditionalProvider() {
+        return [
+            ['Val1', 'a'],
+            ['Val2', 'b'],
+            ['somethingelse', 'c'],
+        ];
     }
 
 
