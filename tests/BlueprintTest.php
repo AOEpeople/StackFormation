@@ -289,6 +289,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
             ->willReturnCallback(function($profile) use ($stackFactoryMock, $subStackFactoryMock) {
                 if (is_null($profile)) { return $stackFactoryMock; }
                 if ($profile == 'myprofile2') { return $subStackFactoryMock; }
+                return null;
             });
 
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
@@ -308,6 +309,40 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('Bar1', $parameters['Foo1']);
         $this->assertEquals('dummyOutputRemote', $parameters['Foo2']);
         $this->assertEquals('dummyOutputLocal', $parameters['Foo3']);
+    }
+
+    /**
+     * @test
+     */
+    public function testSwitchProfileComplex() {
+
+        putenv('ACCOUNT=t');
+        putenv('BASE_TYPE_VERSION=42');
+
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock
+            ->method('getStackFactory')
+            ->willReturnCallback(function() {
+                $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', ['getStackOutput'], [], '', false);
+                $stackFactoryMock->method('getStackOutput')->willReturnCallback(function($stackName, $key) { return "DummyValue|$stackName|$key"; });
+                return $stackFactoryMock;
+            });
+
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
+
+        $valueResolver = new \StackFormation\ValueResolver(
+            new \StackFormation\DependencyTracker(),
+            $profileManagerMock,
+            $config
+        );
+
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+
+        $blueprint = $blueprintFactory->getBlueprint('switch_profile_complex');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+
+        $this->assertEquals('DummyValue|ecom-t-all-ami-types-42-stack|VarnishAmi', $parameters['VarnishAmi']);
     }
 
 
