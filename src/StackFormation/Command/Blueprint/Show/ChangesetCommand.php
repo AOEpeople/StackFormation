@@ -32,27 +32,9 @@ class ChangesetCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
-
         $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
         $changeSetResult = $blueprintAction->getChangeSet();
-
-        $rows = [];
-        foreach ($changeSetResult->search('Changes[]') as $change) {
-            $resourceChange = $change['ResourceChange'];
-            $rows[] = [
-                // $change['Type'], // would this ever show anything other than 'Resource'?
-                Helper::decorateChangesetAction($resourceChange['Action']),
-                $resourceChange['LogicalResourceId'],
-                isset($resourceChange['PhysicalResourceId']) ? $resourceChange['PhysicalResourceId'] : '',
-                $resourceChange['ResourceType'],
-                isset($resourceChange['Replacement']) ? Helper::decorateChangesetReplacement($resourceChange['Replacement']) : '',
-            ];
-        }
-
-        $table = new Table($output);
-        $table
-            ->setHeaders(['Action', 'LogicalResourceId', 'PhysicalResourceId', 'ResourceType', 'Replacement'])
-            ->setRows($rows);
-        $table->render();
+        $table = new Helper\ChangeSetTable($output);
+        $table->render($changeSetResult);
     }
 }

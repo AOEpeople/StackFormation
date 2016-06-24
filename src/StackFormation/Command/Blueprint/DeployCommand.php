@@ -4,6 +4,8 @@ namespace StackFormation\Command\Blueprint;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\BlueprintAction;
+use StackFormation\Helper\ChangeSetTable;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -25,7 +27,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             )
             ->addOption(
                 'no-observe',
-                'no',
+                's',
                 InputOption::VALUE_NONE,
                 'Don\'t observe stack after deploying'
             )
@@ -34,6 +36,18 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 'o',
                 InputOption::VALUE_NONE,
                 'Deprecated. Deployments are being observed by default now'
+            )
+            ->addOption(
+                'review-parameters',
+                'p',
+                InputOption::VALUE_NONE,
+                'Review parameters before deploying'
+            )
+            ->addOption(
+                'review-changeset',
+                'c',
+                InputOption::VALUE_NONE,
+                'Review changeset before deploying'
             )
             ->addOption(
                 'deleteOnTerminate',
@@ -63,7 +77,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if ($input->getOption('observe')) {
-            $output->writeln('-/--observe is deprecated now. Deployments are being observed by default. Please remove this option.');
+            $output->writeln('-o/--observe is deprecated now. Deployments are being observed by default. Please remove this option.');
         }
 
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
@@ -78,6 +92,33 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
         }
 
         try {
+
+            if ($input->getOption('review-parameters')) {
+                $output->writeln("\n\n== Review parameters: ==");
+                $table = new Table($output);
+                $table->setHeaders(['Key', 'Value'])->setRows($blueprint->getParameters());
+                $table->render();
+
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
+                if (!$helper->ask($input, $output, $question)) {
+                    throw new \Exception('Operation aborted');
+                }
+            }
+            if ($input->getOption('review-changeset')) {
+                $output->writeln("\n\n== Review change set: ==");
+                $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
+                $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
+                $changeSetResult = $blueprintAction->getChangeSet();
+                $table = new ChangeSetTable($output);
+                $table->render($changeSetResult);
+
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
+                if (!$helper->ask($input, $output, $question)) {
+                    throw new \Exception('Operation aborted');
+                }
+            }
 
             $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
             $blueprintAction->deploy($dryRun);

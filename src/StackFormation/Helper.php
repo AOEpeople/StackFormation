@@ -59,20 +59,6 @@ class Helper
         return $status;
     }
 
-    public static function decorateChangesetAction($changeSetAction)
-    {
-        if ($changeSetAction == 'Modify') {
-            return "<fg=yellow>$changeSetAction</>";
-        }
-        if ($changeSetAction == 'Add') {
-            return "<fg=green>$changeSetAction</>";
-        }
-        if ($changeSetAction == 'Remove') {
-            return "<fg=red>$changeSetAction</>";
-        }
-        return $changeSetAction;
-    }
-
     public static function decorateChangesetReplacement($changeSetReplacement)
     {
         if ($changeSetReplacement == 'Conditional') {
