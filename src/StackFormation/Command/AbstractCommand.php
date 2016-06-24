@@ -32,7 +32,7 @@ abstract class AbstractCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input, $output);
-        $this->profileManager = new Manager();
+        $this->profileManager = new Manager(null, $output);
         $this->stackFactory = $this->profileManager->getStackFactory(null); // don't load a specific profile
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();

@@ -3,6 +3,7 @@
 namespace StackFormation\Profile;
 
 use StackFormation\StackFactory;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Manager {
 
@@ -10,10 +11,12 @@ class Manager {
     protected $clients = [];
     protected $stackFactories = [];
     protected $credentialProvider;
+    protected $output;
 
-    public function __construct(YamlCredentialProvider $credentialProvider=null)
+    public function __construct(YamlCredentialProvider $credentialProvider=null, OutputInterface $output=null)
     {
         $this->credentialProvider = is_null($credentialProvider) ? new YamlCredentialProvider() : $credentialProvider;
+        $this->output = $output;
     }
 
     protected function getSdk()
@@ -45,9 +48,25 @@ class Manager {
             if ($profile) {
                 $args['credentials'] = $this->credentialProvider->getCredentialsForProfile($profile);
             }
+            $this->printDebug($client, $profile);
             $this->clients[$cacheKey] = $this->getSdk()->createClient($client, $args);
         }
         return $this->clients[$cacheKey];
+    }
+
+    protected function printDebug($client, $profile) {
+        if (!$this->output || !$this->output->isVerbose()) {
+            return;
+        }
+        $message = "[ProfileManager] Created '$client' Client";
+        if ($profile) {
+            $message .= " for profile '$profile'";
+        } elseif ($profileFromEnv = getenv('AWSINSPECTOR_PROFILE')) {
+            $message .= " for profile '$profileFromEnv' with default credentials provider (env/ini/instance)";
+        } else {
+            $message .= " with default credentials provider (env/ini/instance)";
+        }
+        $this->output->writeln($message);
     }
 
     /**

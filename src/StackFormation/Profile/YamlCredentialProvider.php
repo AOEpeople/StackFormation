@@ -49,6 +49,7 @@ class YamlCredentialProvider {
             throw new \Exception("Invalid secret_key in profile $profile");
         }
         return [
+            'AWSINSPECTOR_PROFILE' => $profile, // this isn't really used except for debugging
             'AWS_ACCESS_KEY_ID' => $profileConfig['access_key'],
             'AWS_SECRET_ACCESS_KEY' => $profileConfig['secret_key'],
         ];
