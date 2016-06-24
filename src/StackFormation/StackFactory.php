@@ -24,7 +24,7 @@ class StackFactory {
         $stackName = $this->resolveWildcard($stackName);
         $stacksFromApi = $this->getStacksFromApi($fresh);
         if (!isset($stacksFromApi[$stackName])) {
-            throw new StackNotFoundException("Stack $stackName not found.");
+            throw new StackNotFoundException($stackName);
         }
         return $stacksFromApi[$stackName];
     }

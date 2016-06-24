@@ -13,7 +13,7 @@ class SdkFactory {
      * @throws \Exception
      * @deprecated
      */
-    public static function getClient($client, $profile='default', array $args=[]) {
+    public static function getClient($client, $profile=null, array $args=[]) {
         static $profileManager;
         if (empty($profileManager)) {
             $profileManager = new \StackFormation\Profile\Manager();

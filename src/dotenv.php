@@ -1,11 +1,13 @@
 <?php
 
-if (is_readable(getcwd() . DIRECTORY_SEPARATOR . '.env.default')) {
-    $dotenv = new Dotenv\Dotenv(getcwd(), '.env.default');
+define('CWD', getcwd());
+
+if (is_readable(CWD . DIRECTORY_SEPARATOR . '.env.default')) {
+    $dotenv = new Dotenv\Dotenv(CWD, '.env.default');
     $dotenv->overload();
 }
-if (is_readable(getcwd() . DIRECTORY_SEPARATOR . '.env')) {
-    $dotenv = new Dotenv\Dotenv(getcwd());
+if (is_readable(CWD . DIRECTORY_SEPARATOR . '.env')) {
+    $dotenv = new Dotenv\Dotenv(CWD);
     $dotenv->overload();
 }
 

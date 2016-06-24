@@ -287,7 +287,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
             ->expects($this->exactly(2))
             ->method('getStackFactory')
             ->willReturnCallback(function($profile) use ($stackFactoryMock, $subStackFactoryMock) {
-                if (is_null($profile)) { return $stackFactoryMock; }
+                if ($profile == 'myprofile1') { return $stackFactoryMock; }
                 if ($profile == 'myprofile2') { return $subStackFactoryMock; }
                 return null;
             });

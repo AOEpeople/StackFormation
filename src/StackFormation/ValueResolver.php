@@ -10,9 +10,9 @@ use StackFormation\Profile\Manager;
 class ValueResolver {
 
     protected $dependencyTracker;
-    protected $stackFactory;
     protected $profileManager;
     protected $config;
+    protected $forceProfile;
 
     /**
      * PlaceholderResolver constructor.
@@ -20,13 +20,13 @@ class ValueResolver {
      * @param DependencyTracker $dependencyTracker
      * @param Manager $profileManager
      * @param Config $config
-     * @param string $profile
+     * @param string $forceProfile
      */
-    public function __construct(DependencyTracker $dependencyTracker, Manager $profileManager, Config $config, $profile=null)
+    public function __construct(DependencyTracker $dependencyTracker, Manager $profileManager, Config $config, $forceProfile=null)
     {
         $this->dependencyTracker = $dependencyTracker;
         $this->profileManager = $profileManager;
-        $this->stackFactory = $this->profileManager->getStackFactory($profile);
+        $this->forceProfile = $forceProfile;
         $this->config = $config;
     }
 
@@ -191,7 +191,7 @@ class ValueResolver {
             function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('output', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
-                    return $this->stackFactory->getStackOutput($matches[1], $matches[2]);
+                    return $this->getStackFactory($sourceBlueprint)->getStackOutput($matches[1], $matches[2]);
                 } catch (StackNotFoundException $e) {
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
@@ -221,7 +221,7 @@ class ValueResolver {
             function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('resource', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
-                    return $this->stackFactory->getStackResource($matches[1], $matches[2]);
+                    return $this->getStackFactory($sourceBlueprint)->getStackResource($matches[1], $matches[2]);
                 } catch (StackNotFoundException $e) {
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
@@ -251,7 +251,7 @@ class ValueResolver {
             function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('parameter', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
-                    return $this->stackFactory->getStackParameter($matches[1], $matches[2]);
+                    return $this->getStackFactory($sourceBlueprint)->getStackParameter($matches[1], $matches[2]);
                 } catch (StackNotFoundException $e) {
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
@@ -340,6 +340,14 @@ class ValueResolver {
             $string
         );
         return $string;
+    }
+
+    protected function getStackFactory(Blueprint $sourceBlueprint=null)
+    {
+        if (!is_null($this->forceProfile)) {
+            return $this->profileManager->getStackFactory($this->forceProfile);
+        }
+        return $this->profileManager->getStackFactory($sourceBlueprint ? $sourceBlueprint->getProfile() : null);
     }
 
     /**

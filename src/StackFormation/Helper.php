@@ -2,6 +2,10 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\StackCannotBeUpdatedException;
+use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Exception\StackNoUpdatesToBePerformedException;
+
 class Helper
 {
 
@@ -40,8 +44,26 @@ class Helper
         if ($xml !== false && $xml->Error->Message) {
             return $xml->Error->Message;
         }
-
         return $exception->getMessage();
+    }
+
+    public static function refineException(\Aws\CloudFormation\Exception\CloudFormationException $exception)
+    {
+        $message = self::extractMessage($exception);
+        $matches = [];
+        if (preg_match('/^Stack \[(.+)\] does not exist$/', $message, $matches)) {
+            return new StackNotFoundException($matches[1], $exception);
+        }
+        if (preg_match('/~Stack \[(.+)\] is in ([A-Z_]+) state and can not be updated./', $message, $matches)) {
+            return new StackCannotBeUpdatedException($matches[1], $matches[2], $exception);
+        }
+        if (preg_match('/~Stack \[(.+)\] is in ([A-Z_]+) state and can not be updated./', $message, $matches)) {
+            return new StackCannotBeUpdatedException($matches[1], $matches[2], $exception);
+        }
+        if (strpos($message, 'No updates are to be performed.') !== false) {
+            return new StackNoUpdatesToBePerformedException('TBD');
+        }
+        return $exception;
     }
 
     public static function decorateStatus($status)

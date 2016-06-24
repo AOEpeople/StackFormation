@@ -4,6 +4,7 @@ namespace StackFormation\Command\Blueprint;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\BlueprintAction;
+use StackFormation\Exception\StackNotFoundException;
 use StackFormation\Helper\ChangeSetTable;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -91,6 +92,9 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             throw new \Exception('--deleteOnTerminate cannot be used with --no-observe');
         }
 
+        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
+        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
+
         try {
 
             if ($input->getOption('review-parameters')) {
@@ -107,16 +111,22 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             }
             if ($input->getOption('review-changeset')) {
                 $output->writeln("\n\n== Review change set: ==");
-                $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
-                $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
-                $changeSetResult = $blueprintAction->getChangeSet();
-                $table = new ChangeSetTable($output);
-                $table->render($changeSetResult);
+                try {
+                    $changeSetResult = $blueprintAction->getChangeSet();
+                    $table = new ChangeSetTable($output);
+                    $table->render($changeSetResult);
 
-                $helper = $this->getHelper('question');
-                $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
-                if (!$helper->ask($input, $output, $question)) {
-                    throw new \Exception('Operation aborted');
+                    $helper = $this->getHelper('question');
+                    $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
+                    if (!$helper->ask($input, $output, $question)) {
+                        throw new \Exception('Operation aborted');
+                    }
+                } catch (StackNotFoundException $e) {
+                    $helper = $this->getHelper('question');
+                    $question = new ConfirmationQuestion("This stack does not exist yet. Do you want to proceed creating it? [y/N] ", false);
+                    if (!$helper->ask($input, $output, $question)) {
+                        throw new \Exception('Operation aborted');
+                    }
                 }
             }
 

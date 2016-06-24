@@ -43,6 +43,12 @@ class Manager {
      * @throws \Exception
      */
     public function getClient($client, $profile=null, array $args=[]) {
+        if (!is_string($client)) {
+            throw new \InvalidArgumentException('Client parameter must be a string');
+        }
+        if (!is_null($profile) && !is_string($profile)) {
+            throw new \InvalidArgumentException('Profile parameter must be a string');
+        }
         $cacheKey = $client .'-'. ($profile ? $profile : '__empty__');
         if (!isset($this->clients[$cacheKey])) {
             if ($profile) {
@@ -58,7 +64,7 @@ class Manager {
         if (!$this->output || !$this->output->isVerbose()) {
             return;
         }
-        $message = "[ProfileManager] Created '$client' Client";
+        $message = "[ProfileManager] Created '$client' client";
         if ($profile) {
             $message .= " for profile '$profile'";
         } elseif ($profileFromEnv = getenv('AWSINSPECTOR_PROFILE')) {
@@ -81,11 +87,16 @@ class Manager {
         return $this->credentialProvider->listAllProfiles();
     }
 
-    public function writeProfileToDotEnv($profile, $file='.env') {
+    public function getEnvVarsFromProfile($profile) {
         $tmp = [];
         foreach ($this->credentialProvider->getEnvVarsForProfile($profile) as $var => $value) {
             $tmp[] = "$var=$value";
         }
+        return $tmp;
+    }
+
+    public function writeProfileToDotEnv($profile, $file='.env') {
+        $tmp = $this->getEnvVarsFromProfile($profile);
         $res = file_put_contents($file, implode("\n", $tmp));
         if ($res === false) {
             throw new \Exception('Error while writing file .env');

@@ -2,6 +2,7 @@
 
 namespace StackFormation;
 
+use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\StackNotFoundException;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -49,29 +50,32 @@ class BlueprintAction {
      */
     public function getChangeSet()
     {
-        $arguments = $this->prepareArguments($this->blueprint);
+        $arguments = $this->prepareArguments();
 
-        $this->blueprint->executeBeforeScripts();
+        try {
+            $this->blueprint->executeBeforeScripts();
 
-        if (isset($arguments['StackPolicyBody'])) {
-            unset($arguments['StackPolicyBody']);
+            if (isset($arguments['StackPolicyBody'])) {
+                unset($arguments['StackPolicyBody']);
+            }
+            $arguments['ChangeSetName'] = 'stackformation' . time();
+
+            $res = $this->getCfnClient()->createChangeSet($arguments);
+            $changeSetId = $res->get('Id');
+
+            $result = Poller::poll(function () use ($changeSetId) {
+                $result = $this->getCfnClient()->describeChangeSet(['ChangeSetName' => $changeSetId]);
+                if ($this->output && !$this->output->isQuiet()) {
+                    $this->output->writeln("Status: {$result['Status']}");
+                }
+                if ($result['Status'] == 'FAILED') {
+                    throw new \Exception($result['StatusReason']);
+                }
+                return ($result['Status'] != 'CREATE_COMPLETE') ? false : $result;
+            });
+        } catch (CloudFormationException $e) {
+            throw Helper::refineException($e); // will try to create a StackNotFoundException
         }
-        $arguments['ChangeSetName'] = 'stackformation' . time();
-
-        $res = $this->getCfnClient()->createChangeSet($arguments);
-        $changeSetId = $res->get('Id');
-
-        $result = Poller::poll(function() use ($changeSetId) {
-            $result = $this->getCfnClient()->describeChangeSet(['ChangeSetName' => $changeSetId]);
-            if ($this->output && !$this->output->isQuiet()) {
-                $this->output->writeln("Status: {$result['Status']}");
-            }
-            if ($result['Status'] == 'FAILED') {
-                throw new \Exception($result['StatusReason']);
-            }
-            return ($result['Status'] != 'CREATE_COMPLETE') ? false : $result;
-        });
-        
         return $result;
     }
 

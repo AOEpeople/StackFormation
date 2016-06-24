@@ -141,6 +141,7 @@ class Blueprint {
         }
         foreach ($scripts as &$script) {
             $script = $this->valueResolver->resolvePlaceholders($script, $this, 'script');
+            $script = str_replace('###CWD###', CWD, $script);
         }
         return $scripts;
     }
