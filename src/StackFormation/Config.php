@@ -121,17 +121,17 @@ class Config
         return '/^'.preg_replace('/\{[^\}]+?\}/', '(.*)', $blueprintName) .'$/';
     }
 
-    /**
-     * TODO: this should not be here...
-     *
-     * @return mixed
-     */
-    public function getCurrentUsersAccountId()
-    {
-        $iamClient = SdkFactory::getClient('Iam'); /* @var $iamClient \Aws\Iam\IamClient */
-        $res = $iamClient->getUser();
-        $arn = $res->search('User.Arn');
-        $parts = explode(':', $arn);
-        return $parts[4];
-    }
+    ///**
+    // * TODO: this should not be here...
+    // *
+    // * @return mixed
+    // */
+    //public function getCurrentUsersAccountId()
+    //{
+    //    $iamClient = SdkFactory::getClient('Iam'); /* @var $iamClient \Aws\Iam\IamClient */
+    //    $res = $iamClient->getUser();
+    //    $arn = $res->search('User.Arn');
+    //    $parts = explode(':', $arn);
+    //    return $parts[4];
+    //}
 }

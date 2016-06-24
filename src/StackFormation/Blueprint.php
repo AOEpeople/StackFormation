@@ -11,11 +11,7 @@ class Blueprint {
     protected $blueprintConfig;
     protected $valueResolver;
 
-    public function __construct(
-        $name,
-        array $blueprintConfig,
-        ValueResolver $valueResolver
-    )
+    public function __construct($name, array $blueprintConfig, ValueResolver $valueResolver)
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException('Name must be a string');
@@ -55,7 +51,7 @@ class Blueprint {
             $value = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
             return $value;
         }
-        return false;
+        return null;
     }
 
     public function enforceProfile()

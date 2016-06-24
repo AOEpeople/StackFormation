@@ -3,64 +3,88 @@
 namespace StackFormation;
 
 use StackFormation\Exception\StackNotFoundException;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class BlueprintAction {
     
     protected $cfnClient;
+    protected $blueprint;
+    protected $profileManager;
+    protected $stackFactory;
+    protected $output;
 
-    public function __construct(\Aws\CloudFormation\CloudFormationClient $cfnClient)
+    public function __construct(
+        Blueprint $blueprint,
+        \StackFormation\Profile\Manager $profileManager,
+        StackFactory $stackFactory,
+        OutputInterface $output=null
+    )
     {
-        $this->cfnClient = $cfnClient;
+        $this->blueprint = $blueprint;
+        $this->profileManager = $profileManager;
+        $this->stackFactory = $stackFactory;
+        $this->output = $output;
     }
 
-    public function validateTemplate(Blueprint $blueprint)
+    /**
+     * @return \Aws\CloudFormation\CloudFormationClient
+     */
+    protected function getCfnClient()
     {
-        $this->cfnClient->validateTemplate(['TemplateBody' => $blueprint->getPreprocessedTemplate()]);
+        if (is_null($this->cfnClient)) {
+            $this->cfnClient = $this->profileManager->getClient('CloudFormation', $this->blueprint->getProfile());
+        }
+        return $this->cfnClient;
+    }
+
+    public function validateTemplate()
+    {
+        $this->getCfnClient()->validateTemplate(['TemplateBody' => $this->blueprint->getPreprocessedTemplate()]);
         // will throw an exception if there's a problem
     }
 
     /**
-     * @param Blueprint $blueprint
-     * @param bool $verbose
      * @return \Aws\Result
      * @throws \Exception
      */
-    public function getChangeSet(Blueprint $blueprint, $verbose=true)
+    public function getChangeSet()
     {
-        $arguments = $this->prepareArguments($blueprint);
+        $arguments = $this->prepareArguments($this->blueprint);
 
-        $blueprint->executeBeforeScripts();
+        $this->blueprint->executeBeforeScripts();
 
         if (isset($arguments['StackPolicyBody'])) {
             unset($arguments['StackPolicyBody']);
         }
         $arguments['ChangeSetName'] = 'stackformation' . time();
 
-        $res = $this->cfnClient->createChangeSet($arguments);
+        $res = $this->getCfnClient()->createChangeSet($arguments);
         $changeSetId = $res->get('Id');
-        $result = Poller::poll(function() use ($changeSetId, $verbose) {
-            $result = $this->cfnClient->describeChangeSet(['ChangeSetName' => $changeSetId]);
-            if ($verbose) {
-                echo "Status: {$result['Status']}\n";
+
+        $result = Poller::poll(function() use ($changeSetId) {
+            $result = $this->getCfnClient()->describeChangeSet(['ChangeSetName' => $changeSetId]);
+            if ($this->output && !$this->output->isQuiet()) {
+                $this->output->writeln("Status: {$result['Status']}");
             }
             if ($result['Status'] == 'FAILED') {
                 throw new \Exception($result['StatusReason']);
             }
             return ($result['Status'] != 'CREATE_COMPLETE') ? false : $result;
         });
+        
         return $result;
     }
 
-    public function deploy(Blueprint $blueprint, $dryRun=false, StackFactory $stackFactory)
+    public function deploy($dryRun=false)
     {
-        $arguments = $this->prepareArguments($blueprint);
+        $arguments = $this->prepareArguments();
 
         if (!$dryRun) {
-            $blueprint->executeBeforeScripts();
+            $this->blueprint->executeBeforeScripts();
         }
 
         try {
-            $stackStatus = $stackFactory->getStackStatus($blueprint->getStackName());
+            $stackStatus = $this->stackFactory->getStackStatus($this->blueprint->getStackName());
         } catch (StackNotFoundException $e) {
             $stackStatus = false;
         }
@@ -69,28 +93,28 @@ class BlueprintAction {
             throw new \Exception("Stack can't be updated right now. Status: $stackStatus");
         } elseif (!empty($stackStatus) && $stackStatus != 'DELETE_COMPLETE') {
             if (!$dryRun) {
-                $this->cfnClient->updateStack($arguments);
+                $this->getCfnClient()->updateStack($arguments);
             }
         } else {
-            $arguments['OnFailure'] = $blueprint->getOnFailure();
+            $arguments['OnFailure'] = $this->blueprint->getOnFailure();
             if (!$dryRun) {
-                $this->cfnClient->createStack($arguments);
+                $this->getCfnClient()->createStack($arguments);
             }
         }
     }
 
-    protected function prepareArguments(Blueprint $blueprint)
+    protected function prepareArguments()
     {
         $arguments = [
-            'StackName' => $blueprint->getStackName(),
-            'Parameters' => $blueprint->getParameters(),
-            'TemplateBody' => $blueprint->getPreprocessedTemplate(),
-            'Tags' => $blueprint->getTags()
+            'StackName' => $this->blueprint->getStackName(),
+            'Parameters' => $this->blueprint->getParameters(),
+            'TemplateBody' => $this->blueprint->getPreprocessedTemplate(),
+            'Tags' => $this->blueprint->getTags()
         ];
-        if ($capabilities = $blueprint->getCapabilities()) {
+        if ($capabilities = $this->blueprint->getCapabilities()) {
             $arguments['Capabilities'] = $capabilities;
         }
-        if ($policy = $blueprint->getStackPolicy()) {
+        if ($policy = $this->blueprint->getStackPolicy()) {
             $arguments['StackPolicyBody'] = $policy;
         }
 
@@ -98,7 +122,7 @@ class BlueprintAction {
         try {
             $arguments['Tags'][] = [
                 'Key' => 'stackformation:blueprint',
-                'Value' => $blueprint->getBlueprintReference()
+                'Value' => $this->blueprint->getBlueprintReference()
             ];
         } catch (\Exception $e) {
             // TODO: ignoring this for now...

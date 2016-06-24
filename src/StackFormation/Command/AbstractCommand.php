@@ -3,14 +3,12 @@
 namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
-use StackFormation\BlueprintAction;
 use StackFormation\BlueprintFactory;
-use StackFormation\ConditionalValueResolver;
 use StackFormation\Config;
 use StackFormation\DependencyTracker;
+use StackFormation\Profile\Manager;
 use StackFormation\ValueResolver;
 use StackFormation\StackFactory;
-use StackFormation\SdkFactory;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,19 +26,19 @@ abstract class AbstractCommand extends Command
     /* @var DependencyTracker */
     protected $dependencyTracker;
 
-    /* @var BlueprintAction */
-    protected $blueprintAction;
+    /* @var Manager */
+    protected $profileManager;
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input, $output);
-        $cfnClient = SdkFactory::getCfnClient();
+        $this->profileManager = new Manager();
+        $cfnClient = $this->profileManager->getClient('CloudFormation'); /* @var $cfnClient \Aws\CloudFormation\CloudFormationClient */
         $this->stackFactory = new StackFactory($cfnClient);
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
         $placeholderResolver = new ValueResolver($this->dependencyTracker, $this->stackFactory, $config);
         $this->blueprintFactory = new BlueprintFactory($config, $placeholderResolver);
-        $this->blueprintAction = new BlueprintAction($cfnClient);
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)

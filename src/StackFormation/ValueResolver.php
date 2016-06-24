@@ -4,6 +4,7 @@ namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\MissingEnvVarException;
+use StackFormation\Exception\StackNotFoundException;
 
 class ValueResolver {
 
@@ -185,6 +186,8 @@ class ValueResolver {
                 try {
                     $this->dependencyTracker->trackStackDependency('output', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
                     return $this->stackFactory->getStackOutput($matches[1], $matches[2]);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
@@ -213,6 +216,8 @@ class ValueResolver {
                 try {
                     $this->dependencyTracker->trackStackDependency('resource', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
                     return $this->stackFactory->getStackResource($matches[1], $matches[2]);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
@@ -241,6 +246,8 @@ class ValueResolver {
                 try {
                     $this->dependencyTracker->trackStackDependency('parameter', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
                     return $this->stackFactory->getStackParameter($matches[1], $matches[2]);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");

@@ -3,6 +3,7 @@
 namespace StackFormation\Command\Blueprint;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\BlueprintAction;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -78,7 +79,8 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
 
         try {
 
-            $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
+            $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
+            $blueprintAction->deploy($dryRun);
 
         } catch (CloudFormationException $exception) {
 
@@ -98,7 +100,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $output->writeln('Deleting failed stack ' . $stackName);
                     $this->stackFactory->getStack($stackName)->delete()->observe($output, $this->stackFactory);
                     $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
-                    $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
+                    $blueprintAction->deploy($dryRun);
                 }
             } elseif (strpos($message, 'is in DELETE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
@@ -107,7 +109,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 if ($confirmed) {
                     $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
                     $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
-                    $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
+                    $blueprintAction->deploy($dryRun);
                 }
             } elseif (strpos($message, 'is in UPDATE_IN_PROGRESS state and can not be updated.') !== false) {
                 $helper = $this->getHelper('question');
@@ -117,7 +119,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $output->writeln('Cancelling update for ' . $stackName);
                     $this->stackFactory->getStack($stackName)->cancelUpdate()->observe($output, $this->stackFactory);
                     $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
-                    $this->blueprintAction->deploy($blueprint, $dryRun, $this->stackFactory);
+                    $blueprintAction->deploy($dryRun);
                 }
             } else {
                 throw $exception;

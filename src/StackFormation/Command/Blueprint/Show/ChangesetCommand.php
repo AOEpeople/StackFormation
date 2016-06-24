@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Blueprint\Show;
 
+use StackFormation\BlueprintAction;
 use StackFormation\Helper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,7 +33,8 @@ class ChangesetCommand extends \StackFormation\Command\AbstractCommand
     {
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
 
-        $changeSetResult = $this->blueprintAction->getChangeSet($blueprint, true);
+        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
+        $changeSetResult = $blueprintAction->getChangeSet();
 
         $rows = [];
         foreach ($changeSetResult->search('Changes[]') as $change) {
