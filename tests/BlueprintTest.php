@@ -272,23 +272,21 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
      * @test
      */
     public function testSwitchProfile() {
-        $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'LocalStackFactory', false);
-        $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutputLocal');
-        $stackFactoryMock->method('getStackResource')->willReturn('dummyResourceLocal');
-        $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameterLocal');
-
-        $subStackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'RemoteStackFactory', false);
-        $subStackFactoryMock->method('getStackOutput')->willReturn('dummyOutputRemote');
-        $subStackFactoryMock->method('getStackResource')->willReturn('dummyResourceRemote');
-        $subStackFactoryMock->method('getStackParameter')->willReturn('dummyParameterRemote');
-
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
         $profileManagerMock
             ->expects($this->exactly(2))
             ->method('getStackFactory')
-            ->willReturnCallback(function($profile) use ($stackFactoryMock, $subStackFactoryMock) {
-                if ($profile == 'myprofile1') { return $stackFactoryMock; }
-                if ($profile == 'myprofile2') { return $subStackFactoryMock; }
+            ->willReturnCallback(function($profile) {
+                if ($profile == 'myprofile1') {
+                    $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'LocalStackFactory', false);
+                    $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutputLocal');
+                    return $stackFactoryMock;
+                }
+                if ($profile == 'myprofile2') {
+                    $subStackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'RemoteStackFactory', false);
+                    $subStackFactoryMock->method('getStackOutput')->willReturn('dummyOutputRemote');
+                    return $subStackFactoryMock;
+                }
                 return null;
             });
 
