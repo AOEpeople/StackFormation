@@ -2,10 +2,13 @@
 
 namespace StackFormation\Profile;
 
+use StackFormation\StackFactory;
+
 class Manager {
 
     protected $sdk;
     protected $clients = [];
+    protected $stackFactories = [];
     protected $credentialProvider;
 
     public function __construct(YamlCredentialProvider $credentialProvider=null)
@@ -47,6 +50,13 @@ class Manager {
         return $this->clients[$cacheKey];
     }
 
+    /**
+     * @return \Aws\CloudFormation\CloudFormationClient
+     */
+    public function getCfnClient($profile=null, array $args=[]) {
+        return $this->getClient('CloudFormation', $profile, $args);
+    }
+
     public function listAllProfiles()
     {
         return $this->credentialProvider->listAllProfiles();
@@ -62,6 +72,20 @@ class Manager {
             throw new \Exception('Error while writing file .env');
         }
         return $file;
+    }
+
+    /**
+     * "StackFactory" Factory :)
+     *
+     * @param $profile
+     * @return StackFactory
+     */
+    public function getStackFactory($profile=null) {
+        $cachKey = ($profile ? $profile : '__empty__');
+        if (!isset($this->stackFactories[$cachKey])) {
+            $this->stackFactories[$cachKey] = new StackFactory($this->getCfnClient($profile));
+        }
+        return $this->stackFactories[$cachKey];
     }
 
 }

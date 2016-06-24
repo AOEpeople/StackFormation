@@ -33,12 +33,18 @@ abstract class AbstractCommand extends Command
     {
         parent::initialize($input, $output);
         $this->profileManager = new Manager();
-        $cfnClient = $this->profileManager->getClient('CloudFormation'); /* @var $cfnClient \Aws\CloudFormation\CloudFormationClient */
-        $this->stackFactory = new StackFactory($cfnClient);
+        $this->stackFactory = $this->profileManager->getStackFactory(null); // don't load a specific profile
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
-        $placeholderResolver = new ValueResolver($this->dependencyTracker, $this->stackFactory, $config);
-        $this->blueprintFactory = new BlueprintFactory($config, $placeholderResolver);
+        $this->blueprintFactory = new BlueprintFactory(
+            $config,
+            new ValueResolver(
+                $this->dependencyTracker,
+                $this->profileManager,
+                $config,
+                null // don't load a specific profile
+            )
+        );
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)

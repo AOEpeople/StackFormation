@@ -22,9 +22,11 @@ class ConditionalValueTest extends PHPUnit_Framework_TestCase
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+
         $placeholderResolver = new \StackFormation\ValueResolver(
             new \StackFormation\DependencyTracker(),
-            $stackFactoryMock,
+            $profileManagerMock,
             $config
         );
         return $placeholderResolver;

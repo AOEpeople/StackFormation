@@ -54,24 +54,8 @@ class Blueprint {
         return null;
     }
 
-    public function enforceProfile()
-    {
-        // TODO: loading profiles shouldn't be done within a blueprint!
-        if ($profile = $this->getProfile()) {
-            if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
-                echo "Using IAM instance profile\n";
-            } else {
-                $profileManager = new \AwsInspector\ProfileManager();
-                $profileManager->loadProfile($profile);
-                echo "Loading Profile: $profile\n";
-            }
-        }
-    }
-
     public function getPreprocessedTemplate()
     {
-        $this->enforceProfile();
-
         if (empty($this->blueprintConfig['template']) || !is_array($this->blueprintConfig['template'])) {
             throw new \Exception('No template(s) found');
         }
@@ -96,8 +80,6 @@ class Blueprint {
     public function getParameters($resolvePlaceholders=true)
     {
         $parameters = [];
-
-        $this->enforceProfile();
 
         if (!isset($this->blueprintConfig['parameters'])) {
             return [];

@@ -1,0 +1,9 @@
+blueprints:
+
+  - stackname: 'switch_profile'
+    template: 'dummy.template'
+    profile: 'myprofile1'
+    parameters:
+      Foo1: 'Bar1'
+      Foo2: '[profile:myprofile2:{output:remoteStack:fooField}]'
+      Foo3: '{output:localStack:fooField}'

@@ -7,6 +7,7 @@ use StackFormation\Exception\StackNotFoundException;
 class StackFactory {
 
     protected $cfnClient;
+    protected $stacksCache;
 
     public function __construct(\Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
@@ -81,42 +82,22 @@ class StackFactory {
      */
     public function getStacksFromApi($fresh=false, $nameFilter=null, $statusFilter=null)
     {
-        $stacks = StaticCache::get('stacks-from-api', function () {
-            //$res = $this->cfnClient->listStacks([
-            //    'StackStatusFilter' => [
-            //        'CREATE_IN_PROGRESS',
-            //        'CREATE_FAILED',
-            //        'CREATE_COMPLETE',
-            //        'ROLLBACK_IN_PROGRESS',
-            //        'ROLLBACK_FAILED',
-            //        'ROLLBACK_COMPLETE',
-            //        'DELETE_IN_PROGRESS',
-            //        'DELETE_FAILED',
-            //        'UPDATE_IN_PROGRESS',
-            //        'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-            //        'UPDATE_COMPLETE',
-            //        'UPDATE_ROLLBACK_IN_PROGRESS',
-            //        'UPDATE_ROLLBACK_FAILED',
-            //        'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
-            //        'UPDATE_ROLLBACK_COMPLETE',
-            //    ]]
-            //);
-
+        if ($fresh || is_null($this->stacksCache)) {
             $res = $this->cfnClient->describeStacks();
-            $stacks = [];
+            $this->stacksCache = [];
             foreach ($res->get('Stacks') as $stack) {
-                $stacks[$stack['StackName']] = new Stack($stack, $this->cfnClient);
+                $this->stacksCache[$stack['StackName']] = new Stack($stack, $this->cfnClient);
             }
-            return $stacks;
-        }, $fresh);
+        }
+
+        $stacks = $this->stacksCache;
+        ksort($stacks);
 
         if (is_null($nameFilter)) {
             if ($filter = getenv('STACKFORMATION_NAME_FILTER')) {
                 $nameFilter = $filter;
             }
         }
-
-        ksort($stacks);
 
         // filter names
         if (!is_null($nameFilter)) {

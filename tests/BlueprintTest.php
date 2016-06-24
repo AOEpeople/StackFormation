@@ -9,13 +9,16 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
-        $placeholderResolver = new \StackFormation\ValueResolver(
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock->method('getStackFactory')->willReturn($stackFactoryMock);
+
+        $valueResolver = new \StackFormation\ValueResolver(
             new \StackFormation\DependencyTracker(),
-            $stackFactoryMock,
+            $profileManagerMock,
             $config
         );
 
-        return new \StackFormation\BlueprintFactory($config, $placeholderResolver);
+        return new \StackFormation\BlueprintFactory($config, $valueResolver);
     }
 
     /**
@@ -265,6 +268,47 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($expectedValue, $parameters['Parameter1']);
     }
 
+    /**
+     * @test
+     */
+    public function testSwitchProfile() {
+        $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'LocalStackFactory', false);
+        $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutputLocal');
+        $stackFactoryMock->method('getStackResource')->willReturn('dummyResourceLocal');
+        $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameterLocal');
+
+        $subStackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'RemoteStackFactory', false);
+        $subStackFactoryMock->method('getStackOutput')->willReturn('dummyOutputRemote');
+        $subStackFactoryMock->method('getStackResource')->willReturn('dummyResourceRemote');
+        $subStackFactoryMock->method('getStackParameter')->willReturn('dummyParameterRemote');
+
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock
+            ->expects($this->exactly(2))
+            ->method('getStackFactory')
+            ->willReturnCallback(function($profile) use ($stackFactoryMock, $subStackFactoryMock) {
+                if (is_null($profile)) { return $stackFactoryMock; }
+                if ($profile == 'myprofile2') { return $subStackFactoryMock; }
+            });
+
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
+
+        $valueResolver = new \StackFormation\ValueResolver(
+            new \StackFormation\DependencyTracker(),
+            $profileManagerMock,
+            $config
+        );
+
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+
+        $blueprint = $blueprintFactory->getBlueprint('switch_profile');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+
+        $this->assertEquals('Bar1', $parameters['Foo1']);
+        $this->assertEquals('dummyOutputRemote', $parameters['Foo2']);
+        $this->assertEquals('dummyOutputLocal', $parameters['Foo3']);
+    }
 
 
 }

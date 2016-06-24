@@ -5,24 +5,28 @@ namespace StackFormation;
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\MissingEnvVarException;
 use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Profile\Manager;
 
 class ValueResolver {
 
     protected $dependencyTracker;
     protected $stackFactory;
+    protected $profileManager;
     protected $config;
 
     /**
      * PlaceholderResolver constructor.
      *
      * @param DependencyTracker $dependencyTracker
-     * @param StackFactory $stackFactory
+     * @param Manager $profileManager
      * @param Config $config
+     * @param string $profile
      */
-    public function __construct(DependencyTracker $dependencyTracker, StackFactory $stackFactory, Config $config)
+    public function __construct(DependencyTracker $dependencyTracker, Manager $profileManager, Config $config, $profile=null)
     {
         $this->dependencyTracker = $dependencyTracker;
-        $this->stackFactory = $stackFactory;
+        $this->profileManager = $profileManager;
+        $this->stackFactory = $this->profileManager->getStackFactory($profile);
         $this->config = $config;
     }
 
@@ -46,6 +50,8 @@ class ValueResolver {
         $originalString = $string;
 
         $exceptionMsgAppendix = $this->getExceptionMessageAppendix($sourceBlueprint, $sourceType, $sourceKey);
+
+        $string = $this->switchProfile($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
 
         $string = $this->resolveEnv($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
         $string = $this->resolveEnvWithFallback($string, $sourceBlueprint, $sourceType, $sourceKey);
@@ -295,6 +301,45 @@ class ValueResolver {
             }
         }
         return '';
+    }
+
+    /**
+     * {profile:...:...}
+     *
+     * @param $string
+     * @param Blueprint $sourceBlueprint
+     * @param $sourceType
+     * @param $sourceKey
+     * @param $exceptionMsgAppendix
+     * @return mixed
+     */
+    protected function switchProfile($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMsgAppendix)
+    {
+        $string = preg_replace_callback(
+            '/\[profile:([^:\]\[]+?):([^\]\[]+?)\]/',
+            function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
+                try {
+                    $profile = $matches[1];
+                    $substring = $matches[2];
+
+                    // recursively create another ValueResolver, but this time with a different profile
+                    $subValueResolver = new ValueResolver(
+                        $this->dependencyTracker,
+                        $this->profileManager,
+                        $this->config,
+                        $profile
+                    );
+                    return $subValueResolver->resolvePlaceholders($substring, $sourceBlueprint, $sourceType, $sourceKey);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
+                } catch (CloudFormationException $e) {
+                    $extractedMessage = Helper::extractMessage($e);
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
+                }
+            },
+            $string
+        );
+        return $string;
     }
 
     /**

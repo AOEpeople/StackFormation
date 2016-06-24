@@ -119,6 +119,8 @@ blueprints:
 - Environment variable lookup with default value fallback: `{env:<var>:<defaultValue>}` -> value of environment variable 'var' falling back to 'defaultValue' if env var is not set
 - Stack/global variable lookup: `{var:<var>}` -> value variable 'var'
 - Current timestamp: `{tstamp}` -> e.g. '1453151115'
+- Clean: `{clean:2.1.7}` -> '217' (removes all characters that aren't allowed in stack names
+- Switch profile: `[profile:<profileName>:...]` will switch to a different profile and evaluate the second parameter there. This is useful in cross account setups.
 
 Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
 one stack to the input parameters needed in another stack that sits on top of the first one without manually 
@@ -150,6 +152,14 @@ blueprints:
       KeyPair: '{var:mykeypair}'
       Database: '{output:{var:ParentStack}:DatabaseRds}'
     [...]
+```
+
+Switch Profile Example (in this example an AMI is baked in a different account and shared with this account)
+```
+blueprints:
+  - stackname: mystack
+    parameters:
+      BaseAmi: '[profile:myDevAccountProfile:{output:bakestack:BaseAmi}]'
 ```
 
 ### Conditional parameter values
