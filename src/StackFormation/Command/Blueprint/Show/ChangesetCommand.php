@@ -32,7 +32,7 @@ class ChangesetCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
-        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
+        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $output);
         $changeSetResult = $blueprintAction->getChangeSet();
         $table = new Helper\ChangeSetTable($output);
         $table->render($changeSetResult);

@@ -2,8 +2,6 @@
 
 class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
-    /** @var PHPUnit_Framework_MockObject_MockObject */
-    protected $stackFactoryMock;
 
     /** @var PHPUnit_Framework_MockObject_MockObject */
     protected $profileManagerMock;
@@ -17,14 +15,17 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
     public function setUp()
     {
         parent::setUp();
-        $this->stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
-        $this->stackFactoryMock->method('getStackStatus')->willReturn('CREATE_COMPLETE');
 
         $this->cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', ['createChangeSet', 'UpdateStack', 'DescribeChangeSet', 'ValidateTemplate'], [], '', false);
         $this->cfnClientMock->method('createChangeSet')->willReturn(new \Aws\Result(['id' => 'foo_id']));
 
-        $this->profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', ['getClient'], [], '', false);
+        $this->profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
         $this->profileManagerMock->method('getClient')->willReturn($this->cfnClientMock);
+        $this->profileManagerMock->method('getStackFactory')->willReturnCallback(function () {
+            $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
+            $stackFactoryMock->method('getStackStatus')->willReturn('CREATE_COMPLETE');
+            return $stackFactoryMock;
+        });
 
         $this->blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $this->blueprintMock->method('getBlueprintReference')->willReturn('FOO');
@@ -36,8 +37,7 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $this->blueprintMock,
-            $this->profileManagerMock,
-            $this->stackFactoryMock
+            $this->profileManagerMock
         );
 
         $blueprintAction->deploy(false);
@@ -49,8 +49,7 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $this->blueprintMock,
-            $this->profileManagerMock,
-            $this->stackFactoryMock
+            $this->profileManagerMock
         );
         $blueprintAction->deploy(true);
 
@@ -64,8 +63,7 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $this->blueprintMock,
-            $this->profileManagerMock,
-            $this->stackFactoryMock
+            $this->profileManagerMock
         );
         $blueprintAction->getChangeSet();
     }
@@ -80,8 +78,7 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $this->blueprintMock,
-            $this->profileManagerMock,
-            $this->stackFactoryMock
+            $this->profileManagerMock
         );
         $blueprintAction->getChangeSet();
     }
@@ -92,8 +89,7 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $this->blueprintMock,
-            $this->profileManagerMock,
-            $this->stackFactoryMock
+            $this->profileManagerMock
         );
         $blueprintAction->validateTemplate();
     }

@@ -32,7 +32,7 @@ class ValidateCommand extends \StackFormation\Command\AbstractCommand
     {
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
 
-        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $this->stackFactory, $output);
+        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $output);
         $blueprintAction->validateTemplate(); // will throw an exception if there's a problem
 
         $formatter = new FormatterHelper();

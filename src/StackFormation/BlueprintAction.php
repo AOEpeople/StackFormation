@@ -11,19 +11,16 @@ class BlueprintAction {
     protected $cfnClient;
     protected $blueprint;
     protected $profileManager;
-    protected $stackFactory;
     protected $output;
 
     public function __construct(
         Blueprint $blueprint,
         \StackFormation\Profile\Manager $profileManager,
-        StackFactory $stackFactory,
         OutputInterface $output=null
     )
     {
         $this->blueprint = $blueprint;
         $this->profileManager = $profileManager;
-        $this->stackFactory = $stackFactory;
         $this->output = $output;
     }
 
@@ -88,7 +85,8 @@ class BlueprintAction {
         }
 
         try {
-            $stackStatus = $this->stackFactory->getStackStatus($this->blueprint->getStackName());
+            $stackFactory = $this->profileManager->getStackFactory($this->blueprint->getProfile());
+            $stackStatus = $stackFactory->getStackStatus($this->blueprint->getStackName());
         } catch (StackNotFoundException $e) {
             $stackStatus = false;
         }
