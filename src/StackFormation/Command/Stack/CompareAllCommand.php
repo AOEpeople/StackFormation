@@ -24,7 +24,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stacks = $this->stackFactory->getStacksFromApi(false);
+        $stacks = $this->getStackFactory()->getStacksFromApi(false);
 
         $data = [];
         foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */

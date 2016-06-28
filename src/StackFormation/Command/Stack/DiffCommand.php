@@ -31,7 +31,7 @@ class DiffCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
+        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
         $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
 
         $diff = new Diff($output);

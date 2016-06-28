@@ -28,7 +28,7 @@ class TimelineCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
+        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
 
         $events = $stack->getEvents();
 

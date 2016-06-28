@@ -8,12 +8,14 @@ use StackFormation\Exception\StackCannotBeUpdatedException;
 use StackFormation\Exception\StackNotFoundException;
 use StackFormation\Exception\StackNoUpdatesToBePerformedException;
 use StackFormation\Helper\ChangeSetTable;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\Console\Question\Question;
 
 class DeployCommand extends \StackFormation\Command\AbstractCommand
 {
@@ -108,9 +110,9 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $table->setHeaders(['Key', 'Value'])->setRows($blueprint->getParameters());
                     $table->render();
 
-                    $helper = $this->getHelper('question');
+                    $questionHelper = $this->getHelper('question');
                     $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
-                    if (!$helper->ask($input, $output, $question)) {
+                    if (!$questionHelper->ask($input, $output, $question)) {
                         throw new \Exception('Operation aborted');
                     }
                 }
@@ -121,15 +123,15 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                         $table = new ChangeSetTable($output);
                         $table->render($changeSetResult);
 
-                        $helper = $this->getHelper('question');
+                        $questionHelper = $this->getHelper('question');
                         $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
-                        if (!$helper->ask($input, $output, $question)) {
+                        if (!$questionHelper->ask($input, $output, $question)) {
                             throw new \Exception('Operation aborted');
                         }
                     } catch (StackNotFoundException $e) {
-                        $helper = $this->getHelper('question');
+                        $questionHelper = $this->getHelper('question');
                         $question = new ConfirmationQuestion("This stack does not exist yet. Do you want to proceed creating it? [y/N] ", false);
-                        if (!$helper->ask($input, $output, $question)) {
+                        if (!$questionHelper->ask($input, $output, $question)) {
                             throw new \Exception('Operation aborted');
                         }
                     }
@@ -145,33 +147,34 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             $output->writeln('No updates are to be performed.');
             return 0; // exit code
         } catch (StackCannotBeUpdatedException $e) {
-            $helper = $this->getHelper('question');
+            $questionHelper = $this->getHelper('question'); /* @var $questionHelper QuestionHelper */
+            $stack = $stackFactory->getStack($stackName, true);
             switch ($e->getState()) {
                 case 'CREATE_FAILED':
                     $question = new ConfirmationQuestion('Stack is in CREATE_FAILED state. Do you want to delete it first? [Y/n]');
-                    $confirmed = $helper->ask($input, $output, $question);
+                    $confirmed = $questionHelper->ask($input, $output, $question);
                     if ($confirmed) {
                         $output->writeln('Deleting failed stack ' . $stackName);
-                        $this->stackFactory->getStack($stackName)->delete()->observe($output, $this->stackFactory);
+                        $stack->delete()->observe($output, $stackFactory);
                         $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
                     break;
                 case 'DELETE_IN_PROGRESS':
                     $question = new ConfirmationQuestion('Stack is in DELETE_IN_PROGRESS state. Do you want to wait and deploy then? [Y/n]');
-                    $confirmed = $helper->ask($input, $output, $question);
+                    $confirmed = $questionHelper->ask($input, $output, $question);
                     if ($confirmed) {
-                        $this->stackFactory->getStack($stackName)->observe($output, $this->stackFactory);
+                        $stack->observe($output, $stackFactory);
                         $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
                     break;
                 case 'UPDATE_IN_PROGRESS':
                     $question = new ConfirmationQuestion('Stack is in UPDATE_IN_PROGRESS state. Do you want to cancel the current update and deploy then? [Y/n]');
-                    $confirmed = $helper->ask($input, $output, $question);
+                    $confirmed = $questionHelper->ask($input, $output, $question);
                     if ($confirmed) {
                         $output->writeln('Cancelling update for ' . $stackName);
-                        $this->stackFactory->getStack($stackName)->cancelUpdate()->observe($output, $this->stackFactory);
+                        $stack->cancelUpdate()->observe($output, $stackFactory);
                         $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
@@ -187,8 +190,8 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $output->writeln("\n-> Run this to observe the stack creation/update:");
                 $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stackName\n");
             } else {
-                $stackFactory = $this->profileManager->getStackFactory($blueprint->getProfile());
-                return $stackFactory->getStack($stackName, true)->observe($output, $this->stackFactory, $deleteOnTerminate);
+                $stack = $stackFactory->getStack($stackName, true);
+                return $stack->observe($output, $stackFactory, $deleteOnTerminate);
             }
         }
     }

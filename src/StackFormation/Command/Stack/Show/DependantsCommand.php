@@ -29,7 +29,7 @@ class DependantsCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
+        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
 
         $this->dependencyTracker->reset();
         foreach ($this->blueprintFactory->getAllBlueprints() as $blueprint) {

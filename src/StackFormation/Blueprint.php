@@ -45,10 +45,13 @@ class Blueprint {
         return $this->valueResolver->resolvePlaceholders($this->name, $this, 'stackname');
     }
 
-    public function getProfile()
+    public function getProfile($resolvePlaceholders=true)
     {
         if (isset($this->blueprintConfig['profile'])) {
-            $value = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
+            $value = $this->blueprintConfig['profile'];
+            if ($resolvePlaceholders) {
+                $value = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
+            }
             return $value;
         }
         return null;
@@ -132,7 +135,11 @@ class Blueprint {
 
         return $parameters;
     }
-    
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getBeforeScripts()
     {
         $scripts = [];
@@ -185,23 +192,6 @@ class Blueprint {
     public function getVars()
     {
         return isset($this->blueprintConfig['vars']) ? $this->blueprintConfig['vars'] : [];
-    }
-
-    public function executeBeforeScripts()
-    {
-        $scripts = $this->getBeforeScripts();
-        if (count($scripts) == 0) {
-            return;
-        }
-
-        $cwd = getcwd();
-        chdir($this->getBasePath());
-
-        passthru(implode("\n", $scripts), $returnVar);
-        if ($returnVar !== 0) {
-            throw new \Exception('Error executing commands');
-        }
-        chdir($cwd);
     }
 
     public function getBlueprintReference()

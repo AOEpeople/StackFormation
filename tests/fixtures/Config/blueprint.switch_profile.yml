@@ -12,4 +12,4 @@ blueprints:
     template: 'dummy.template'
     profile: 'myprofile1'
     parameters:
-      VarnishAmi: '[profile:test.deploy:{output:ecom-{env:ACCOUNT}-all-ami-types-{env:BASE_TYPE_VERSION}-stack:VarnishAmi}]'
+      VarnishAmi: '[profile:t.deploy-ecom:{output:ecom-{env:ACCOUNT}-all-ami-types-{env:BASE_TYPE_VERSION}-stack:VarnishAmi}]'

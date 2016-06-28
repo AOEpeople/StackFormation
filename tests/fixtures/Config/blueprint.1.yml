@@ -36,3 +36,10 @@ blueprints:
   - stackname: 'fixture7'
     template: 'dummy.template'
     stackPolicy: 'dummy_policy.json'
+
+
+  - stackname: 'fixture8'
+    template: 'dummy.template'
+    profile: 'before_scripts_profile'
+    before:
+    - 'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > {env:TESTFILE}'

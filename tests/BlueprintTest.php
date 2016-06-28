@@ -12,11 +12,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
         $profileManagerMock->method('getStackFactory')->willReturn($stackFactoryMock);
 
-        $valueResolver = new \StackFormation\ValueResolver(
-            new \StackFormation\DependencyTracker(),
-            $profileManagerMock,
-            $config
-        );
+        $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
 
         return new \StackFormation\BlueprintFactory($config, $valueResolver);
     }
@@ -165,21 +161,6 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1');
         $this->assertEquals(FIXTURE_ROOT.'Config', $blueprint->getBasePath());
-    }
-
-    /**
-     * @test
-     */
-    public function runBeforeScriptsWith()
-    {
-        $testfile = tempnam(sys_get_temp_dir(), __METHOD__);
-        putenv("TESTFILE=$testfile");
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
-        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture6');
-        $blueprint->executeBeforeScripts();
-
-        $this->assertStringEqualsFile($testfile, 'HELLO WORLD');
-        unlink($testfile);
     }
 
     /**

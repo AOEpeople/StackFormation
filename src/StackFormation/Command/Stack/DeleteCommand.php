@@ -83,7 +83,7 @@ class DeleteCommand extends \StackFormation\Command\AbstractCommand
         }
 
         foreach ($stacks as $stackName) {
-            $this->stackFactory->getStack($stackName)->delete();
+            $this->getStackFactory()->getStack($stackName)->delete();
             $output->writeln("Triggered deletion of stack '$stackName'.");
         }
     }

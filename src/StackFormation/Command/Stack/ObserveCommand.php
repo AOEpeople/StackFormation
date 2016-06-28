@@ -35,8 +35,8 @@ class ObserveCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
+        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
         $deleteOnTerminate = $input->getOption('deleteOnTerminate');
-        return $stack->observe($output, $this->stackFactory, $deleteOnTerminate);
+        return $stack->observe($output, $this->getStackFactory(), $deleteOnTerminate);
     }
 }

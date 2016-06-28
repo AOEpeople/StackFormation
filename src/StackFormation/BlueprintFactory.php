@@ -11,9 +11,12 @@ class BlueprintFactory {
     protected $config;
     protected $valueResolver;
 
-    public function __construct(Config $config, ValueResolver $valueResolver)
+    public function __construct(Config $config=null, ValueResolver $valueResolver=null)
     {
-        $this->config = $config;
+        $this->config = $config ? $config : new Config();
+        if (is_null($valueResolver)) {
+            $valueResolver = new ValueResolver(null, null, $this->config, null);
+        }
         $this->valueResolver = $valueResolver;
     }
 

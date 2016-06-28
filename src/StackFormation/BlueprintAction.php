@@ -41,6 +41,23 @@ class BlueprintAction {
         // will throw an exception if there's a problem
     }
 
+
+    public function executeBeforeScripts()
+    {
+        $scripts = $this->blueprint->getBeforeScripts();
+        if (count($scripts) == 0) {
+            return;
+        }
+
+        $cwd = getcwd();
+        chdir($this->blueprint->getBasePath());
+
+        passthru(implode("\n", $scripts), $returnVar);
+        if ($returnVar !== 0) {
+            throw new \Exception('Error executing commands');
+        }
+        chdir($cwd);
+    }
     /**
      * @return \Aws\Result
      * @throws \Exception
@@ -50,7 +67,7 @@ class BlueprintAction {
         $arguments = $this->prepareArguments();
 
         try {
-            $this->blueprint->executeBeforeScripts();
+            $this->executeBeforeScripts();
 
             if (isset($arguments['StackPolicyBody'])) {
                 unset($arguments['StackPolicyBody']);
@@ -81,7 +98,7 @@ class BlueprintAction {
         $arguments = $this->prepareArguments();
 
         if (!$dryRun) {
-            $this->blueprint->executeBeforeScripts();
+            $this->executeBeforeScripts();
         }
 
         try {

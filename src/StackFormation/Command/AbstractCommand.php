@@ -33,7 +33,6 @@ abstract class AbstractCommand extends Command
     {
         parent::initialize($input, $output);
         $this->profileManager = new Manager(null, $output);
-        $this->stackFactory = $this->profileManager->getStackFactory(null); // don't load a specific profile
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
         $this->blueprintFactory = new BlueprintFactory(
@@ -45,6 +44,14 @@ abstract class AbstractCommand extends Command
                 null // don't load a specific profile
             )
         );
+    }
+
+    protected function getStackFactory()
+    {
+        if (is_null($this->stackFactory)) {
+            $this->stackFactory = $this->profileManager->getStackFactory(null);
+        }
+        return $this->stackFactory;
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)
@@ -76,7 +83,7 @@ abstract class AbstractCommand extends Command
 
     protected function getStacks($nameFilter=null, $statusFilter=null)
     {
-        return array_keys($this->stackFactory->getStacksFromApi(false, $nameFilter, $statusFilter));
+        return array_keys($this->getStackFactory()->getStacksFromApi(false, $nameFilter, $statusFilter));
     }
 
     public function interactAskForStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)

@@ -40,7 +40,7 @@ abstract class AbstractShowCommand extends \StackFormation\Command\AbstractComma
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $this->stackFactory->getStack($input->getArgument('stack'));
+        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
 
         $methodName = 'get'.ucfirst($this->property);
 
