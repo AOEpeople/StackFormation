@@ -3,6 +3,7 @@
 namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\Exception\StackNotFoundException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
@@ -33,6 +34,8 @@ class Observer
         $returnValue = 0;
         $printedEvents = [];
         $first = true;
+        $stackGone = false;
+        $lastStatus = '';
         do {
             if ($first) {
                 $first = false;
@@ -40,14 +43,13 @@ class Observer
                 sleep($pollInterval);
             }
 
-            // load fresh instance for updated status
-            $this->stack = $this->stackFactory->getStack($this->stack->getName(), true);
-            $status = $this->stack->getStatus();
-
-            $this->output->writeln("-> Polling... (Stack Status: $status)");
-
-            $stackGone = false; // while deleting
             try {
+                // load fresh instance for updated status
+                $this->stack = $this->stackFactory->getStack($this->stack->getName(), true);
+                $lastStatus = $this->stack->getStatus();
+
+                $this->output->writeln("-> Polling... (Stack Status: $lastStatus)");
+
                 $events = $this->stack->getEvents();
 
                 $logMessages = [];
@@ -123,17 +125,20 @@ class Observer
                     throw $exception;
                 }
 
+            } catch (StackNotFoundException $exception) {
+                $stackGone = true;
+                $this->output->writeln("-> Stack gone.");
             }
-        } while (!$stackGone && strpos($status, 'IN_PROGRESS') !== false);
+        } while (!$stackGone && strpos($lastStatus, 'IN_PROGRESS') !== false);
 
         $formatter = new FormatterHelper();
-        if (strpos($status, 'FAILED') !== false) {
-            $formattedBlock = $formatter->formatBlock(['Error!', 'Status: ' . $status], 'error', true);
+        if (strpos($lastStatus, 'FAILED') !== false) {
+            $formattedBlock = $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true);
         } else {
-            $formattedBlock = $formatter->formatBlock(['Completed', 'Status: ' . $status], 'info', true);
+            $formattedBlock = $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true);
         }
 
-        if (!in_array($status, ['CREATE_COMPLETE', 'UPDATE_COMPLETE'])) {
+        if (!in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'DELETE_IN_PROGRESS'])) {
             $returnValue = 1;
         }
 
