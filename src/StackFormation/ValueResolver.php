@@ -151,6 +151,9 @@ class ValueResolver {
                 if (is_array($value)) {
                     $value = $this->resolveConditionalValue($value, $sourceBlueprint);
                 }
+                if ($value == $matches[0]) {
+                    throw new \Exception('Direct circular reference detected');
+                }
                 return $value;
             },
             $string

@@ -1,6 +1,6 @@
 <?php
 
-class ConditionalValueTest extends PHPUnit_Framework_TestCase
+class ValueResolverTest extends PHPUnit_Framework_TestCase
 {
 
     /**
@@ -15,7 +15,16 @@ class ConditionalValueTest extends PHPUnit_Framework_TestCase
 
     public function getMockedPlaceholderResolver() {
         $config = $this->getMock('\StackFormation\Config', [], [], '', false);
-        $config->method('getGlobalVars')->willReturn(['GlobalFoo' => 'GlobalBar']);
+        $config->method('getGlobalVars')->willReturn([
+            'GlobalFoo' => 'GlobalBar',
+            'GlobalFoo2' => 'GlobalBar2',
+            'GlobalBar' => 'GlobalFoo3',
+            'rescursiveA' => '{var:rescursiveB}',
+            'rescursiveB' => 'Hello',
+            'circularA' => '{var:circularB}',
+            'circularB' => '{var:circularA}',
+            'directCircular' => '{var:directCircular}',
+        ]);
 
         $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
         $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutput');
@@ -25,7 +34,7 @@ class ConditionalValueTest extends PHPUnit_Framework_TestCase
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
 
         $placeholderResolver = new \StackFormation\ValueResolver(
-            new \StackFormation\DependencyTracker(),
+            null,
             $profileManagerMock,
             $config
         );
@@ -156,7 +165,52 @@ class ConditionalValueTest extends PHPUnit_Framework_TestCase
     public function missingEnv()
     {
         $this->setExpectedException('Exception', "Environment variable 'DDD' not found");
-        $actualValue = $this->valueResolver->resolveConditionalValue(['{env:DDD}' => 13]);
+        $this->valueResolver->resolveConditionalValue(['{env:DDD}' => 13]);
+    }
+
+    /**
+     * @test
+     */
+    public function missingVar()
+    {
+        $this->setExpectedException('Exception', "Variable 'DDD' not found (Type:conditional_value, Key:{var:DDD})");
+        $this->valueResolver->resolveConditionalValue(['{var:DDD}' => 13]);
+    }
+
+    /**
+     * @test
+     */
+    public function nestedVars()
+    {
+        $result = $this->valueResolver->resolvePlaceholders('{var:{var:GlobalFoo}}');
+        $this->assertEquals('GlobalFoo3', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function recursiveReferences()
+    {
+        $result = $this->valueResolver->resolvePlaceholders('{var:rescursiveA}');
+        $this->assertEquals('Hello', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function directCircularReferences()
+    {
+        $this->setExpectedException('Exception', 'Direct circular reference detected');
+        $result = $this->valueResolver->resolvePlaceholders('{var:directCircular}');
+    }
+
+    /**
+     * @test
+     */
+    public function circularReferences()
+    {
+        $this->setExpectedException('Exception', 'Max nesting level reached. Looks like a circular dependency.');
+        $this->valueResolver->resolvePlaceholders('{var:circularA}');
     }
 
 }
