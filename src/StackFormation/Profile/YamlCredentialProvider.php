@@ -3,6 +3,7 @@
 namespace StackFormation\Profile;
 
 use Aws\Credentials\Credentials;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class YamlCredentialProvider {
 
@@ -109,7 +110,12 @@ class YamlCredentialProvider {
         }
         if (!is_file($filename)) {
             // try if there's an encrpyted version of this file
-            return $this->getDecryptedFilecontent($this->getEncryptedFileName($filename));
+            try {
+                $encryptedFilename = $this->getEncryptedFileName($filename);
+                return $this->getDecryptedFilecontent($encryptedFilename);
+            } catch (FileNotFoundException $e) {
+                throw new FileNotFoundException("Could not find '$filename' or '$encryptedFilename'", 0, $e);
+            }
         }
         return file_get_contents($filename);
     }

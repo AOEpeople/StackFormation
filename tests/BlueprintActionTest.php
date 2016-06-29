@@ -61,17 +61,17 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
      */
     public function runBeforeScripts()
     {
-        $testfile = tempnam(sys_get_temp_dir(), __METHOD__);
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
 
-        $this->blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
-        $this->blueprintMock->method('getBlueprintReference')->willReturn('FOO');
-        $this->blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $this->blueprintMock->method('getBeforeScripts')->willReturn([
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
             'echo -n "HELLO WORLD" > '.$testfile
         ]);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
-            $this->blueprintMock,
+            $blueprintMock,
             $this->profileManagerMock
         );
 
@@ -81,27 +81,58 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
         unlink($testfile);
     }
 
+
+    /**
+     * @test
+     */
+    public function runBeforeScriptsInCorrectLocation()
+    {
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getBasePath')->willReturn(FIXTURE_ROOT.'RunBeforeScript');
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'cat foo.txt > '.$testfile
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $this->profileManagerMock
+        );
+
+        $blueprintAction->executeBeforeScripts();
+
+        $this->assertStringEqualsFile($testfile, 'HELLO WORLD FROM FILE');
+        unlink($testfile);
+    }
+
     /**
      * @test
      */
     public function beforeScriptsHaveProfilesEnvVarsSet()
     {
-        $this->markTestSkipped('TODO');
-        chdir(FIXTURE_ROOT.'Config');
-        $testfile = tempnam(sys_get_temp_dir(), __METHOD__);
-        putenv("TESTFILE=$testfile");
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        chdir(FIXTURE_ROOT.'ProfileManager/fixture_before_scripts');
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
 
         $profileManager = new \StackFormation\Profile\Manager();
 
-        $valueResolver = new \StackFormation\ValueResolver(null, $profileManager, $config);
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > '.$testfile
+        ]);
 
-        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $profileManager
+        );
 
-        $blueprint = $blueprintFactory->getBlueprint('fixture7');
-        $blueprint->executeBeforeScripts();
+        $blueprintAction->executeBeforeScripts();
 
-        $this->assertStringEqualsFile($testfile, 'HELLO WORLD');
+        $this->assertStringEqualsFile($testfile, 'TESTACCESSKEY1:TESTSECRETKEY1');
         unlink($testfile);
     }
 

@@ -49,14 +49,22 @@ class BlueprintAction {
             return;
         }
 
-        $cwd = getcwd();
-        chdir($this->blueprint->getBasePath());
+        $envVars = $this->profileManager->getEnvVarsFromProfile($this->blueprint->getProfile());
+        if (empty($envVars)) {
+            $envVars = [];
+        }
 
-        passthru(implode("\n", $scripts), $returnVar);
+        $basePath = $this->blueprint->getBasePath();
+
+        $tmpfile = tempnam(sys_get_temp_dir(), 'before_scripts_');
+        file_put_contents($tmpfile, implode("\n", $scripts));
+
+        $command = "cd $basePath && " . implode(' ', $envVars) . " /usr/bin/bash $tmpfile";
+        passthru($command, $returnVar);
+        unlink($tmpfile);
         if ($returnVar !== 0) {
             throw new \Exception('Error executing commands');
         }
-        chdir($cwd);
     }
     /**
      * @return \Aws\Result
