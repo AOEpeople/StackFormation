@@ -54,10 +54,7 @@ class Helper
         if (preg_match('/^Stack \[(.+)\] does not exist$/', $message, $matches)) {
             return new StackNotFoundException($matches[1], $exception);
         }
-        if (preg_match('/~Stack \[(.+)\] is in ([A-Z_]+) state and can not be updated./', $message, $matches)) {
-            return new StackCannotBeUpdatedException($matches[1], $matches[2], $exception);
-        }
-        if (preg_match('/~Stack \[(.+)\] is in ([A-Z_]+) state and can not be updated./', $message, $matches)) {
+        if (preg_match('/.+stack\/(.+)\/.+is in ([A-Z_]+) state and can not be updated./', $message, $matches)) {
             return new StackCannotBeUpdatedException($matches[1], $matches[2], $exception);
         }
         if (strpos($message, 'No updates are to be performed.') !== false) {
