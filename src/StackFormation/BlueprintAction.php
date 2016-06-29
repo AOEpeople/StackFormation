@@ -59,7 +59,7 @@ class BlueprintAction {
         $tmpfile = tempnam(sys_get_temp_dir(), 'before_scripts_');
         file_put_contents($tmpfile, implode("\n", $scripts));
 
-        $command = "cd $basePath && " . implode(' ', $envVars) . " /usr/bin/bash $tmpfile";
+        $command = "cd $basePath && " . implode(' ', $envVars) . " bash $tmpfile";
         passthru($command, $returnVar);
         unlink($tmpfile);
         if ($returnVar !== 0) {
