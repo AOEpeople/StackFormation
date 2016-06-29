@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Stack;
 
+use StackFormation\Helper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,6 +30,7 @@ class TimelineCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
+        Helper::validateStackname($stack);
 
         $events = $stack->getEvents();
 

@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Stack\Show;
 
+use StackFormation\Helper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,6 +31,7 @@ class DependantsCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
+        Helper::validateStackname($stack);
 
         $this->dependencyTracker->reset();
         foreach ($this->blueprintFactory->getAllBlueprints() as $blueprint) {

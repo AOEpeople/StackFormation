@@ -114,6 +114,15 @@ class Helper
         return null;
     }
 
+    public static function validateStackname($stackName)
+    {
+        // A stack name can contain only alphanumeric characters (case sensitive) and hyphens.
+        // It must start with an alphabetic character and cannot be longer than 128 characters.
+        if (!preg_match('/^[a-zA-Z][a-zA-Z0-9-]{0,127}$/', $stackName)) {
+            throw new \Exception('Invalid stack name: ' . $stackName);
+        }
+    }
+
     public static function validateTags(array $tags)
     {
         // @see http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#tag-restrictions

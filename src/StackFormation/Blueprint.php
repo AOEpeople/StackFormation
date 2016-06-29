@@ -42,7 +42,9 @@ class Blueprint {
 
     public function getStackName()
     {
-        return $this->valueResolver->resolvePlaceholders($this->name, $this, 'stackname');
+        $stackName = $this->valueResolver->resolvePlaceholders($this->name, $this, 'stackname');
+        Helper::validateStackname($stackName);
+        return $stackName;
     }
 
     public function getProfile($resolvePlaceholders=true)

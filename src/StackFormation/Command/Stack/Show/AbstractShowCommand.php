@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Stack\Show;
 
+use StackFormation\Helper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,6 +42,7 @@ abstract class AbstractShowCommand extends \StackFormation\Command\AbstractComma
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
+        Helper::validateStackname($stack);
 
         $methodName = 'get'.ucfirst($this->property);
 
