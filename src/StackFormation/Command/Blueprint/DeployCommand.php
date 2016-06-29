@@ -4,6 +4,7 @@ namespace StackFormation\Command\Blueprint;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\BlueprintAction;
+use StackFormation\Exception\OperationAbortedException;
 use StackFormation\Exception\StackCannotBeUpdatedException;
 use StackFormation\Exception\StackNotFoundException;
 use StackFormation\Exception\StackNoUpdatesToBePerformedException;
@@ -93,7 +94,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
         $noObserve = $input->getOption('no-observe');
 
         if ($deleteOnTerminate && $noObserve) {
-            throw new \Exception('--deleteOnTerminate cannot be used with --no-observe');
+            throw new \InvalidArgumentException('--deleteOnTerminate cannot be used with --no-observe');
         }
 
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
@@ -113,7 +114,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     $questionHelper = $this->getHelper('question');
                     $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
                     if (!$questionHelper->ask($input, $output, $question)) {
-                        throw new \Exception('Operation aborted');
+                        throw new OperationAbortedException('blueprint:deploy', 'review-parameters');
                     }
                 }
                 if ($input->getOption('review-changeset')) {
@@ -126,19 +127,20 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                         $questionHelper = $this->getHelper('question');
                         $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
                         if (!$questionHelper->ask($input, $output, $question)) {
-                            throw new \Exception('Operation aborted');
+                            throw new OperationAbortedException('blueprint:deploy', 'review-changeset');
                         }
                     } catch (StackNotFoundException $e) {
                         $questionHelper = $this->getHelper('question');
                         $question = new ConfirmationQuestion("This stack does not exist yet. Do you want to proceed creating it? [y/N] ", false);
                         if (!$questionHelper->ask($input, $output, $question)) {
-                            throw new \Exception('Operation aborted');
+                            throw new OperationAbortedException('blueprint:deploy', 'Stack does not exist');
                         }
                     }
                 }
 
                 $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $output);
                 $blueprintAction->deploy($dryRun);
+                $output->writeln("Triggered deployment of stack '$stackName'.");
 
             } catch (CloudFormationException $exception) {
                 throw \StackFormation\Helper::refineException($exception);
@@ -151,9 +153,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             $stack = $stackFactory->getStack($stackName, true);
             switch ($e->getState()) {
                 case 'CREATE_FAILED':
-                    $question = new ConfirmationQuestion('Stack is in CREATE_FAILED state. Do you want to delete it first? [Y/n]');
-                    $confirmed = $questionHelper->ask($input, $output, $question);
-                    if ($confirmed) {
+                    if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Stack is in CREATE_FAILED state. Do you want to delete it first? [Y/n]'))) {
                         $output->writeln('Deleting failed stack ' . $stackName);
                         $stack->delete()->observe($output, $stackFactory);
                         $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
@@ -161,18 +161,15 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                     }
                     break;
                 case 'DELETE_IN_PROGRESS':
-                    $question = new ConfirmationQuestion('Stack is in DELETE_IN_PROGRESS state. Do you want to wait and deploy then? [Y/n]');
-                    $confirmed = $questionHelper->ask($input, $output, $question);
-                    if ($confirmed) {
+                    if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Stack is in DELETE_IN_PROGRESS state. Do you want to wait and deploy then? [Y/n]'))) {
+                        $output->writeln('Waiting until deletion completes for ' . $stackName);
                         $stack->observe($output, $stackFactory);
                         $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
                     break;
                 case 'UPDATE_IN_PROGRESS':
-                    $question = new ConfirmationQuestion('Stack is in UPDATE_IN_PROGRESS state. Do you want to cancel the current update and deploy then? [Y/n]');
-                    $confirmed = $questionHelper->ask($input, $output, $question);
-                    if ($confirmed) {
+                    if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Stack is in UPDATE_IN_PROGRESS state. Do you want to cancel the current update and deploy then? [Y/n]'))) {
                         $output->writeln('Cancelling update for ' . $stackName);
                         $stack->cancelUpdate()->observe($output, $stackFactory);
                         $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
@@ -184,8 +181,6 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
         }
 
         if (!$dryRun) {
-            $output->writeln("Triggered deployment of stack '$stackName'.");
-
             if ($noObserve) {
                 $output->writeln("\n-> Run this to observe the stack creation/update:");
                 $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stackName\n");
