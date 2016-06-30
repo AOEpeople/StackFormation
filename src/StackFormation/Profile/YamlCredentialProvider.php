@@ -20,12 +20,8 @@ class YamlCredentialProvider {
         }
         $config = $this->getConfig();
         $profileConfig = $config[$profile];
-        if (empty($profileConfig['access_key'])) {
-            throw new \Exception("Invalid access_key in profile $profile");
-        }
-        if (empty($profileConfig['secret_key'])) {
-            throw new \Exception("Invalid secret_key in profile $profile");
-        }
+        if (empty($profileConfig['access_key'])) { throw new \Exception("Invalid access_key in profile $profile"); }
+        if (empty($profileConfig['secret_key'])) { throw new \Exception("Invalid secret_key in profile $profile"); }
         return new Credentials(
             $profileConfig['access_key'],
             $profileConfig['secret_key']
@@ -43,12 +39,8 @@ class YamlCredentialProvider {
         }
         $config = $this->getConfig();
         $profileConfig = $config[$profile];
-        if (empty($profileConfig['access_key'])) {
-            throw new \Exception("Invalid access_key in profile $profile");
-        }
-        if (empty($profileConfig['secret_key'])) {
-            throw new \Exception("Invalid secret_key in profile $profile");
-        }
+        if (empty($profileConfig['access_key'])) { throw new \Exception("Invalid access_key in profile $profile"); }
+        if (empty($profileConfig['secret_key'])) { throw new \Exception("Invalid secret_key in profile $profile"); }
         return [
             'AWSINSPECTOR_PROFILE' => $profile, // this isn't really used except for debugging
             'AWS_ACCESS_KEY_ID' => $profileConfig['access_key'],
