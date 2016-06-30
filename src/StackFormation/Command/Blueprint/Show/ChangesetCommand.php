@@ -4,7 +4,6 @@ namespace StackFormation\Command\Blueprint\Show;
 
 use StackFormation\BlueprintAction;
 use StackFormation\Helper;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

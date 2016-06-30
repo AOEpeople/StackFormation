@@ -28,11 +28,21 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
         ]);
 
         $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
-        $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutput');
-        $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
-        $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
+        $stackFactoryMock->method('getStackOutput')->willReturnCallback(function($stack) {
+            if ($stack == 'stackthatdoesnotexist') { throw new \StackFormation\Exception\StackNotFoundException('stackthatdoesnotexist'); };
+            return 'dummyOutput';
+        });
+        $stackFactoryMock->method('getStackResource')->willReturnCallback(function($stack) {
+            if ($stack == 'stackthatdoesnotexist') { throw new \StackFormation\Exception\StackNotFoundException('stackthatdoesnotexist'); };
+            return 'dummyResource';
+        });
+        $stackFactoryMock->method('getStackParameter')->willReturnCallback(function($stack) {
+            if ($stack == 'stackthatdoesnotexist') { throw new \StackFormation\Exception\StackNotFoundException('stackthatdoesnotexist'); };
+            return 'dummyParameter';
+        });
 
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock->method('getStackFactory')->willReturn($stackFactoryMock);
 
         $placeholderResolver = new \StackFormation\ValueResolver(
             null,
@@ -233,6 +243,33 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
             ['abc123', 'abc123'],
             [' ', ''],
             ['{var:Dirty}', '123'],
+        ];
+    }
+
+    /**
+     * @test
+     */
+    public function testDependencyTracker()
+    {
+        $this->assertInstanceOf('\StackFormation\DependencyTracker', $this->valueResolver->getDependencyTracker());
+    }
+
+    /**
+     * @test
+     * @dataProvider testStackNotFoundProvider
+     */
+    public function testStackNotFound($value)
+    {
+        $this->setExpectedException('Exception', "Error resolving '$value'");
+        $this->valueResolver->resolvePlaceholders($value);
+    }
+
+    public function testStackNotFoundProvider()
+    {
+        return [
+            ['{output:stackthatdoesnotexist:any}'],
+            ['{parameter:stackthatdoesnotexist:any}'],
+            ['{resource:stackthatdoesnotexist:any}'],
         ];
     }
 

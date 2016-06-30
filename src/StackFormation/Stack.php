@@ -2,7 +2,11 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\OutputNotFoundException;
+use StackFormation\Exception\ParameterNotFoundException;
+use StackFormation\Exception\ResourceNotFoundException;
 use StackFormation\Exception\TagNotFoundException;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class Stack {
     
@@ -41,7 +45,7 @@ class Stack {
     {
         $parameters = $this->getParameters();
         if (!isset($parameters[$key])) {
-            throw new \Exception("Parameter '$key' not found in stack '{$this->getName()}'");
+            throw new ParameterNotFoundException("Parameter '$key' not found in stack '{$this->getName()}'");
         }
         if ($parameters[$key] == '****') {
             throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
@@ -76,7 +80,7 @@ class Stack {
     {
         $outputs = $this->getOutputs();
         if (!isset($outputs[$key])) {
-            throw new \Exception("Output '$key' not found in stack '{$this->getName()}'");
+            throw new OutputNotFoundException("Output '$key' not found in stack '{$this->getName()}'");
         }
         if ($outputs[$key] == '****') {
             throw new \Exception("Trying to retrieve a 'NoEcho' value (Key: '$key')");
@@ -110,7 +114,7 @@ class Stack {
     {
         $resources = $this->getResources();
         if (!isset($resources[$key])) {
-            throw new \Exception("Resource '$key' not found in stack '{$this->getName()}'");
+            throw new ResourceNotFoundException("Resource '$key' not found in stack '{$this->getName()}'");
         }
         return $resources[$key];
     }
@@ -156,6 +160,9 @@ class Stack {
         return $tags;
     }
 
+    /**
+     * @return array
+     */
     public function getEvents()
     {
         $res = $this->cfnClient->describeStackEvents(['StackName' => $this->getName()]);

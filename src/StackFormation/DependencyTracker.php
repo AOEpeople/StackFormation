@@ -30,7 +30,7 @@ class DependencyTracker
         ];
     }
 
-    public function trackStackDependency($type, $stack, $resource, Blueprint $sourceBlueprint, $sourceType, $sourceKey)
+    public function trackStackDependency($type, $stack, $resource, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null)
     {
         if (!isset($this->stacks[$type])) {
             $this->stacks[$type] = [];

@@ -5,6 +5,7 @@ namespace StackFormation;
 use StackFormation\Exception\StackCannotBeUpdatedException;
 use StackFormation\Exception\StackNotFoundException;
 use StackFormation\Exception\StackNoUpdatesToBePerformedException;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class Helper
 {
@@ -152,6 +153,50 @@ class Helper
             $tmp[$item[$keyKey]] = $item[$valueKey];
         }
         return $tmp;
+    }
+
+    /**
+     * @param $resourceStatusReason
+     * @return array
+     */
+    public static function getDetailedLogFromResourceStatusReason($resourceStatusReason)
+    {
+        $logMessages = [];
+        if (preg_match('/See the details in CloudWatch Log Stream: (.*)/', $resourceStatusReason, $matches)) {
+            $logStream = $matches[1];
+
+            $logGroupName = Helper::findCloudWatchLogGroupByStream($logStream);
+
+            $params = [
+                'limit' => 20,
+                'logGroupName' => $logGroupName,
+                'logStreamName' => $logStream
+            ];
+            $cloudWatchLogClient = \AwsInspector\SdkFactory::getClient('CloudWatchLogs'); /* @var $cloudWatchLogClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
+            $res = $cloudWatchLogClient->getLogEvents($params);
+            $logMessages = array_merge(
+                [ "==> Showing last 20 messages from $logGroupName -> $logStream" ],
+                $res->search('events[].message')
+            );
+        } elseif (preg_match('/WaitCondition received failed message:.*for uniqueId: (i-[0-9a-f]+)/', $resourceStatusReason, $matches)) {
+            $instanceId = $matches[1];
+            $ec2Repo = new \AwsInspector\Model\Ec2\Repository();
+            $instance = $ec2Repo->findEc2InstanceBy('instance-id', $instanceId);
+            if ($instance) {
+                try {
+                    $res = $instance->exec('tail -50 /var/log/cloud-init-output.log');
+                    $logMessages = array_merge(
+                        ["==> Showing last 50 lines in /var/log/cloud-init-output.log"],
+                        $res['output']
+                    );
+                } catch (FileNotFoundException $e) {
+                    $logMessages = ["Could not log in to instance '$instanceId' because the pem file could not be found"];
+                }
+            } else {
+                $logMessages = ["Could not find instance '$instanceId'"];
+            }
+        }
+        return $logMessages;
     }
 
 }
