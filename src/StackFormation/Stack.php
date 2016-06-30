@@ -226,17 +226,24 @@ class Stack {
         return $res->get('TemplateBody');
     }
 
-    public function observe(
-        \Symfony\Component\Console\Output\OutputInterface $output,
-        \StackFormation\StackFactory $stackFactory,
-        $deleteOnTerminate=false)
-    {
-        $observer = new Observer($this, $stackFactory, $output);
-        if ($deleteOnTerminate) {
-            $observer->deleteOnSignal();
-        }
-        return $observer->observeStackActivity();
-    }
+    ///**
+    // * @param \Symfony\Component\Console\Output\OutputInterface $output
+    // * @param StackFactory $stackFactory
+    // * @param bool $deleteOnTerminate
+    // * @return int
+    // * @deprecated
+    // */
+    //public function observe(
+    //    \Symfony\Component\Console\Output\OutputInterface $output,
+    //    \StackFormation\StackFactory $stackFactory,
+    //    $deleteOnTerminate=false)
+    //{
+    //    $observer = new Observer($this, $stackFactory, $output);
+    //    if ($deleteOnTerminate) {
+    //        $observer->deleteOnSignal();
+    //    }
+    //    return $observer->observeStackActivity();
+    //}
 
     public function cancelUpdate()
     {

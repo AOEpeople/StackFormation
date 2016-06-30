@@ -9,6 +9,7 @@ use StackFormation\Exception\StackCannotBeUpdatedException;
 use StackFormation\Exception\StackNotFoundException;
 use StackFormation\Exception\StackNoUpdatesToBePerformedException;
 use StackFormation\Helper\ChangeSetTable;
+use StackFormation\Observer;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -155,7 +156,10 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 case 'CREATE_FAILED':
                     if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Stack is in CREATE_FAILED state. Do you want to delete it first? [Y/n]'))) {
                         $output->writeln('Deleting failed stack ' . $stackName);
-                        $stack->delete()->observe($output, $stackFactory);
+                        $stack->delete();
+                        $observer = new Observer($stack, $stackFactory, $output);
+                        if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
+                        $observer->observeStackActivity();
                         $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
@@ -163,7 +167,9 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 case 'DELETE_IN_PROGRESS':
                     if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Stack is in DELETE_IN_PROGRESS state. Do you want to wait and deploy then? [Y/n]'))) {
                         $output->writeln('Waiting until deletion completes for ' . $stackName);
-                        $stack->observe($output, $stackFactory);
+                        $observer = new Observer($stack, $stackFactory, $output);
+                        if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
+                        $observer->observeStackActivity();
                         $output->writeln('Deletion completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
@@ -171,7 +177,10 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 case 'UPDATE_IN_PROGRESS':
                     if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Stack is in UPDATE_IN_PROGRESS state. Do you want to cancel the current update and deploy then? [Y/n]'))) {
                         $output->writeln('Cancelling update for ' . $stackName);
-                        $stack->cancelUpdate()->observe($output, $stackFactory);
+                        $stack->cancelUpdate();
+                        $observer = new Observer($stack, $stackFactory, $output);
+                        if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
+                        $observer->observeStackActivity();
                         $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
@@ -186,7 +195,9 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $output->writeln("{$GLOBALS['argv'][0]} stack:observe $stackName\n");
             } else {
                 $stack = $stackFactory->getStack($stackName, true);
-                return $stack->observe($output, $stackFactory, $deleteOnTerminate);
+                $observer = new Observer($stack, $stackFactory, $output);
+                if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
+                return $observer->observeStackActivity();
             }
         }
     }

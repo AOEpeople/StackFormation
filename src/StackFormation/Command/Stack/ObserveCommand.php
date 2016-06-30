@@ -3,6 +3,7 @@
 namespace StackFormation\Command\Stack;
 
 use StackFormation\Helper;
+use StackFormation\Observer;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -36,10 +37,15 @@ class ObserveCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
-        Helper::validateStackname($stack);
+        $stackName = $input->getArgument('stack');
+        Helper::validateStackname($stackName);
 
-        $deleteOnTerminate = $input->getOption('deleteOnTerminate');
-        return $stack->observe($output, $this->getStackFactory(), $deleteOnTerminate);
+        $stack = $this->getStackFactory()->getStack($stackName);
+
+        $observer = new Observer($stack, $this->getStackFactory(), $output);
+        if ($input->getOption('deleteOnTerminate')) {
+            $observer->deleteOnSignal();
+        }
+        return $observer->observeStackActivity();
     }
 }
