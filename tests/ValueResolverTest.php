@@ -24,6 +24,7 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
             'circularA' => '{var:circularB}',
             'circularB' => '{var:circularA}',
             'directCircular' => '{var:directCircular}',
+            'Dirty' => '1.2.3'
         ]);
 
         $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
@@ -211,6 +212,28 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('Exception', 'Max nesting level reached. Looks like a circular dependency.');
         $this->valueResolver->resolvePlaceholders('{var:circularA}');
+    }
+
+    /**
+     * @test
+     * @dataProvider dirtyValueProvider
+     */
+    public function resolveClean($dirtyValue, $expectedCleanValue)
+    {
+        $actualCleanValue = $this->valueResolver->resolvePlaceholders('{clean:'.$dirtyValue.'}');
+        $this->assertEquals($expectedCleanValue, $actualCleanValue);
+    }
+
+    public function dirtyValueProvider() {
+        return [
+            ['1.2.3', '123'],
+            ['123', '123'],
+            ['-123', '-123'],
+            ['1 2 3', '123'],
+            ['abc123', 'abc123'],
+            [' ', ''],
+            ['{var:Dirty}', '123'],
+        ];
     }
 
 }
