@@ -29,7 +29,7 @@ class Manager {
             $this->sdk = new \Aws\Sdk([
                 'version' => 'latest',
                 'region' => $region,
-                'retries' => 20
+                'retries' => 5
             ]);
         }
         return $this->sdk;
