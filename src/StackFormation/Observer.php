@@ -101,17 +101,14 @@ class Observer
             }
         } while (!$stackGone && strpos($lastStatus, 'IN_PROGRESS') !== false);
 
-        $formatter = new FormatterHelper();
-        if (strpos($lastStatus, 'FAILED') !== false) {
-            $formattedBlock = $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true);
-        } else {
-            $formattedBlock = $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true);
-        }
-
         if (!in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'DELETE_IN_PROGRESS'])) {
             $returnValue = 1;
         }
 
+        $formatter = new FormatterHelper();
+        $formattedBlock = (strpos($lastStatus, 'FAILED') !== false)
+            ? $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true)
+            : $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true);
         $this->output->writeln("\n\n$formattedBlock\n\n");
 
         $this->output->writeln("== OUTPUTS ==");
