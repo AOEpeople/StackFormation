@@ -49,6 +49,10 @@ class BlueprintAction {
             return;
         }
 
+        if ($this->output && !$this->output->isQuiet()) {
+            $this->output->writeln("Running scripts:");
+        }
+
         $envVars = $this->profileManager->getEnvVarsFromProfile($this->blueprint->getProfile());
         if (empty($envVars)) {
             $envVars = [];
@@ -59,7 +63,7 @@ class BlueprintAction {
         $tmpfile = tempnam(sys_get_temp_dir(), 'before_scripts_');
         file_put_contents($tmpfile, implode("\n", $scripts));
 
-        $command = "cd $basePath && " . implode(' ', $envVars) . " /usr/bin/env bash $tmpfile";
+        $command = "cd $basePath && " . implode(' ', $envVars) . " /usr/bin/env bash -x $tmpfile";
         passthru($command, $returnVar);
         unlink($tmpfile);
         if ($returnVar !== 0) {
@@ -132,10 +136,18 @@ class BlueprintAction {
 
     protected function prepareArguments()
     {
+        if ($this->output && !$this->output->isQuiet()) { $this->output->write("Preparing parameters... "); }
+        $parameters = $this->blueprint->getParameters();
+        if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("done."); }
+
+        if ($this->output && !$this->output->isQuiet()) { $this->output->write("Preparing template... "); }
+        $template = $this->blueprint->getPreprocessedTemplate();
+        if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("done."); }
+
         $arguments = [
             'StackName' => $this->blueprint->getStackName(),
-            'Parameters' => $this->blueprint->getParameters(),
-            'TemplateBody' => $this->blueprint->getPreprocessedTemplate(),
+            'Parameters' => $parameters,
+            'TemplateBody' => $template,
             'Tags' => $this->blueprint->getTags()
         ];
         if ($capabilities = $this->blueprint->getCapabilities()) {
