@@ -34,7 +34,7 @@ class StaticCache
             if (!is_null($callback)) {
                 self::set($key, $callback());
             } else {
-                throw new \Exception(sprintf('Cache key % not found.', $key));
+                throw new \Exception(sprintf("Cache key '%s' not found.", $key));
             }
         }
         return self::$cache[$key];

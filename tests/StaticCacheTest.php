@@ -44,4 +44,12 @@ class StaticCacheTest extends PHPUnit_Framework_TestCase {
 
         $this->assertFalse($result);
     }
+
+    /**
+     * @test
+     */
+    public function keyNotFound() {
+        $this->setExpectedException('Exception', "Cache key 'doesnotexist' not found.");
+        \StackFormation\StaticCache::get('doesnotexist');
+    }
 }
