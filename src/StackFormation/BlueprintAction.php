@@ -49,9 +49,7 @@ class BlueprintAction {
             return;
         }
 
-        if ($this->output && !$this->output->isQuiet()) {
-            $this->output->writeln("Running scripts:");
-        }
+        if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("Running scripts:"); }
 
         $envVars = $this->profileManager->getEnvVarsFromProfile($this->blueprint->getProfile());
         if (empty($envVars)) {
@@ -91,9 +89,7 @@ class BlueprintAction {
 
             $result = Poller::poll(function () use ($changeSetId) {
                 $result = $this->getCfnClient()->describeChangeSet(['ChangeSetName' => $changeSetId]);
-                if ($this->output && !$this->output->isQuiet()) {
-                    $this->output->writeln("Status: {$result['Status']}");
-                }
+                if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("Status: {$result['Status']}"); }
                 if ($result['Status'] == 'FAILED') {
                     throw new \Exception($result['StatusReason']);
                 }
