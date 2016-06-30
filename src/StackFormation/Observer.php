@@ -6,7 +6,6 @@ use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\StackNotFoundException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class Observer
 {
@@ -29,7 +28,7 @@ class Observer
         return $this;
     }
 
-    public function observeStackActivity($pollInterval = 10)
+    public function observeStackActivity($pollInterval = 20)
     {
         $returnValue = 0;
         $printedEvents = [];
