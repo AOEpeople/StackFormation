@@ -333,8 +333,6 @@ class ValueResolver {
                         $profile
                     );
                     return $subValueResolver->resolvePlaceholders($substring, $sourceBlueprint, $sourceType, $sourceKey);
-                } catch (StackNotFoundException $e) {
-                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
