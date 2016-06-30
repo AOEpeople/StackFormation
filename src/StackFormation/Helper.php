@@ -2,6 +2,10 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\StackCannotBeUpdatedException;
+use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Exception\StackNoUpdatesToBePerformedException;
+
 class Helper
 {
 
@@ -40,8 +44,23 @@ class Helper
         if ($xml !== false && $xml->Error->Message) {
             return $xml->Error->Message;
         }
-
         return $exception->getMessage();
+    }
+
+    public static function refineException(\Aws\CloudFormation\Exception\CloudFormationException $exception)
+    {
+        $message = self::extractMessage($exception);
+        $matches = [];
+        if (preg_match('/^Stack \[(.+)\] does not exist$/', $message, $matches)) {
+            return new StackNotFoundException($matches[1], $exception);
+        }
+        if (preg_match('/.+stack\/(.+)\/.+is in ([A-Z_]+) state and can not be updated./', $message, $matches)) {
+            return new StackCannotBeUpdatedException($matches[1], $matches[2], $exception);
+        }
+        if (strpos($message, 'No updates are to be performed.') !== false) {
+            return new StackNoUpdatesToBePerformedException('TBD');
+        }
+        return $exception;
     }
 
     public static function decorateStatus($status)
@@ -57,20 +76,6 @@ class Helper
         }
 
         return $status;
-    }
-
-    public static function decorateChangesetAction($changeSetAction)
-    {
-        if ($changeSetAction == 'Modify') {
-            return "<fg=yellow>$changeSetAction</>";
-        }
-        if ($changeSetAction == 'Add') {
-            return "<fg=green>$changeSetAction</>";
-        }
-        if ($changeSetAction == 'Remove') {
-            return "<fg=red>$changeSetAction</>";
-        }
-        return $changeSetAction;
     }
 
     public static function decorateChangesetReplacement($changeSetReplacement)
@@ -107,6 +112,15 @@ class Helper
             }
         }
         return null;
+    }
+
+    public static function validateStackname($stackName)
+    {
+        // A stack name can contain only alphanumeric characters (case sensitive) and hyphens.
+        // It must start with an alphabetic character and cannot be longer than 128 characters.
+        if (!preg_match('/^[a-zA-Z][a-zA-Z0-9-]{0,127}$/', $stackName)) {
+            throw new \Exception('Invalid stack name: ' . $stackName);
+        }
     }
 
     public static function validateTags(array $tags)

@@ -4,24 +4,29 @@ namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\MissingEnvVarException;
+use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Profile\Manager;
 
-class PlaceholderResolver {
+class ValueResolver {
 
     protected $dependencyTracker;
-    protected $stackFactory;
+    protected $profileManager;
     protected $config;
+    protected $forceProfile;
 
     /**
      * PlaceholderResolver constructor.
      *
      * @param DependencyTracker $dependencyTracker
-     * @param StackFactory $stackFactory
+     * @param Manager $profileManager
      * @param Config $config
+     * @param string $forceProfile
      */
-    public function __construct(DependencyTracker $dependencyTracker, StackFactory $stackFactory, Config $config)
+    public function __construct(DependencyTracker $dependencyTracker=null, Manager $profileManager=null, Config $config, $forceProfile=null)
     {
-        $this->dependencyTracker = $dependencyTracker;
-        $this->stackFactory = $stackFactory;
+        $this->dependencyTracker = $dependencyTracker ? $dependencyTracker : new DependencyTracker();
+        $this->profileManager = $profileManager ? $profileManager : new Manager();
+        $this->forceProfile = $forceProfile;
         $this->config = $config;
     }
 
@@ -46,9 +51,12 @@ class PlaceholderResolver {
 
         $exceptionMsgAppendix = $this->getExceptionMessageAppendix($sourceBlueprint, $sourceType, $sourceKey);
 
+        $string = $this->switchProfile($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
+
         $string = $this->resolveEnv($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
         $string = $this->resolveEnvWithFallback($string, $sourceBlueprint, $sourceType, $sourceKey);
         $string = $this->resolveVar($string, $sourceBlueprint, $exceptionMsgAppendix);
+        $string = $this->resolveConditionalValue($string, $sourceBlueprint);
         $string = $this->resolveTstamp($string);
         $string = $this->resolveOutput($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
         $string = $this->resolveResource($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
@@ -139,7 +147,14 @@ class PlaceholderResolver {
                 if (!isset($vars[$matches[1]])) {
                     throw new \Exception("Variable '{$matches[1]}' not found$exceptionMsgAppendix");
                 }
-                return $vars[$matches[1]];
+                $value = $vars[$matches[1]];
+                if (is_array($value)) {
+                    $value = $this->resolveConditionalValue($value, $sourceBlueprint);
+                }
+                if ($value == $matches[0]) {
+                    throw new \Exception('Direct circular reference detected');
+                }
+                return $value;
             },
             $string
         );
@@ -179,7 +194,9 @@ class PlaceholderResolver {
             function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('output', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
-                    return $this->stackFactory->getStackOutput($matches[1], $matches[2]);
+                    return $this->getStackFactory($sourceBlueprint)->getStackOutput($matches[1], $matches[2]);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
@@ -207,7 +224,9 @@ class PlaceholderResolver {
             function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('resource', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
-                    return $this->stackFactory->getStackResource($matches[1], $matches[2]);
+                    return $this->getStackFactory($sourceBlueprint)->getStackResource($matches[1], $matches[2]);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
@@ -235,7 +254,9 @@ class PlaceholderResolver {
             function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
                 try {
                     $this->dependencyTracker->trackStackDependency('parameter', $matches[1], $matches[2], $sourceBlueprint, $sourceType, $sourceKey);
-                    return $this->stackFactory->getStackParameter($matches[1], $matches[2]);
+                    return $this->getStackFactory($sourceBlueprint)->getStackParameter($matches[1], $matches[2]);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
                 } catch (CloudFormationException $e) {
                     $extractedMessage = Helper::extractMessage($e);
                     throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
@@ -262,6 +283,110 @@ class PlaceholderResolver {
             $string
         );
         return $string;
+    }
+
+    /**
+     * Resolve conditional value
+     *
+     * @param array $values
+     * @param Blueprint|null $sourceBlueprint
+     * @return string
+     * @throws \Exception
+     */
+    public function resolveConditionalValue($values, Blueprint $sourceBlueprint=null)
+    {
+        if (!is_array($values)) {
+            return $values;
+        }
+        foreach ($values as $condition => $value) {
+            if ($this->isTrue($condition, $sourceBlueprint)) {
+                return $value;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * {profile:...:...}
+     *
+     * @param $string
+     * @param Blueprint $sourceBlueprint
+     * @param $sourceType
+     * @param $sourceKey
+     * @param $exceptionMsgAppendix
+     * @return mixed
+     */
+    protected function switchProfile($string, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, $exceptionMsgAppendix)
+    {
+        $string = preg_replace_callback(
+            '/\[profile:([^:\]\[]+?):([^\]\[]+?)\]/',
+            function ($matches) use ($exceptionMsgAppendix, $sourceBlueprint, $sourceType, $sourceKey) {
+                try {
+                    $profile = $matches[1];
+                    $substring = $matches[2];
+
+                    // recursively create another ValueResolver, but this time with a different profile
+                    $subValueResolver = new ValueResolver(
+                        $this->dependencyTracker,
+                        $this->profileManager,
+                        $this->config,
+                        $profile
+                    );
+                    return $subValueResolver->resolvePlaceholders($substring, $sourceBlueprint, $sourceType, $sourceKey);
+                } catch (StackNotFoundException $e) {
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix", 0, $e);
+                } catch (CloudFormationException $e) {
+                    $extractedMessage = Helper::extractMessage($e);
+                    throw new \Exception("Error resolving '{$matches[0]}'$exceptionMsgAppendix (CloudFormation error: $extractedMessage)");
+                }
+            },
+            $string
+        );
+        return $string;
+    }
+
+    protected function getStackFactory(Blueprint $sourceBlueprint=null)
+    {
+        if (!is_null($this->forceProfile)) {
+            return $this->profileManager->getStackFactory($this->forceProfile);
+        }
+        return $this->profileManager->getStackFactory($sourceBlueprint ? $sourceBlueprint->getProfile() : null);
+    }
+
+    /**
+     * Evaluate is key 'is true'
+     *
+     * @param $condition
+     * @param Blueprint|null $sourceBlueprint
+     * @return bool
+     * @throws \Exception
+     */
+    public function isTrue($condition, Blueprint $sourceBlueprint=null)
+    {
+        // resolve placeholders
+        $condition = $this->resolvePlaceholders($condition, $sourceBlueprint, 'conditional_value', $condition);
+
+        if ($condition == 'default') {
+            return true;
+        }
+        if (strpos($condition, '==') !== false) {
+            list($left, $right) = explode('==', $condition, 2);
+            $left = trim($left);
+            $right = trim($right);
+            return ($left == $right);
+        } elseif (strpos($condition, '!=') !== false) {
+            list($left, $right) = explode('!=', $condition, 2);
+            $left = trim($left);
+            $right = trim($right);
+            return ($left != $right);
+        } elseif (strpos($condition, '~=') !== false) {
+            list($subject, $pattern) = explode('~=', $condition, 2);
+            $subject = trim($subject);
+            $pattern = trim($pattern);
+            return preg_match($pattern, $subject);
+        } else {
+            throw new \Exception('Invalid condition: ' . $condition);
+        }
     }
 
     /**

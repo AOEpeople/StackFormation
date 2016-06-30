@@ -2,6 +2,7 @@
 
 namespace AwsInspector\Command\Profile;
 
+use StackFormation\Profile\Manager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,7 +19,7 @@ class ListCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $profileManager = new \AwsInspector\ProfileManager();
+        $profileManager = new Manager();
 
         $rows=[];
         foreach($profileManager->listAllProfiles() as $profileName) {

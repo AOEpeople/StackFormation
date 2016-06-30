@@ -1,0 +1,15 @@
+blueprints:
+
+  - stackname: 'switch_profile'
+    template: 'dummy.template'
+    profile: 'myprofile1'
+    parameters:
+      Foo1: 'Bar1'
+      Foo2: '[profile:myprofile2:{output:remoteStack:fooField}]'
+      Foo3: '{output:localStack:fooField}'
+
+  - stackname: 'switch_profile_complex'
+    template: 'dummy.template'
+    profile: 'myprofile1'
+    parameters:
+      VarnishAmi: '[profile:t.deploy-ecom:{output:ecom-{env:ACCOUNT}-all-ami-types-{env:BASE_TYPE_VERSION}-stack:VarnishAmi}]'

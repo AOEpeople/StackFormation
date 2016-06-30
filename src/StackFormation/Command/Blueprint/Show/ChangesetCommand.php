@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Blueprint\Show;
 
+use StackFormation\BlueprintAction;
 use StackFormation\Helper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,26 +32,9 @@ class ChangesetCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
-
-        $changeSetResult = $this->blueprintAction->getChangeSet($blueprint, true);
-
-        $rows = [];
-        foreach ($changeSetResult->search('Changes[]') as $change) {
-            $resourceChange = $change['ResourceChange'];
-            $rows[] = [
-                // $change['Type'], // would this ever show anything other than 'Resource'?
-                Helper::decorateChangesetAction($resourceChange['Action']),
-                $resourceChange['LogicalResourceId'],
-                isset($resourceChange['PhysicalResourceId']) ? $resourceChange['PhysicalResourceId'] : '',
-                $resourceChange['ResourceType'],
-                isset($resourceChange['Replacement']) ? Helper::decorateChangesetReplacement($resourceChange['Replacement']) : '',
-            ];
-        }
-
-        $table = new Table($output);
-        $table
-            ->setHeaders(['Action', 'LogicalResourceId', 'PhysicalResourceId', 'ResourceType', 'Replacement'])
-            ->setRows($rows);
-        $table->render();
+        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $output);
+        $changeSetResult = $blueprintAction->getChangeSet();
+        $table = new Helper\ChangeSetTable($output);
+        $table->render($changeSetResult);
     }
 }

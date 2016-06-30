@@ -1,30 +1,41 @@
 <?php
 
-class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
+class ValueResolverTest extends PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var \StackFormation\ConditionalValueResolver
+     * @var \StackFormation\ValueResolver
      */
-    protected $conditionalValueResolver;
+    protected $valueResolver;
 
     public function setUp() {
-        $this->conditionalValueResolver = new \StackFormation\ConditionalValueResolver($this->getMockedPlaceholderResolver());
+        $this->valueResolver = $this->getMockedPlaceholderResolver();
         parent::setUp();
     }
 
     public function getMockedPlaceholderResolver() {
         $config = $this->getMock('\StackFormation\Config', [], [], '', false);
-        $config->method('getGlobalVars')->willReturn(['GlobalFoo' => 'GlobalBar']);
+        $config->method('getGlobalVars')->willReturn([
+            'GlobalFoo' => 'GlobalBar',
+            'GlobalFoo2' => 'GlobalBar2',
+            'GlobalBar' => 'GlobalFoo3',
+            'rescursiveA' => '{var:rescursiveB}',
+            'rescursiveB' => 'Hello',
+            'circularA' => '{var:circularB}',
+            'circularB' => '{var:circularA}',
+            'directCircular' => '{var:directCircular}',
+        ]);
 
         $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
         $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutput');
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
-        $placeholderResolver = new \StackFormation\PlaceholderResolver(
-            new \StackFormation\DependencyTracker(),
-            $stackFactoryMock,
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+
+        $placeholderResolver = new \StackFormation\ValueResolver(
+            null,
+            $profileManagerMock,
             $config
         );
         return $placeholderResolver;
@@ -35,7 +46,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
      */
     public function defaultIsTrue()
     {
-        $this->assertTrue($this->conditionalValueResolver->isTrue('default'));
+        $this->assertTrue($this->valueResolver->isTrue('default'));
     }
 
     /**
@@ -49,7 +60,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
         if ($putenv) {
             putenv($putenv);
         }
-        $actualValue = $this->conditionalValueResolver->isTrue($key, $blueprint);
+        $actualValue = $this->valueResolver->isTrue($key, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
@@ -75,12 +86,18 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
             ['{env:FOO}=={var:GlobalFoo}', true, 'FOO=GlobalBar'],
             ['GlobalBar=={var:{env:FOO}}', true, 'FOO=GlobalFoo'],
             ['{var:BlueprintFoo}==BlueprintBar', true],
+            ['prod~=/^prod$/', true],
+            ['prod~=/^(prod|qa)$/', true],
+            ['prd~=/^(prod|qa)$/', false],
+            ['test1~=/^test.$/', true],
         ];
         $invertedValues = [];
         foreach ($values as $value) {
-            $value[0] = str_replace('==', '!=', $value[0]);
-            $value[1] = !$value[1];
-            $invertedValues[] = $value;
+            if (strpos($value[0], '==') !== false) {
+                $value[0] = str_replace('==', '!=', $value[0]);
+                $value[1] = !$value[1];
+                $invertedValues[] = $value;
+            }
         }
         return array_merge($values, $invertedValues);
     }
@@ -91,7 +108,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
      */
     public function invalidCondition($key) {
         $this->setExpectedException('Exception', 'Invalid condition');
-        $this->conditionalValueResolver->isTrue($key);
+        $this->valueResolver->isTrue($key);
     }
 
     public function invalidConditionProvider() {
@@ -114,7 +131,7 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
         }
         $blueprint = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprint->method('getVars')->willReturn(['BlueprintFoo' => 'BlueprintBar']);
-        $actualValue = $this->conditionalValueResolver->resolveConditionalValue($conditions, $blueprint);
+        $actualValue = $this->valueResolver->resolveConditionalValue($conditions, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
@@ -148,7 +165,52 @@ class ConditionalValueResolverTest extends PHPUnit_Framework_TestCase
     public function missingEnv()
     {
         $this->setExpectedException('Exception', "Environment variable 'DDD' not found");
-        $actualValue = $this->conditionalValueResolver->resolveConditionalValue(['{env:DDD}' => 13]);
+        $this->valueResolver->resolveConditionalValue(['{env:DDD}' => 13]);
+    }
+
+    /**
+     * @test
+     */
+    public function missingVar()
+    {
+        $this->setExpectedException('Exception', "Variable 'DDD' not found (Type:conditional_value, Key:{var:DDD})");
+        $this->valueResolver->resolveConditionalValue(['{var:DDD}' => 13]);
+    }
+
+    /**
+     * @test
+     */
+    public function nestedVars()
+    {
+        $result = $this->valueResolver->resolvePlaceholders('{var:{var:GlobalFoo}}');
+        $this->assertEquals('GlobalFoo3', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function recursiveReferences()
+    {
+        $result = $this->valueResolver->resolvePlaceholders('{var:rescursiveA}');
+        $this->assertEquals('Hello', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function directCircularReferences()
+    {
+        $this->setExpectedException('Exception', 'Direct circular reference detected');
+        $result = $this->valueResolver->resolvePlaceholders('{var:directCircular}');
+    }
+
+    /**
+     * @test
+     */
+    public function circularReferences()
+    {
+        $this->setExpectedException('Exception', 'Max nesting level reached. Looks like a circular dependency.');
+        $this->valueResolver->resolvePlaceholders('{var:circularA}');
     }
 
 }

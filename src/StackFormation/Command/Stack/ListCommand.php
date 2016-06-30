@@ -35,7 +35,7 @@ class ListCommand extends \StackFormation\Command\AbstractCommand
         $nameFilter = $input->getOption('nameFilter');
         $statusFilter = $input->getOption('statusFilter');
 
-        $stacks = $this->stackFactory->getStacksFromApi(false, $nameFilter, $statusFilter);
+        $stacks = $this->getStackFactory()->getStacksFromApi(false, $nameFilter, $statusFilter);
 
         $rows = [];
         foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */

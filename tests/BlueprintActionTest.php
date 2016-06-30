@@ -2,74 +2,138 @@
 
 class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
-    public function testBeforeScriptsAreBeingExecutedWhenDeploying()
+
+    /** @var PHPUnit_Framework_MockObject_MockObject */
+    protected $profileManagerMock;
+
+    /** @var PHPUnit_Framework_MockObject_MockObject */
+    protected $cfnClientMock;
+
+    /** @var PHPUnit_Framework_MockObject_MockObject */
+    protected $blueprintMock;
+
+    public function setUp()
     {
-        $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
-        $stackFactoryMock->method('getStackStatus')->willReturn('CREATE_COMPLETE');
+        parent::setUp();
 
-        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
-        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
-        $blueprintMock->expects($this->once())->method('executeBeforeScripts');
+        $this->cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', ['createChangeSet', 'UpdateStack', 'DescribeChangeSet', 'ValidateTemplate'], [], '', false);
+        $this->cfnClientMock->method('createChangeSet')->willReturn(new \Aws\Result(['id' => 'foo_id']));
 
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', [], [], '', false);
-        $blueprintAction = new \StackFormation\BlueprintAction($cfnClientMock);
-        $blueprintAction->deploy($blueprintMock, false, $stackFactoryMock);
-    }
+        $this->profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $this->profileManagerMock->method('getClient')->willReturn($this->cfnClientMock);
+        $this->profileManagerMock->method('getStackFactory')->willReturnCallback(function () {
+            $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
+            $stackFactoryMock->method('getStackStatus')->willReturn('CREATE_COMPLETE');
+            return $stackFactoryMock;
+        });
 
-    public function testBeforeScriptsAreNotBeingExecutedWhenDeployingWithDryRun()
-    {
-        $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
-        $stackFactoryMock->method('getStackStatus')->willReturn('CREATE_COMPLETE');
-
-        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
-        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
-        $blueprintMock->expects($this->never())->method('executeBeforeScripts');
-
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', [], [], '', false);
-        $blueprintAction = new \StackFormation\BlueprintAction($cfnClientMock);
-        $blueprintAction->deploy($blueprintMock, true, $stackFactoryMock);
-    }
-
-    public function testBeforeScriptsAreBeingExecutedWhenRequestingChangeSet()
-    {
-        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
-        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
-        $blueprintMock->expects($this->once())->method('executeBeforeScripts');
-
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', ['createChangeSet', 'describeChangeSet'], [], '', false);
-        $cfnClientMock->method('createChangeSet')->willReturn(new \Aws\Result(['id' => 'foo_id']));
-        $cfnClientMock->method('describeChangeSet')->willReturn(new \Aws\Result(['Status' => 'CREATE_COMPLETE']));
-
-        $blueprintAction = new \StackFormation\BlueprintAction($cfnClientMock);
-        $blueprintAction->getChangeSet($blueprintMock, false);
+        $this->blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $this->blueprintMock->method('getBlueprintReference')->willReturn('FOO');
     }
 
     public function testFailingChangeSet()
     {
-        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
-        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
-        $blueprintMock->expects($this->once())->method('executeBeforeScripts');
+        $this->cfnClientMock->method('describeChangeSet')->willReturn(new \Aws\Result(['Status' => 'FAILED', 'StatusReason' => 'FOO REASON']));
 
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', ['createChangeSet', 'describeChangeSet'], [], '', false);
-        $cfnClientMock->method('createChangeSet')->willReturn(new \Aws\Result(['id' => 'foo_id']));
-        $cfnClientMock->method('describeChangeSet')->willReturn(new \Aws\Result(['Status' => 'FAILED', 'StatusReason' => 'FOO REASON']));
+        $this->setExpectedException('Exception', 'FOO REASON');
 
-        $this->setExpectedException('\Exception', 'FOO REASON');
-
-        $blueprintAction = new \StackFormation\BlueprintAction($cfnClientMock);
-        $blueprintAction->getChangeSet($blueprintMock, false);
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $this->blueprintMock,
+            $this->profileManagerMock
+        );
+        $blueprintAction->getChangeSet();
     }
 
     public function testValidateTemplate()
     {
+        $this->cfnClientMock->expects($this->once())->method('validateTemplate');
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $this->blueprintMock,
+            $this->profileManagerMock
+        );
+        $blueprintAction->validateTemplate();
+    }
+
+
+    /**
+     * @test
+     */
+    public function runBeforeScripts()
+    {
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
         $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'echo -n "HELLO WORLD" > '.$testfile
+        ]);
 
-        $cfnClientMock = $this->getMock('\Aws\CloudFormation\CloudFormationClient', ['validateTemplate'], [], '', false);
-        $cfnClientMock->expects($this->once())->method('validateTemplate');
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $this->profileManagerMock
+        );
 
-        $blueprintAction = new \StackFormation\BlueprintAction($cfnClientMock);
-        $blueprintAction->validateTemplate($blueprintMock);
+        $blueprintAction->executeBeforeScripts();
+
+        $this->assertStringEqualsFile($testfile, 'HELLO WORLD');
+        unlink($testfile);
+    }
+
+
+    /**
+     * @test
+     */
+    public function runBeforeScriptsInCorrectLocation()
+    {
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getBasePath')->willReturn(FIXTURE_ROOT.'RunBeforeScript');
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'cat foo.txt > '.$testfile
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $this->profileManagerMock
+        );
+
+        $blueprintAction->executeBeforeScripts();
+
+        $this->assertStringEqualsFile($testfile, 'HELLO WORLD FROM FILE');
+        unlink($testfile);
+    }
+
+    /**
+     * @test
+     */
+    public function beforeScriptsHaveProfilesEnvVarsSet()
+    {
+        chdir(FIXTURE_ROOT.'ProfileManager/fixture_before_scripts');
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
+        $profileManager = new \StackFormation\Profile\Manager();
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > '.$testfile
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $profileManager
+        );
+
+        $blueprintAction->executeBeforeScripts();
+
+        $this->assertStringEqualsFile($testfile, 'TESTACCESSKEY1:TESTSECRETKEY1');
+        unlink($testfile);
     }
 
 

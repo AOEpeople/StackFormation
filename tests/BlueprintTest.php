@@ -9,14 +9,12 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
-        $placeholderResolver = new \StackFormation\PlaceholderResolver(
-            new \StackFormation\DependencyTracker(),
-            $stackFactoryMock,
-            $config
-        );
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock->method('getStackFactory')->willReturn($stackFactoryMock);
 
-        $conditionalValueResolver = new \StackFormation\ConditionalValueResolver($placeholderResolver);
-        return new \StackFormation\BlueprintFactory($config, $placeholderResolver, $conditionalValueResolver);
+        $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
+
+        return new \StackFormation\BlueprintFactory($config, $valueResolver);
     }
 
     /**
@@ -28,6 +26,11 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $blueprintVars = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getVars();
         $this->assertArrayHasKey('BlueprintFoo', $blueprintVars);
         $this->assertEquals('BlueprintBar', $blueprintVars['BlueprintFoo']);
+    }
+
+    public function testBlueprintVarOverridesGlobalVar()
+    {
+        $this->markTestIncomplete();
     }
 
     /**
@@ -163,21 +166,6 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
     /**
      * @test
      */
-    public function runBeforeScriptsWith()
-    {
-        $testfile = tempnam(sys_get_temp_dir(), __METHOD__);
-        putenv("TESTFILE=$testfile");
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
-        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture6');
-        $blueprint->executeBeforeScripts();
-
-        $this->assertStringEqualsFile($testfile, 'HELLO WORLD');
-        unlink($testfile);
-    }
-
-    /**
-     * @test
-     */
     public function loadStackPolicy()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
@@ -223,6 +211,117 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
             ['Val2', 'b'],
             ['somethingelse', 'c'],
         ];
+    }
+
+    /**
+     * @test
+     * @dataProvider testConditionalGlobalProvider
+     */
+    public function testConditionalGlobalVar($foo, $expectedValue)
+    {
+        putenv('Foo='.$foo);
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_vars.yml']);
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional_global');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+        $this->assertEquals($expectedValue, $parameters['Parameter1']);
+    }
+
+    public function testConditionalGlobalProvider() {
+        return [
+            ['Val1', 'a'],
+            ['Val2', 'b'],
+            ['somethingelse', 'c'],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider testConditionalGlobalProvider
+     */
+    public function testConditionalLocalVar($foo, $expectedValue)
+    {
+        putenv('Foo='.$foo);
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_vars.yml']);
+        $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional_local');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+        $this->assertEquals($expectedValue, $parameters['Parameter1']);
+    }
+
+    /**
+     * @test
+     */
+    public function testSwitchProfile() {
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock
+            ->expects($this->exactly(2))
+            ->method('getStackFactory')
+            ->willReturnCallback(function($profile) {
+                if ($profile == 'myprofile1') {
+                    $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'LocalStackFactory', false);
+                    $stackFactoryMock->method('getStackOutput')->willReturn('dummyOutputLocal');
+                    return $stackFactoryMock;
+                }
+                if ($profile == 'myprofile2') {
+                    $subStackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], 'RemoteStackFactory', false);
+                    $subStackFactoryMock->method('getStackOutput')->willReturn('dummyOutputRemote');
+                    return $subStackFactoryMock;
+                }
+                return null;
+            });
+
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
+
+        $valueResolver = new \StackFormation\ValueResolver(
+            new \StackFormation\DependencyTracker(),
+            $profileManagerMock,
+            $config
+        );
+
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+
+        $blueprint = $blueprintFactory->getBlueprint('switch_profile');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+
+        $this->assertEquals('Bar1', $parameters['Foo1']);
+        $this->assertEquals('dummyOutputRemote', $parameters['Foo2']);
+        $this->assertEquals('dummyOutputLocal', $parameters['Foo3']);
+    }
+
+    /**
+     * @test
+     */
+    public function testSwitchProfileComplex() {
+
+        putenv('ACCOUNT=t');
+        putenv('BASE_TYPE_VERSION=42');
+
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock
+            ->method('getStackFactory')
+            ->willReturnCallback(function() {
+                $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', ['getStackOutput'], [], '', false);
+                $stackFactoryMock->method('getStackOutput')->willReturnCallback(function($stackName, $key) { return "DummyValue|$stackName|$key"; });
+                return $stackFactoryMock;
+            });
+
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
+
+        $valueResolver = new \StackFormation\ValueResolver(
+            new \StackFormation\DependencyTracker(),
+            $profileManagerMock,
+            $config
+        );
+
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+
+        $blueprint = $blueprintFactory->getBlueprint('switch_profile_complex');
+        $parameters = $blueprint->getParameters(true);
+        $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
+
+        $this->assertEquals('DummyValue|ecom-t-all-ami-types-42-stack|VarnishAmi', $parameters['VarnishAmi']);
     }
 
 

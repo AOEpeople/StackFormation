@@ -89,7 +89,7 @@ class Stack {
      *
      * @return array
      */
-    public function getOutputs()
+    public function  getOutputs()
     {
         $outputs = [];
         $res = isset($this->data['Outputs']) ? $this->data['Outputs'] : [];

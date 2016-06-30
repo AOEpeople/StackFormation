@@ -7,10 +7,16 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
 
     protected $originalCwd;
 
+    /**
+     * @var \StackFormation\Profile\Manager
+     */
+    protected $profileManager;
+
     public function setUp()
     {
         parent::setUp();
         $this->originalCwd = getcwd();
+        $this->profileManager = new \StackFormation\Profile\Manager();
     }
 
     public function tearDown()
@@ -22,47 +28,38 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
     public function testListProfiles()
     {
         chdir(FIXTURE_ROOT.'ProfileManager/fixture_basic');
-        $profileManager = new \AwsInspector\ProfileManager();
         $this->assertEquals(
             ['test1', 'test2', 'test3'],
-            $profileManager->listAllProfiles()
-        );
-        $this->assertEquals(
-            ['profiles.yml'],
-            $profileManager->getLoadedFiles()
+            $this->profileManager->listAllProfiles()
         );
     }
 
     public function testInvalidProfile()
     {
         chdir(FIXTURE_ROOT . 'ProfileManager/fixture_basic');
-        $profileManager = new \AwsInspector\ProfileManager();
-        $this->assertFalse($profileManager->isValidProfile('invalidProfile'));
+        $this->setExpectedException('Exception', 'Invalid profile: invalidProfile');
+        $this->profileManager->getClient('CloudFormation', 'invalidProfile');
     }
 
     public function testLoadProfile()
     {
         chdir(FIXTURE_ROOT . 'ProfileManager/fixture_basic');
-        $profileManager = new \AwsInspector\ProfileManager();
-        $profileManager->loadProfile('test1');
 
-        $this->assertEquals('test1', getenv('AWSINSPECTOR_PROFILE'));
-        $this->assertEquals('us-east-1', getenv('AWS_DEFAULT_REGION'));
-        $this->assertEquals('TESTACCESSKEY1', getenv('AWS_ACCESS_KEY_ID'));
-        $this->assertEquals('TESTSECRETKEY1', getenv('AWS_SECRET_ACCESS_KEY'));
+        putenv("AWS_DEFAULT_REGION=eu-west-1");
+        $cfnClient = $this->profileManager->getClient('CloudFormation', 'test1');
+
+        $credentials = $cfnClient->getCredentials()->wait(true);
+
+        $this->assertEquals('TESTACCESSKEY1', $credentials->getAccessKeyId());
+        $this->assertEquals('TESTSECRETKEY1', $credentials->getSecretKey());
     }
 
     public function testLoadMultipleFiles()
     {
         chdir(FIXTURE_ROOT . 'ProfileManager/fixture_merge_profiles');
-        $profileManager = new \AwsInspector\ProfileManager();
         $this->assertEquals(
             ['test1', 'test2', 'test3', 'test1-personal', 'test2-personal'],
-            $profileManager->listAllProfiles()
-        );
-        $this->assertEquals(
-            ['profiles.yml', 'profiles.personal.yml'],
-            $profileManager->getLoadedFiles()
+            $this->profileManager->listAllProfiles()
         );
     }
 
@@ -74,8 +71,7 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         putenv("VAULT_MAC_KEY=");
         putenv("VAULT_ENCRYPTION_KEY=");
         chdir(FIXTURE_ROOT . 'ProfileManager/fixture_encrpyted');
-        $profileManager = new \AwsInspector\ProfileManager();
-        $profileManager->listAllProfiles();
+        $this->profileManager->listAllProfiles();
     }
 
     public function testEncryptedFileWithWrongVaultVars() {
@@ -86,8 +82,7 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         putenv("VAULT_MAC_KEY=sadsad");
         putenv("VAULT_ENCRYPTION_KEY=asdsad");
         chdir(FIXTURE_ROOT . 'ProfileManager/fixture_encrpyted');
-        $profileManager = new \AwsInspector\ProfileManager();
-        $profileManager->listAllProfiles();
+        $this->profileManager->listAllProfiles();
     }
 
     public function testEncryptedFile() {
@@ -97,14 +92,9 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         putenv("VAULT_MAC_KEY=".self::VAULT_MAC_KEY);
         putenv("VAULT_ENCRYPTION_KEY=".self::VAULT_ENCRYPTION_KEY);
         chdir(FIXTURE_ROOT . 'ProfileManager/fixture_encrpyted');
-        $profileManager = new \AwsInspector\ProfileManager();
         $this->assertEquals(
             ['test1', 'test2', 'test3'],
-            $profileManager->listAllProfiles()
-        );
-        $this->assertEquals(
-            ['profiles.yml'],
-            $profileManager->getLoadedFiles()
+            $this->profileManager->listAllProfiles()
         );
     }
 
@@ -115,14 +105,9 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         putenv("VAULT_MAC_KEY=".self::VAULT_MAC_KEY);
         putenv("VAULT_ENCRYPTION_KEY=".self::VAULT_ENCRYPTION_KEY);
         chdir(FIXTURE_ROOT . 'ProfileManager/fixture_encrpyted_mix');
-        $profileManager = new \AwsInspector\ProfileManager();
         $this->assertEquals(
             ['test1', 'test2', 'test3', 'test1-personal', 'test2-personal'],
-            $profileManager->listAllProfiles()
-        );
-        $this->assertEquals(
-            ['profiles.yml', 'profiles.personal.yml'],
-            $profileManager->getLoadedFiles()
+            $this->profileManager->listAllProfiles()
         );
     }
 

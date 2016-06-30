@@ -11,18 +11,19 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $stackFactoryMock->method('getStackResource')->willReturn('dummyResource');
         $stackFactoryMock->method('getStackParameter')->willReturn('dummyParameter');
 
-        $placeholderResolver = new \StackFormation\PlaceholderResolver(
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $profileManagerMock->method('getStackFactory')->willReturn($stackFactoryMock);
+
+        $placeholderResolver = new \StackFormation\ValueResolver(
             new \StackFormation\DependencyTracker(),
-            $stackFactoryMock,
+            $profileManagerMock,
             $configMock
         );
-
-        $conditionalValueResolver = new \StackFormation\ConditionalValueResolver($placeholderResolver);
 
         if (is_null($name)) {
             $name = 'blueprint_mock_'.time();
         }
-        return new \StackFormation\Blueprint($name, $blueprintConfig, $placeholderResolver, $conditionalValueResolver);
+        return new \StackFormation\Blueprint($name, $blueprintConfig, $placeholderResolver);
     }
 
     /**
@@ -34,7 +35,7 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         if ($putenv) {
             putenv($putenv);
         }
-        $blueprint = $this->getMockedBlueprint([ 'parameters' => [
+        $blueprint = $this->getMockedBlueprint(['parameters' => [
             'Foo' => $rawParameterValue
         ]]);
         $parameters = $blueprint->getParameters(true);
@@ -132,6 +133,5 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $basePath = $blueprint->getBasePath();
         $this->assertEquals(FIXTURE_ROOT.'Config', $basePath);
     }
-
 
 }

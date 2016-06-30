@@ -1,0 +1,5 @@
+profiles:
+  before_scripts_profile:
+    region: 'us-east-1'
+    access_key: 'TESTACCESSKEY1'
+    secret_key: 'TESTSECRETKEY1'

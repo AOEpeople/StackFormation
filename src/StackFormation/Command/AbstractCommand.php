@@ -3,14 +3,12 @@
 namespace StackFormation\Command;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
-use StackFormation\BlueprintAction;
 use StackFormation\BlueprintFactory;
-use StackFormation\ConditionalValueResolver;
 use StackFormation\Config;
 use StackFormation\DependencyTracker;
-use StackFormation\PlaceholderResolver;
+use StackFormation\Profile\Manager;
+use StackFormation\ValueResolver;
 use StackFormation\StackFactory;
-use StackFormation\SdkFactory;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,20 +26,32 @@ abstract class AbstractCommand extends Command
     /* @var DependencyTracker */
     protected $dependencyTracker;
 
-    /* @var BlueprintAction */
-    protected $blueprintAction;
+    /* @var Manager */
+    protected $profileManager;
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input, $output);
-        $cfnClient = SdkFactory::getCfnClient();
-        $this->stackFactory = new StackFactory($cfnClient);
+        $this->profileManager = new Manager(null, $output);
         $config = new Config();
         $this->dependencyTracker = new DependencyTracker();
-        $placeholderResolver = new PlaceholderResolver($this->dependencyTracker, $this->stackFactory, $config);
-        $conditionalValueResolver = new ConditionalValueResolver($placeholderResolver);
-        $this->blueprintFactory = new BlueprintFactory($config, $placeholderResolver, $conditionalValueResolver);
-        $this->blueprintAction = new BlueprintAction($cfnClient);
+        $this->blueprintFactory = new BlueprintFactory(
+            $config,
+            new ValueResolver(
+                $this->dependencyTracker,
+                $this->profileManager,
+                $config,
+                null // don't load a specific profile
+            )
+        );
+    }
+
+    protected function getStackFactory()
+    {
+        if (is_null($this->stackFactory)) {
+            $this->stackFactory = $this->profileManager->getStackFactory(null);
+        }
+        return $this->stackFactory;
     }
 
     protected function interactAskForBlueprint(InputInterface $input, OutputInterface $output)
@@ -73,7 +83,7 @@ abstract class AbstractCommand extends Command
 
     protected function getStacks($nameFilter=null, $statusFilter=null)
     {
-        return array_keys($this->stackFactory->getStacksFromApi(false, $nameFilter, $statusFilter));
+        return array_keys($this->getStackFactory()->getStacksFromApi(false, $nameFilter, $statusFilter));
     }
 
     public function interactAskForStack(InputInterface $input, OutputInterface $output, $nameFilter=null, $statusFilter=null)

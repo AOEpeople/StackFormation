@@ -9,22 +9,15 @@ class Blueprint {
      */
     protected $name;
     protected $blueprintConfig;
-    protected $placeholderResolver;
     protected $valueResolver;
 
-    public function __construct(
-        $name,
-        array $blueprintConfig,
-        PlaceholderResolver $placeholderResolver,
-        ConditionalValueResolver $valueResolver
-    )
+    public function __construct($name, array $blueprintConfig, ValueResolver $valueResolver)
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException('Name must be a string');
         }
         $this->name = $name;
         $this->blueprintConfig = $blueprintConfig;
-        $this->placeholderResolver = $placeholderResolver;
         $this->valueResolver = $valueResolver;
     }
 
@@ -39,7 +32,7 @@ class Blueprint {
         if (isset($this->blueprintConfig['tags'])) {
             foreach ($this->blueprintConfig['tags'] as $key => $value) {
                 if ($resolvePlaceholders) {
-                    $value = $this->placeholderResolver->resolvePlaceholders($value, $this, 'tag', $key);
+                    $value = $this->valueResolver->resolvePlaceholders($value, $this, 'tag', $key);
                 }
                 $tags[] = ['Key' => $key, 'Value' => $value];
             }
@@ -49,40 +42,25 @@ class Blueprint {
 
     public function getStackName()
     {
-        return $this->placeholderResolver->resolvePlaceholders($this->name, $this, 'stackname');
+        $stackName = $this->valueResolver->resolvePlaceholders($this->name, $this, 'stackname');
+        Helper::validateStackname($stackName);
+        return $stackName;
     }
 
-    public function getProfile()
+    public function getProfile($resolvePlaceholders=true)
     {
         if (isset($this->blueprintConfig['profile'])) {
             $value = $this->blueprintConfig['profile'];
-            if (is_array($value)) {
-                $value = $this->valueResolver->resolveConditionalValue($value, $this);
+            if ($resolvePlaceholders) {
+                $value = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
             }
-            $value = $this->placeholderResolver->resolvePlaceholders($value, $this, 'profile');
             return $value;
         }
-        return false;
-    }
-
-    public function enforceProfile()
-    {
-        // TODO: loading profiles shouldn't be done within a blueprint!
-        if ($profile = $this->getProfile()) {
-            if ($profile == 'USE_IAM_INSTANCE_PROFILE') {
-                echo "Using IAM instance profile\n";
-            } else {
-                $profileManager = new \AwsInspector\ProfileManager();
-                $profileManager->loadProfile($profile);
-                echo "Loading Profile: $profile\n";
-            }
-        }
+        return null;
     }
 
     public function getPreprocessedTemplate()
     {
-        $this->enforceProfile();
-
         if (empty($this->blueprintConfig['template']) || !is_array($this->blueprintConfig['template'])) {
             throw new \Exception('No template(s) found');
         }
@@ -108,8 +86,6 @@ class Blueprint {
     {
         $parameters = [];
 
-        $this->enforceProfile();
-
         if (!isset($this->blueprintConfig['parameters'])) {
             return [];
         }
@@ -120,18 +96,15 @@ class Blueprint {
                 throw new \Exception("Invalid parameter key '$parameterKey'.");
             }
 
-            if (is_array($parameterValue)) {
-                $parameterValue = $this->valueResolver->resolveConditionalValue($parameterValue, $this);
-            }
             if (is_null($parameterValue)) {
                 throw new \Exception("Parameter $parameterKey is null.");
             }
-            if (!is_scalar($parameterValue)) {
-                throw new \Exception('Invalid type for value');
-            }
 
             if ($resolvePlaceholders) {
-                $parameterValue = $this->placeholderResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
+                $parameterValue = $this->valueResolver->resolvePlaceholders($parameterValue, $this, 'parameter', $parameterKey);
+            }
+            if (!is_scalar($parameterValue)) {
+                throw new \Exception('Invalid type for value');
             }
 
             $tmp = [
@@ -164,7 +137,11 @@ class Blueprint {
 
         return $parameters;
     }
-    
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getBeforeScripts()
     {
         $scripts = [];
@@ -172,7 +149,8 @@ class Blueprint {
             $scripts = $this->blueprintConfig['before'];
         }
         foreach ($scripts as &$script) {
-            $script = $this->placeholderResolver->resolvePlaceholders($script, $this, 'script');
+            $script = $this->valueResolver->resolvePlaceholders($script, $this, 'script');
+            $script = str_replace('###CWD###', CWD, $script);
         }
         return $scripts;
     }
@@ -218,29 +196,12 @@ class Blueprint {
         return isset($this->blueprintConfig['vars']) ? $this->blueprintConfig['vars'] : [];
     }
 
-    public function executeBeforeScripts()
-    {
-        $scripts = $this->getBeforeScripts();
-        if (count($scripts) == 0) {
-            return;
-        }
-
-        $cwd = getcwd();
-        chdir($this->getBasePath());
-
-        passthru(implode("\n", $scripts), $returnVar);
-        if ($returnVar !== 0) {
-            throw new \Exception('Error executing commands');
-        }
-        chdir($cwd);
-    }
-
     public function getBlueprintReference()
     {
         // this is how we reference a stack back to its blueprint
         $blueprintReference = array_merge(
             ['Name' => $this->name],
-            $this->placeholderResolver->getDependencyTracker()->getUsedEnvironmentVariables()
+            $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables()
         );
 
         $encodedValues = http_build_query($blueprintReference);
