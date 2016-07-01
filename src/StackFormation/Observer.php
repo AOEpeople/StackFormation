@@ -4,6 +4,7 @@ namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Helper\StackEventsTable;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
 
@@ -30,70 +31,26 @@ class Observer
 
     public function observeStackActivity($pollInterval = 20)
     {
-        $printedEvents = [];
-        $first = true;
-        $stackGone = false;
-        $lastStatus = '';
-        do {
-            if ($first) {
-                $first = false;
-            } else {
-                sleep($pollInterval);
-            }
-
+        $eventTable = new StackEventsTable($this->output);
+        $lastStatus = Poller::poll(function() use ($eventTable) {
             try {
-                // load fresh instance for updated status
-                $this->stack = $this->stackFactory->getStack($this->stack->getName(), true);
-                $lastStatus = $this->stack->getStatus();
-
-                $this->output->writeln("-> Polling... (Stack Status: $lastStatus)");
-
-                $logMessages = [];
-
-                $rows = [];
-                foreach ($this->stack->getEvents() as $eventId => $event) {
-                    if (!in_array($eventId, $printedEvents)) {
-                        $printedEvents[] = $eventId;
-                        $rows[] = [
-                            // $event['Timestamp'],
-                            Helper::decorateStatus($event['Status']),
-                            $event['ResourceType'],
-                            $event['LogicalResourceId'],
-                            wordwrap($event['ResourceStatusReason'], 40, "\n"),
-                        ];
-
-                        if (!count($logMessages)) {
-                            $logMessages = Helper::getDetailedLogFromResourceStatusReason($event['ResourceStatusReason']);
-                        }
-                    }
+                try {
+                    $this->stack = $this->stackFactory->getStack($this->stack->getName(), true); // load fresh instance for updated status
+                    $this->output->writeln("-> Polling... (Stack Status: {$this->stack->getStatus()})");
+                    $eventTable->render($this->stack->getEvents());
+                } catch (CloudFormationException $exception) {
+                    throw \StackFormation\Helper::refineException($exception);
                 }
-
-                $table = new Table($this->output);
-                $table->setRows($rows);
-                $table->render();
-
-                $this->printLogMessages($logMessages);
-
-            } catch (CloudFormationException $exception) {
-                // TODO: use refineException instead
-                $message = \StackFormation\Helper::extractMessage($exception);
-                if ($message == "Stack [{$this->stack->getName()}] does not exist") {
-                    $stackGone = true;
-                    $this->output->writeln("-> Stack gone.");
-                } else {
-                    throw $exception;
-                }
-
             } catch (StackNotFoundException $exception) {
-                $stackGone = true;
                 $this->output->writeln("-> Stack gone.");
+                return 'STACK_GONE'; // this is != false and will stop the poller
             }
-        } while (!$stackGone && strpos($lastStatus, 'IN_PROGRESS') !== false);
+            return $this->stack->isInProgress() ? false : $this->stack->getStatus();
+        }, $pollInterval, 1000);
 
         $this->printStatus($lastStatus);
         $this->printOutputs();
-
-        return in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'DELETE_IN_PROGRESS']) ? 0 : 1;
+        return in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'STACK_GONE']) ? 0 : 1;
     }
 
     protected function printOutputs()
@@ -126,21 +83,5 @@ class Observer
             ? $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true)
             : $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true);
         $this->output->writeln("\n\n$formattedBlock\n\n");
-    }
-
-    /**
-     * @param $logMessages
-     */
-    protected function printLogMessages(array $logMessages)
-    {
-        if (count($logMessages)) {
-            $this->output->writeln('');
-            $this->output->writeln("====================");
-            $this->output->writeln("Detailed log output:");
-            $this->output->writeln("====================");
-            foreach ($logMessages as $line) {
-                $this->output->writeln(trim($line));
-            }
-        }
     }
 }

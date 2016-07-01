@@ -52,6 +52,11 @@ class Stack {
         return $this->data['StackStatus'];
     }
 
+    public function isInProgress()
+    {
+        return strpos($this->getStatus(), 'IN_PROGRESS') !== false;
+    }
+
     public function getParameter($key)
     {
         $parameters = $this->getParameters();
