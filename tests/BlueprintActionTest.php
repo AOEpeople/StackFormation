@@ -29,6 +29,7 @@ class BlueprintActionTest extends PHPUnit_Framework_TestCase {
 
         $this->blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $this->blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $this->blueprintMock->method('getTags')->willReturn([]);
     }
 
     public function testFailingChangeSet()

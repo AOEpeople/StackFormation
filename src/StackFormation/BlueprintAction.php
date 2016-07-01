@@ -153,16 +153,6 @@ class BlueprintAction {
             $arguments['StackPolicyBody'] = $policy;
         }
 
-        // this is how we reference a stack back to its blueprint
-        try {
-            $arguments['Tags'][] = [
-                'Key' => 'stackformation:blueprint',
-                'Value' => $this->blueprint->getBlueprintReference()
-            ];
-        } catch (\Exception $e) {
-            // TODO: ignoring this for now...
-        }
-
         Helper::validateTags($arguments['Tags']);
 
         return $arguments;

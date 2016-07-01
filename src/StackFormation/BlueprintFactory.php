@@ -23,7 +23,7 @@ class BlueprintFactory {
     public function getBlueprint($blueprintName)
     {
         if (!$this->blueprintExists($blueprintName)) {
-            throw new BlueprintNotFoundException("Blueprint '$blueprintName' does not exist'");
+            throw new BlueprintNotFoundException("Blueprint '$blueprintName' does not exist.");
         }
         $blueprint = new Blueprint(
             $blueprintName,
@@ -35,13 +35,8 @@ class BlueprintFactory {
 
     public function getBlueprintByStack(Stack $stack)
     {
-        try {
-            $blueprintName = $stack->getBlueprintName();
-            return $this->getBlueprint($blueprintName);
-        } catch (TagNotFoundException $e) {
-            // let's try if there's a blueprint with the same name
-            return $this->getBlueprint($stack->getName());
-        }
+        $blueprintName = $stack->getBlueprintName();
+        return $this->getBlueprint($blueprintName);
     }
 
     public function blueprintExists($blueprint)

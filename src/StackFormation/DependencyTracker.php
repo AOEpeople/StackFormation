@@ -66,6 +66,7 @@ class DependencyTracker
                 $vars[$variableName] = $data['value'];
             }
         }
+        ksort($vars);
         return $vars;
     }
 

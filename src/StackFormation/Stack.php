@@ -6,10 +6,14 @@ use StackFormation\Exception\OutputNotFoundException;
 use StackFormation\Exception\ParameterNotFoundException;
 use StackFormation\Exception\ResourceNotFoundException;
 use StackFormation\Exception\TagNotFoundException;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use StackFormation\Helper\Cache;
 
 class Stack {
-    
+
+    CONST METADATA_KEY = 'StackFormation';
+    CONST METADATA_KEY_BLUEPRINT = 'Blueprint';
+    CONST METADATA_KEY_ENVVARS = 'EnvironmentVariables';
+
     /**
      * @var string
      */
@@ -20,10 +24,16 @@ class Stack {
      */
     protected $cfnClient;
 
+    /**
+     * @var Cache
+     */
+    protected $cache;
+
     public function __construct($data, \Aws\CloudFormation\CloudFormationClient $cfnClient)
     {
         $this->data = $data;
         $this->cfnClient = $cfnClient;
+        $this->cache = new Cache();
     }
 
     public function getName()
@@ -127,7 +137,7 @@ class Stack {
      */
     public function getResources()
     {
-        return StaticCache::get('stack-resources-' . $this->getName(), function () {
+        return $this->cache->get(__METHOD__, function () {
             $resources = [];
             $res = $this->cfnClient->describeStackResources(['StackName' => $this->getName()])->search('StackResources[]');
             if (is_array($res)) {
@@ -182,48 +192,44 @@ class Stack {
 
     public function getBlueprintName()
     {
-        $reference = $this->getBlueprintReference();
-        return $reference['Name'];
+        $blueprintReference = $this->getBlueprintReference();
+        if (!isset($blueprintReference[self::METADATA_KEY_BLUEPRINT])) {
+            throw new \Exception('No bleprint name found in blueprint reference for stack ' . $this->getName());
+        }
+        return $blueprintReference[self::METADATA_KEY_BLUEPRINT];
     }
 
     public function getUsedEnvVars()
     {
-        try {
-            $reference = $this->getBlueprintReference();
-            unset($reference['Name']);
-        } catch (TagNotFoundException $e) {
-            $reference = [];
+        $blueprintReference = $this->getBlueprintReference();
+        if (!isset($blueprintReference[self::METADATA_KEY_ENVVARS])) {
+            throw new \Exception('No env vars found in blueprint reference for stack ' . $this->getName());
         }
-        return $reference;
+        return $blueprintReference[self::METADATA_KEY_ENVVARS];
     }
 
     /**
      * @return array
-     * @throws TagNotFoundException
+     * @throws \Exception
      */
-    public function getBlueprintReference()
+    protected function getBlueprintReference()
     {
-        $data = [];
-        $reference = $this->getTag('stackformation:blueprint');
-        $reference = base64_decode($reference);
-
-        if (strpos($reference, 'gz:') === 0) {
-            $reference = gzdecode(substr($reference, 3));
-        }
-
-        if (substr($reference, 0, 5) == 'Name=') {
-            parse_str($reference, $data);
-        } else {
-            // old style
-            $data['Name'] = $reference;
-        }
-        return $data;
+        return $this->cache->get(__METHOD__, function () {
+            $template = $this->getTemplate();
+            $decodedTemplate = json_decode($template, true);
+            if (!isset($decodedTemplate['Metadata']) || !isset($decodedTemplate['Metadata'][self::METADATA_KEY])) {
+                throw new \Exception('No blueprint reference found');
+            }
+            return $decodedTemplate['Metadata'][self::METADATA_KEY];
+        });
     }
 
     public function getTemplate()
     {
-        $res = $this->cfnClient->getTemplate(['StackName' => $this->getName()]);
-        return $res->get('TemplateBody');
+        return $this->cache->get(__METHOD__, function () {
+            $res = $this->cfnClient->getTemplate(['StackName' => $this->getName()]);
+            return $res->get('TemplateBody');
+        });
     }
 
     ///**
