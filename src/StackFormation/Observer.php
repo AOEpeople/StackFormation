@@ -48,12 +48,10 @@ class Observer
 
                 $this->output->writeln("-> Polling... (Stack Status: $lastStatus)");
 
-                $events = $this->stack->getEvents();
-
                 $logMessages = [];
 
                 $rows = [];
-                foreach ($events as $eventId => $event) {
+                foreach ($this->stack->getEvents() as $eventId => $event) {
                     if (!in_array($eventId, $printedEvents)) {
                         $printedEvents[] = $eventId;
                         $rows[] = [
@@ -74,15 +72,8 @@ class Observer
                 $table->setRows($rows);
                 $table->render();
 
-                if (count($logMessages)) {
-                    $this->output->writeln('');
-                    $this->output->writeln("====================");
-                    $this->output->writeln("Detailed log output:");
-                    $this->output->writeln("====================");
-                    foreach ($logMessages as $line) {
-                        $this->output->writeln(trim($line));
-                    }
-                }
+                $this->printLogMessages($logMessages);
+
             } catch (CloudFormationException $exception) {
                 // TODO: use refineException instead
                 $message = \StackFormation\Helper::extractMessage($exception);
@@ -99,12 +90,14 @@ class Observer
             }
         } while (!$stackGone && strpos($lastStatus, 'IN_PROGRESS') !== false);
 
-        $formatter = new FormatterHelper();
-        $formattedBlock = (strpos($lastStatus, 'FAILED') !== false)
-            ? $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true)
-            : $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true);
-        $this->output->writeln("\n\n$formattedBlock\n\n");
+        $this->printStatus($lastStatus);
+        $this->printOutputs();
 
+        return in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'DELETE_IN_PROGRESS']) ? 0 : 1;
+    }
+
+    protected function printOutputs()
+    {
         $this->output->writeln("== OUTPUTS ==");
         try {
             $rows = [];
@@ -121,7 +114,33 @@ class Observer
         } catch (\Exception $e) {
             // never mind...
         }
+    }
 
-        return in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'DELETE_IN_PROGRESS']) ? 0 : 1;
+    /**
+     * @param $lastStatus
+     */
+    protected function printStatus($lastStatus)
+    {
+        $formatter = new FormatterHelper();
+        $formattedBlock = (strpos($lastStatus, 'FAILED') !== false)
+            ? $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true)
+            : $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true);
+        $this->output->writeln("\n\n$formattedBlock\n\n");
+    }
+
+    /**
+     * @param $logMessages
+     */
+    protected function printLogMessages(array $logMessages)
+    {
+        if (count($logMessages)) {
+            $this->output->writeln('');
+            $this->output->writeln("====================");
+            $this->output->writeln("Detailed log output:");
+            $this->output->writeln("====================");
+            foreach ($logMessages as $line) {
+                $this->output->writeln(trim($line));
+            }
+        }
     }
 }
