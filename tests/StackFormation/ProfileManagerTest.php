@@ -1,10 +1,15 @@
 <?php
 
-class ProfileManagerTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
 
+class ProfileManagerTest extends \PHPUnit_Framework_TestCase
+{
     CONST VAULT_MAC_KEY = 'ziBH2sJjat30mpnJtJwvlp7a4G6u20aKyJ6LonVbZKs=';
     CONST VAULT_ENCRYPTION_KEY = 'XXuso82dkjakWHNGtEqUF1eB1h4nKkmZ0Cxv7aQC8Jo=';
 
+    /**
+     * @var string
+     */
     protected $originalCwd;
 
     /**
@@ -27,7 +32,7 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
 
     public function testListProfiles()
     {
-        chdir(FIXTURE_ROOT.'ProfileManager/fixture_basic');
+        chdir(FIXTURE_ROOT . 'ProfileManager/fixture_basic');
         $this->assertEquals(
             ['test1', 'test2', 'test3'],
             $this->profileManager->listAllProfiles()
@@ -63,7 +68,8 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-    public function testEncryptedFileWithoutVaultVars() {
+    public function testEncryptedFileWithoutVaultVars()
+    {
         if (!class_exists('\Vault\Vault')) {
             $this->markTestSkipped('aoepeople/vault must be installed to run this test');
         }
@@ -74,7 +80,8 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         $this->profileManager->listAllProfiles();
     }
 
-    public function testEncryptedFileWithWrongVaultVars() {
+    public function testEncryptedFileWithWrongVaultVars()
+    {
         if (!class_exists('\Vault\Vault')) {
             $this->markTestSkipped('aoepeople/vault must be installed to run this test');
         }
@@ -85,7 +92,8 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         $this->profileManager->listAllProfiles();
     }
 
-    public function testEncryptedFile() {
+    public function testEncryptedFile()
+    {
         if (!class_exists('\Vault\Vault')) {
             $this->markTestSkipped('aoepeople/vault must be installed to run this test');
         }
@@ -98,7 +106,8 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-    public function testEncryptedAndUnencryptedFile() {
+    public function testEncryptedAndUnencryptedFile()
+    {
         if (!class_exists('\Vault\Vault')) {
             $this->markTestSkipped('aoepeople/vault must be installed to run this test');
         }
@@ -110,6 +119,4 @@ class ProfileManagerTest extends PHPUnit_Framework_TestCase {
             $this->profileManager->listAllProfiles()
         );
     }
-
-
 }

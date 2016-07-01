@@ -1,7 +1,12 @@
 <?php
 
-class PollerTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
 
+class PollerTest extends \PHPUnit_Framework_TestCase
+{
+    /**
+     * @var array
+     */
     protected $counters = [];
 
     /**
@@ -41,5 +46,4 @@ class PollerTest extends PHPUnit_Framework_TestCase {
         $result = \StackFormation\Poller::poll($function, 0);
         $this->assertEquals("HELLO WORLD", $result);
     }
-
 }

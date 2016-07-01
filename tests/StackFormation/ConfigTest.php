@@ -1,14 +1,16 @@
 <?php
 
-class ConfigTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
 
+class ConfigTest extends \PHPUnit_Framework_TestCase
+{
     /**
      * @test
      */
     public function missingTemplate()
     {
         $this->setExpectedException('Exception', "Stackname 'a' does not specify a template.");
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.template_missing.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.template_missing.yml']);
     }
 
     /**
@@ -17,7 +19,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
     public function missingTemplateFile()
     {
         $this->setExpectedException('Exception', "Could not find template file doesnotexist.template referenced in stack a");
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.templatefile_missing.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.templatefile_missing.yml']);
     }
 
     /**
@@ -26,7 +28,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
     public function duplicateStackName()
     {
         $this->setExpectedException('Exception', "Stackname 'a' was declared more than once.");
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.duplicate_stackname.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.duplicate_stackname.yml']);
     }
 
     /**
@@ -34,7 +36,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
      */
     public function globalVariable()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.1.yml']);
         $globalVars = $config->getGlobalVars();
         $this->assertArrayHasKey('GlobalFoo', $globalVars);
         $this->assertEquals('GlobalBar', $globalVars['GlobalFoo']);
@@ -45,7 +47,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
      */
     public function getBlueprints()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.1.yml']);
         $this->assertTrue($config->blueprintExists('fixture1'));
         $this->assertTrue($config->blueprintExists('fixture2'));
         $names = $config->getBlueprintNames();
@@ -61,16 +63,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase {
             '\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException',
             'Unrecognized option "parameter" under "root.blueprints.invalid_attribute"'
         );
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.invalid_attribute.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.invalid_attribute.yml']);
     }
 
     //public function testDuplicateGlobalVar()
     //{
     //    $this->markTestSkipped('This is not so trivial :)');
     //    $this->setExpectedException('Exception');
-    //    $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.duplicateglobalvar.yml']);
+    //    $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.duplicateglobalvar.yml']);
     //    $vars = $config->getGlobalVars();
     //}
-
-
 }

@@ -1,8 +1,16 @@
 <?php
 
-class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
 
-    protected function getMockedBlueprint($blueprintConfig, $name=null)
+class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
+{
+
+    /**
+     * @param $blueprintConfig
+     * @param null $name
+     * @return \StackFormation\Blueprint
+     */
+    protected function getMockedBlueprint($blueprintConfig, $name = null)
     {
         $configMock = $this->getMock('\StackFormation\Config', [], [], '', false);
 
@@ -27,23 +35,33 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @param $rawParameterValue
+     * @param $expectedResolvedValue
+     * @param null $putenv
+     * @throws \Exception
      * @test
      * @dataProvider getParameterProvider
      */
-    public function getParameter($rawParameterValue, $expectedResolvedValue, $putenv=null)
+    public function getParameter($rawParameterValue, $expectedResolvedValue, $putenv = null)
     {
         if ($putenv) {
             putenv($putenv);
         }
-        $blueprint = $this->getMockedBlueprint(['parameters' => [
-            'Foo' => $rawParameterValue
-        ]]);
+        $blueprint = $this->getMockedBlueprint(
+            [
+                'parameters' => ['Foo' => $rawParameterValue]
+            ]
+        );
         $parameters = $blueprint->getParameters(true);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertEquals($expectedResolvedValue, $parameters['Foo']);
     }
 
-    public function getParameterProvider() {
+    /**
+     * @return array
+     */
+    public function getParameterProvider()
+    {
         return [
             ['Foo', 'Foo'],
             [' Foo ', ' Foo '],
@@ -66,12 +84,17 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
     public function invalidParameterKey($invalidKey)
     {
         $this->setExpectedException('Exception', "Invalid parameter key '$invalidKey'.");
-        $blueprint = $this->getMockedBlueprint([ 'parameters' => [
-            $invalidKey => 'asdsad'
-        ]]);
+        $blueprint = $this->getMockedBlueprint(
+            [
+                'parameters' => [$invalidKey => 'asdsad']
+            ]
+        );
         $blueprint->getParameters(true);
     }
 
+    /**
+     * @return array
+     */
     public function invalidKeyProvider()
     {
         return [
@@ -86,21 +109,20 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         ];
     }
 
-
-
     /**
      * @test
      */
     public function getUnsresolvedParameter()
     {
-        $blueprint = $this->getMockedBlueprint([ 'parameters' => [
-            'Foo' => '{env:DONTRESOVLE}'
-        ]]);
+        $blueprint = $this->getMockedBlueprint(
+            [
+                'parameters' => ['Foo' => '{env:DONTRESOVLE}']
+            ]
+        );
         $parameters = $blueprint->getParameters(false);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
         $this->assertEquals('{env:DONTRESOVLE}', $parameters['Foo']);
     }
-
 
     /**
      * @test
@@ -112,7 +134,6 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $basePath = $blueprint->getBasePath();
     }
 
-
     /**
      * @test
      */
@@ -123,7 +144,6 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
         $basePath = $blueprint->getBasePath();
     }
 
-
     /**
      * @test
      */
@@ -131,7 +151,6 @@ class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
     {
         $blueprint = $this->getMockedBlueprint(['basepath' => FIXTURE_ROOT.'Config']);
         $basePath = $blueprint->getBasePath();
-        $this->assertEquals(FIXTURE_ROOT.'Config', $basePath);
+        $this->assertEquals(FIXTURE_ROOT . 'Config', $basePath);
     }
-
 }

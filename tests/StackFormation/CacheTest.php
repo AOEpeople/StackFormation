@@ -1,7 +1,9 @@
 <?php
 
-class CacheTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
 
+class CacheTest extends \PHPUnit_Framework_TestCase
+{
     protected $cache;
 
     public function setUp()
@@ -14,7 +16,8 @@ class CacheTest extends PHPUnit_Framework_TestCase {
      * @throws Exception
      * @test
      */
-    public function storeInCache() {
+    public function storeInCache()
+    {
         $result = $this->cache->has('test');
         $this->assertFalse($result);
 
@@ -35,7 +38,8 @@ class CacheTest extends PHPUnit_Framework_TestCase {
      * @throws Exception
      * @test
      */
-    public function storeInCacheWithCallback() {
+    public function storeInCacheWithCallback()
+    {
         $result = $this->cache->has('test');
         $this->assertFalse($result);
 
@@ -56,7 +60,8 @@ class CacheTest extends PHPUnit_Framework_TestCase {
     /**
      * @test
      */
-    public function keyNotFound() {
+    public function keyNotFound()
+    {
         $this->setExpectedException('Exception', "Cache key 'doesnotexist' not found.");
         $this->cache->get('doesnotexist');
     }

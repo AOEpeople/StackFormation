@@ -1,19 +1,22 @@
 <?php
 
-class ValueResolverTest extends PHPUnit_Framework_TestCase
-{
+namespace StackFormation\Tests;
 
+class ValueResolverTest extends \PHPUnit_Framework_TestCase
+{
     /**
      * @var \StackFormation\ValueResolver
      */
     protected $valueResolver;
 
-    public function setUp() {
+    public function setUp()
+    {
         $this->valueResolver = $this->getMockedPlaceholderResolver();
         parent::setUp();
     }
 
-    public function getMockedPlaceholderResolver() {
+    public function getMockedPlaceholderResolver()
+    {
         $config = $this->getMock('\StackFormation\Config', [], [], '', false);
         $config->method('getGlobalVars')->willReturn([
             'GlobalFoo' => 'GlobalBar',
@@ -61,20 +64,25 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $key
+     * @param string $expectedValue
+     * @param string|null $putenv
+     * @throws \Exception
      * @test
      * @dataProvider isConditionDataProvider
      */
-    public function checkKey($key, $expectedValue, $putenv=null) {
-
+    public function checkKey($key, $expectedValue, $putenv = null)
+    {
         $blueprint = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprint->method('getVars')->willReturn(['BlueprintFoo' => 'BlueprintBar']);
-        if ($putenv) {
-            putenv($putenv);
-        }
+        if ($putenv) { putenv($putenv); }
         $actualValue = $this->valueResolver->isTrue($key, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
+    /**
+     * @return array
+     */
     public function isConditionDataProvider()
     {
         $values = [
@@ -114,15 +122,22 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $key
+     * @throws \Exception
      * @test
      * @dataProvider invalidConditionProvider
      */
-    public function invalidCondition($key) {
+    public function invalidCondition($key)
+    {
         $this->setExpectedException('Exception', 'Invalid condition');
         $this->valueResolver->isTrue($key);
     }
 
-    public function invalidConditionProvider() {
+    /**
+     * @return array
+     */
+    public function invalidConditionProvider()
+    {
         return [
             ['foo'],
             ['foo=bar'],
@@ -130,23 +145,26 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @test
      * @param array $conditions
-     * @param $expectedValue
+     * @param string $expectedValue
+     * @param string|null $putenv
+     * @test
      * @dataProvider resolveDataProvider
      */
-    public function resolve(array $conditions, $expectedValue, $putenv=null)
+    public function resolve(array $conditions, $expectedValue, $putenv = null)
     {
-        if ($putenv) {
-            putenv($putenv);
-        }
+        if ($putenv) { putenv($putenv); }
         $blueprint = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprint->method('getVars')->willReturn(['BlueprintFoo' => 'BlueprintBar']);
         $actualValue = $this->valueResolver->resolveConditionalValue($conditions, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
-    public function resolveDataProvider() {
+    /**
+     * @return array
+     */
+    public function resolveDataProvider()
+    {
         return [
             [['default' => 42], 42],
             [['default' => '{env:FOO}'], '{env:FOO}', 'FOO=lala'],
@@ -225,6 +243,9 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $dirtyValue
+     * @param string $expectedCleanValue
+     * @throws \Exception
      * @test
      * @dataProvider dirtyValueProvider
      */
@@ -234,7 +255,11 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expectedCleanValue, $actualCleanValue);
     }
 
-    public function dirtyValueProvider() {
+    /**
+     * @return array
+     */
+    public function dirtyValueProvider()
+    {
         return [
             ['1.2.3', '123'],
             ['123', '123'],
@@ -255,6 +280,8 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $value
+     * @throws \Exception
      * @test
      * @dataProvider testStackNotFoundProvider
      */
@@ -264,6 +291,9 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
         $this->valueResolver->resolvePlaceholders($value);
     }
 
+    /**
+     * @return array
+     */
     public function testStackNotFoundProvider()
     {
         return [
@@ -282,5 +312,4 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
         $actualValue = $this->valueResolver->resolvePlaceholders('{md5:'.$file.'}');
         $this->assertEquals('e2fe08e5c455ef195f806dec2b7b6875', $actualValue);
     }
-
 }

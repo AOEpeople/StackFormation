@@ -1,16 +1,25 @@
 <?php
 
-class ValidateTagsTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
 
+class ValidateTagsTest extends \PHPUnit_Framework_TestCase
+{
     /**
+     * @param array $tag
+     * @throws \Exception
      * @test
      * @dataProvider validTagsProvider
      */
-    public function validTag(array $tag) {
-        StackFormation\Helper::validateTags([$tag]);
+    public function validTag(array $tag)
+    {
+        \StackFormation\Helper::validateTags([$tag]);
     }
 
-    public function validTagsProvider() {
+    /**
+     * @return array
+     */
+    public function validTagsProvider()
+    {
         return [
             [['Key' => 'Name', 'Value' => 'Bar']],
             [['Key' => str_repeat('A', 127), 'Value' => 'Bar']],
@@ -20,15 +29,22 @@ class ValidateTagsTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @param array $tag
+     * @throws \Exception
      * @test
      * @dataProvider invalidTagsProvider
      */
-    public function invalidTag(array $tag) {
+    public function invalidTag(array $tag)
+    {
         $this->setExpectedException('Exception');
-        StackFormation\Helper::validateTags([$tag]);
+        \StackFormation\Helper::validateTags([$tag]);
     }
 
-    public function invalidTagsProvider() {
+    /**
+     * @return array
+     */
+    public function invalidTagsProvider()
+    {
         return [
             [['Key' => 'aws:Name', 'Value' => 'Bar']],
             [['Name' => 'Foo', 'Value' => 'Bar']],
@@ -38,5 +54,4 @@ class ValidateTagsTest extends PHPUnit_Framework_TestCase {
             [['Key' => 'Name', 'Value' => str_repeat('A', 256)]],
         ];
     }
-
 }
