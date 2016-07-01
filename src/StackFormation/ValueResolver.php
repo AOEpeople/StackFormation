@@ -415,9 +415,8 @@ class ValueResolver {
             $subject = trim($subject);
             $pattern = trim($pattern);
             return preg_match($pattern, $subject);
-        } else {
-            throw new \Exception('Invalid condition: ' . $condition);
         }
+        throw new \Exception('Invalid condition: ' . $condition);
     }
 
     /**
