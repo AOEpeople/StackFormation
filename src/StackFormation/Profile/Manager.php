@@ -29,7 +29,8 @@ class Manager {
             $this->sdk = new \Aws\Sdk([
                 'version' => 'latest',
                 'region' => $region,
-                'retries' => 5
+                'retries' => 5,
+                'http' => [ 'connect_timeout' => 20 ]
             ]);
         }
         return $this->sdk;
