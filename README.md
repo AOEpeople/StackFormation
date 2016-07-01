@@ -119,6 +119,7 @@ blueprints:
 - Environment variable lookup with default value fallback: `{env:<var>:<defaultValue>}` -> value of environment variable 'var' falling back to 'defaultValue' if env var is not set
 - Stack/global variable lookup: `{var:<var>}` -> value variable 'var'
 - Current timestamp: `{tstamp}` -> e.g. '1453151115'
+- MD5 sum: `{md5:<filename>}` -> e.g. 'fdd747e9989440289dcfb476c75b4268'
 - Clean: `{clean:2.1.7}` -> '217' (removes all characters that aren't allowed in stack names
 - Switch profile: `[profile:<profileName>:...]` will switch to a different profile and evaluate the second parameter there. This is useful in cross account setups.
 
