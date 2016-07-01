@@ -16,7 +16,7 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param $fixtureDirectory
+     * @param string $fixtureDirectory
      * @throws Exception
      * @test
      * @dataProvider processFileDataProvider
@@ -44,10 +44,10 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $inputJson
+     * @param string $expectedJson
      * @throws Exception
      * @test
-     * @param $inputJson
-     * @param $expectedJson
      * @dataProvider processJsonDataProvider
      */
     public function processJson($inputJson, $expectedJson)
@@ -58,6 +58,9 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @return array
+     */
     public function processJsonDataProvider()
     {
         return [

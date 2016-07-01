@@ -7,6 +7,9 @@ class ProfileManagerTest extends \PHPUnit_Framework_TestCase
     CONST VAULT_MAC_KEY = 'ziBH2sJjat30mpnJtJwvlp7a4G6u20aKyJ6LonVbZKs=';
     CONST VAULT_ENCRYPTION_KEY = 'XXuso82dkjakWHNGtEqUF1eB1h4nKkmZ0Cxv7aQC8Jo=';
 
+    /**
+     * @var string
+     */
     protected $originalCwd;
 
     /**
@@ -29,7 +32,7 @@ class ProfileManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testListProfiles()
     {
-        chdir(FIXTURE_ROOT.'ProfileManager/fixture_basic');
+        chdir(FIXTURE_ROOT . 'ProfileManager/fixture_basic');
         $this->assertEquals(
             ['test1', 'test2', 'test3'],
             $this->profileManager->listAllProfiles()

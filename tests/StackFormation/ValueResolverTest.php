@@ -64,21 +64,25 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $key
+     * @param string $expectedValue
+     * @param string|null $putenv
+     * @throws \Exception
      * @test
      * @dataProvider isConditionDataProvider
      */
-    public function checkKey($key, $expectedValue, $putenv=null)
+    public function checkKey($key, $expectedValue, $putenv = null)
     {
-
         $blueprint = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprint->method('getVars')->willReturn(['BlueprintFoo' => 'BlueprintBar']);
-        if ($putenv) {
-            putenv($putenv);
-        }
+        if ($putenv) { putenv($putenv); }
         $actualValue = $this->valueResolver->isTrue($key, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
+    /**
+     * @return array
+     */
     public function isConditionDataProvider()
     {
         $values = [
@@ -118,6 +122,8 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $key
+     * @throws \Exception
      * @test
      * @dataProvider invalidConditionProvider
      */
@@ -127,6 +133,9 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
         $this->valueResolver->isTrue($key);
     }
 
+    /**
+     * @return array
+     */
     public function invalidConditionProvider()
     {
         return [
@@ -136,22 +145,24 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @test
      * @param array $conditions
-     * @param $expectedValue
+     * @param string $expectedValue
+     * @param string|null $putenv
+     * @test
      * @dataProvider resolveDataProvider
      */
-    public function resolve(array $conditions, $expectedValue, $putenv=null)
+    public function resolve(array $conditions, $expectedValue, $putenv = null)
     {
-        if ($putenv) {
-            putenv($putenv);
-        }
+        if ($putenv) { putenv($putenv); }
         $blueprint = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprint->method('getVars')->willReturn(['BlueprintFoo' => 'BlueprintBar']);
         $actualValue = $this->valueResolver->resolveConditionalValue($conditions, $blueprint);
         $this->assertEquals($expectedValue, $actualValue);
     }
 
+    /**
+     * @return array
+     */
     public function resolveDataProvider()
     {
         return [
@@ -232,6 +243,9 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $dirtyValue
+     * @param string $expectedCleanValue
+     * @throws \Exception
      * @test
      * @dataProvider dirtyValueProvider
      */
@@ -241,6 +255,9 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedCleanValue, $actualCleanValue);
     }
 
+    /**
+     * @return array
+     */
     public function dirtyValueProvider()
     {
         return [
@@ -263,6 +280,8 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $value
+     * @throws \Exception
      * @test
      * @dataProvider testStackNotFoundProvider
      */
@@ -272,6 +291,9 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
         $this->valueResolver->resolvePlaceholders($value);
     }
 
+    /**
+     * @return array
+     */
     public function testStackNotFoundProvider()
     {
         return [

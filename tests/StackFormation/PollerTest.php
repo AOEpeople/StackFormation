@@ -4,6 +4,9 @@ namespace StackFormation\Tests;
 
 class PollerTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var array
+     */
     protected $counters = [];
 
     /**

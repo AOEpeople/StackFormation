@@ -9,6 +9,9 @@ class StackTest extends \PHPUnit_Framework_TestCase
      */
     protected $stack;
 
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject<\Aws\CloudFormation\CloudFormationClient>
+     */
     protected $cfnClientMock;
 
     public function setUp()

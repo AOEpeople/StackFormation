@@ -5,6 +5,8 @@ namespace StackFormation\Tests;
 class HelperTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @param string $stackName
+     * @throws \Exception
      * @test
      * @dataProvider validStackNameProvider
      */
@@ -13,6 +15,9 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         \StackFormation\Helper::validateStackname($stackName);
     }
 
+    /**
+     * @return array
+     */
     public function validStackNameProvider()
     {
         return [
@@ -24,6 +29,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $stackName
+     * @throws \Exception
      * @test
      * @dataProvider invalidStackNameProvider
      */
@@ -33,6 +40,9 @@ class HelperTest extends \PHPUnit_Framework_TestCase
         \StackFormation\Helper::validateStackname($stackName);
     }
 
+    /**
+     * @return array
+     */
     public function invalidStackNameProvider()
     {
         return [

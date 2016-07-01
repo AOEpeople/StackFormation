@@ -5,6 +5,8 @@ namespace StackFormation\Tests;
 class ValidateTagsTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @param array $tag
+     * @throws \Exception
      * @test
      * @dataProvider validTagsProvider
      */
@@ -13,6 +15,9 @@ class ValidateTagsTest extends \PHPUnit_Framework_TestCase
         \StackFormation\Helper::validateTags([$tag]);
     }
 
+    /**
+     * @return array
+     */
     public function validTagsProvider()
     {
         return [
@@ -24,6 +29,8 @@ class ValidateTagsTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param array $tag
+     * @throws \Exception
      * @test
      * @dataProvider invalidTagsProvider
      */
@@ -33,6 +40,9 @@ class ValidateTagsTest extends \PHPUnit_Framework_TestCase
         \StackFormation\Helper::validateTags([$tag]);
     }
 
+    /**
+     * @return array
+     */
     public function invalidTagsProvider()
     {
         return [

@@ -4,13 +4,19 @@ namespace StackFormation\Tests;
 
 class BlueprintActionTest extends \PHPUnit_Framework_TestCase
 {
-    /** @var PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject
+     */
     protected $profileManagerMock;
 
-    /** @var PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject
+     */
     protected $cfnClientMock;
 
-    /** @var PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var PHPUnit_Framework_MockObject_MockObject
+     */
     protected $blueprintMock;
 
     public function setUp()
@@ -68,7 +74,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
         $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo -n "HELLO WORLD" > '.$testfile
+            'echo -n "HELLO WORLD" > ' . $testfile
         ]);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
@@ -93,7 +99,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(FIXTURE_ROOT.'RunBeforeScript');
         $blueprintMock->method('getBeforeScripts')->willReturn([
-            'cat foo.txt > '.$testfile
+            'cat foo.txt > ' . $testfile
         ]);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
@@ -122,14 +128,10 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
         $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > '.$testfile
+            'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > ' . $testfile
         ]);
 
-        $blueprintAction = new \StackFormation\BlueprintAction(
-            $blueprintMock,
-            $profileManager
-        );
-
+        $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
         $blueprintAction->executeBeforeScripts();
 
         $this->assertStringEqualsFile($testfile, 'TESTACCESSKEY1:TESTSECRETKEY1');
@@ -155,11 +157,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
             'exit 1'
         ]);
 
-        $blueprintAction = new \StackFormation\BlueprintAction(
-            $blueprintMock,
-            $profileManager
-        );
-
+        $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
         $blueprintAction->executeBeforeScripts();
     }
 }

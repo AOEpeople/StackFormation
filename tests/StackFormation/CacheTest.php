@@ -43,8 +43,7 @@ class CacheTest extends \PHPUnit_Framework_TestCase
         $result = $this->cache->has('test');
         $this->assertFalse($result);
 
-        $result = $this->cache->get('test', function()
-        {
+        $result = $this->cache->get('test', function() {
             return '42';
         });
         $this->assertEquals('42', $result);

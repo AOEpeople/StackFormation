@@ -4,7 +4,10 @@ namespace StackFormation\Tests;
 
 class BlueprintTest extends \PHPUnit_Framework_TestCase
 {
-
+    /**
+     * @param \StackFormation\Config $config
+     * @return \StackFormation\BlueprintFactory
+     */
     protected function getMockedBlueprintFactory(\StackFormation\Config $config)
     {
         $stackFactoryMock = $this->getMock('\StackFormation\StackFactory', [], [], '', false);
@@ -25,7 +28,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getVariable()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprintVars = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getVars();
         $this->assertArrayHasKey('BlueprintFoo', $blueprintVars);
         $this->assertEquals('BlueprintBar', $blueprintVars['BlueprintFoo']);
@@ -42,7 +45,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function getConditionalParameterValueDefault()
     {
         putenv('Foo=Val5');
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_value.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.conditional_value.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
         $parameters = $blueprint->getParameters(true);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
@@ -56,7 +59,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function getConditionalParameterValueEnvFooVal1()
     {
         putenv('Foo=Val1');
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_value.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.conditional_value.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
         $parameters = $blueprint->getParameters(true);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
@@ -70,7 +73,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function getConditionalParameterValueEnvFooVal2()
     {
         putenv('Foo=Val2');
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_value.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.conditional_value.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('conditional_value');
         $parameters = $blueprint->getParameters(true);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
@@ -83,7 +86,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getFlattenedTags()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true);
         $blueprintTags = \StackFormation\Helper::flatten($blueprintTags);
         $this->assertArrayHasKey('TagFoo', $blueprintTags);
@@ -95,7 +98,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getUnflattenedTags()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1')->getTags(true);
         $this->assertEquals([['Key' => 'TagFoo', 'Value' => 'TagBar']], $blueprintTags);
     }
@@ -107,7 +110,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     {
         $value = 'Value_'.time();
         putenv('Foo='.$value);
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(true);
         $blueprintTags = \StackFormation\Helper::flatten($blueprintTags);
         $this->assertEquals($value, $blueprintTags['TagFoo']);
@@ -120,7 +123,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     {
         $value = 'Value_'.time();
         putenv('Foo='.$value);
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprintTags = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture3')->getTags(false);
         $blueprintTags = \StackFormation\Helper::flatten($blueprintTags);
         $this->assertEquals('{env:Foo}', $blueprintTags['TagFoo']);
@@ -131,7 +134,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getStackname()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1');
         $this->assertEquals('fixture1', $blueprint->getStackName());
     }
@@ -141,7 +144,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getSingleCapibility()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture4');
         $this->assertEquals(['FOO'], $blueprint->getCapabilities());
     }
@@ -151,7 +154,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getMulitpleCapibilities()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture5');
         $this->assertEquals(['FOO', 'BAR'], $blueprint->getCapabilities());
     }
@@ -161,9 +164,9 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getBasepath()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture1');
-        $this->assertEquals(FIXTURE_ROOT.'Config', $blueprint->getBasePath());
+        $this->assertEquals(FIXTURE_ROOT . 'Config', $blueprint->getBasePath());
     }
 
     /**
@@ -171,7 +174,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function loadStackPolicy()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture7');
         $this->assertContains('"Action" : "Update:Delete"', $blueprint->getStackPolicy());
     }
@@ -181,7 +184,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetProfile()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.select_profile.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.select_profile.yml']);
         $profile = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_selectprofile')->getProfile();
         $this->assertEquals('myprofile', $profile);
     }
@@ -191,7 +194,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function testselectProfile()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.select_profile.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.select_profile.yml']);
         $profile = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_selectprofile')->getProfile();
         $this->assertEquals('myprofile', $profile);
     }
@@ -203,7 +206,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function testselectProfileConditional($foo, $expectedProfile)
     {
         putenv('Foo='.$foo);
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.select_profile.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.select_profile.yml']);
         $profile = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_selectprofile_conditional')->getProfile();
         $this->assertEquals($expectedProfile, $profile);
     }
@@ -224,7 +227,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function testConditionalGlobalVar($foo, $expectedValue)
     {
         putenv('Foo='.$foo);
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_vars.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.conditional_vars.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional_global');
         $parameters = $blueprint->getParameters(true);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
@@ -247,7 +250,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function testConditionalLocalVar($foo, $expectedValue)
     {
         putenv('Foo='.$foo);
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.conditional_vars.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.conditional_vars.yml']);
         $blueprint = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture_var_conditional_local');
         $parameters = $blueprint->getParameters(true);
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
@@ -277,7 +280,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
                 return null;
             });
 
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.switch_profile.yml']);
 
         $valueResolver = new \StackFormation\ValueResolver(
             new \StackFormation\DependencyTracker(),
@@ -301,7 +304,6 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function testSwitchProfileComplex()
     {
-
         putenv('ACCOUNT=t');
         putenv('BASE_TYPE_VERSION=42');
 
@@ -314,7 +316,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
                 return $stackFactoryMock;
             });
 
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.switch_profile.yml']);
 
         $valueResolver = new \StackFormation\ValueResolver(
             null,
@@ -337,7 +339,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function blueprintDoesNotExist()
     {
         $this->setExpectedException('\StackFormation\Exception\BlueprintNotFoundException', "Blueprint 'doenotexist' not found.");
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
 
         $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
@@ -350,7 +352,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getBlueprintReference()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.reference.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.reference.yml']);
 
         putenv('FOO3=BAR3');
         putenv('FOO2=BAR2');
@@ -382,7 +384,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getPreprocessedTemplate()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
         $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
         $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
@@ -399,7 +401,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
      */
     public function getPreprocessedTemplateContainsBlueprintReference()
     {
-        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.reference.yml']);
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.reference.yml']);
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
         $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
         $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
