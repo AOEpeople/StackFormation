@@ -106,7 +106,7 @@ class Diff
             $tmp['parameters'] = 'Stack not found';
             $tmp['template'] = 'Stack not found';
         } catch (\Exception $e) {
-            $tmp['parameters'] = 'EXCEPTION ' . $e->getMessage();
+            $tmp['parameters'] = '<fg=red>EXCEPTION: ' . $e->getMessage(). '</>';
             $tmp['template'] = 'EXCEPTION';
         }
         return $tmp;
