@@ -211,4 +211,19 @@ class Helper
         return $logMessages;
     }
 
+
+    /**
+     * @param string $program
+     * @return bool
+     * @see n98-magerun/src/N98/Util/OperatingSystem.php
+     */
+    public static function isProgramInstalled($program)
+    {
+        $out = null;
+        $return = null;
+        @exec('which ' . $program, $out, $return);
+        return $return === 0;
+    }
+
+
 }

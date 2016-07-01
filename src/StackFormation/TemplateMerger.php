@@ -5,6 +5,13 @@ namespace StackFormation;
 class TemplateMerger
 {
 
+    /**
+     * @param \StackFormation\Template[] $templates
+     * @param null $description
+     * @param array $additionalData
+     * @return string
+     * @throws \Exception
+     */
     public function merge(array $templates, $description = null, array $additionalData = [])
     {
         if (count($templates) == 0) {
@@ -27,25 +34,36 @@ class TemplateMerger
         // If we have no description and this is a single template, use the single template's description
         if (empty($description) && count($templates) === 1) {
             $template = reset($templates);
-            if (!empty($template['Description'])) {
-                $description = $template['Description'];
-            }
+            $description = $template->getDescription();
         }
 
-        foreach ($templates as $key => $template) {
+        foreach ($templates as $key => $template) { /* @var $template Template */
+
+            if (!$template instanceof \StackFormation\Template) {
+                throw new \InvalidArgumentException('Expecting an array of \StackFormation\Template objects');
+            }
+
             $prefix = '';
+
+            $templateBody = $template->getProcessedTemplate();
 
             if (!is_int($key)) {
                 $prefix = $key;
-                $template = $this->updateRef($prefix, $template);
-                $template = $this->updateDependsOn($prefix, $template);
-                $template = $this->updateDependsOnMultiple($prefix, $template);
-                $template = $this->updateFnGetAtt($prefix, $template);
+                $templateBody = $this->updateRef($prefix, $templateBody);
+                $templateBody = $this->updateDependsOn($prefix, $templateBody);
+                $templateBody = $this->updateDependsOnMultiple($prefix, $templateBody);
+                $templateBody = $this->updateFnGetAtt($prefix, $templateBody);
             }
 
-            $array = json_decode($template, true);
+            $array = json_decode($templateBody, true);
             if (!is_array($array)) {
-                throw new \Exception('Error decoding file ' . $key);
+                if (Helper::isProgramInstalled('jq')) {
+                    $tmpfile = tempnam(sys_get_temp_dir(), 'json_validate_');
+                    file_put_contents($tmpfile, $templateBody);
+                    passthru('jq . ' . $tmpfile);
+                    unlink($tmpfile);
+                }
+                throw new \Exception(sprintf("Error decoding file '%s' (Key: %s)", $template->getFilePath(), $key));
             }
             if ($array['AWSTemplateFormatVersion'] != '2010-09-09') {
                 throw new \Exception('Invalid AWSTemplateFormatVersion');

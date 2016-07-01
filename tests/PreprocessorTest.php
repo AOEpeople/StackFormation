@@ -24,8 +24,9 @@ class PreprocessorTest extends PHPUnit_Framework_TestCase {
         $prefix = FIXTURE_ROOT . 'Preprocessor/';
         $prefix .= $fixtureDirectory . '/';
         $templatePath = $prefix . 'blueprint/input.template';
+        $fileContent = file_get_contents($templatePath);
         $this->assertEquals(
-            $this->preprocessor->processFile($templatePath),
+            $this->preprocessor->processJson($fileContent, dirname($templatePath)),
             file_get_contents($prefix. 'blueprint/expected.template')
         );
     }
@@ -50,7 +51,7 @@ class PreprocessorTest extends PHPUnit_Framework_TestCase {
     public function processJson($inputJson, $expectedJson)
     {
         $this->assertEquals(
-            $this->preprocessor->processJson($inputJson),
+            $this->preprocessor->processJson($inputJson, sys_get_temp_dir()),
             $expectedJson
         );
     }

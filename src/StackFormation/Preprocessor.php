@@ -7,23 +7,11 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 class Preprocessor
 {
 
-    public function processFile($filePath)
+    public function processJson($json, $basePath)
     {
-        if (!is_file($filePath)) {
-            throw new FileNotFoundException("File '$filePath' not found");
+        if (!is_string($json)) {
+            throw new \InvalidArgumentException('Expected json string');
         }
-        $json = file_get_contents($filePath);
-        try {
-            $json = $this->processJson($json, dirname($filePath));
-        } catch (\Exception $e) {
-            // wrapping exception in order to add some more information
-            throw new \Exception("Error processing $filePath", 0, $e);
-        }
-        return $json;
-    }
-
-    public function processJson($json, $basePath=null)
-    {
         $json = $this->stripComments($json);
         $json = $this->parseRefInDoubleQuotedStrings($json);
         $json = $this->expandPort($json);
@@ -106,7 +94,7 @@ class Preprocessor
             function (array $matches) use ($basePath) {
                 $file = $basePath . '/' . end($matches);
                 if (!is_file($file)) {
-                    throw new FileNotFoundException("File $file not found");
+                    throw new FileNotFoundException("File '$file' not found");
                 }
 
                 $fileContent = file_get_contents($file);

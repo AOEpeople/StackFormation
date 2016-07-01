@@ -26,12 +26,25 @@ class Manager {
             if (empty($region)) {
                 throw new \Exception('Environment variable AWS_DEFAULT_REGION not set.');
             }
-            $this->sdk = new \Aws\Sdk([
+
+            $parameters = [
                 'version' => 'latest',
                 'region' => $region,
                 'retries' => 5,
                 'http' => [ 'connect_timeout' => 20 ]
-            ]);
+            ];
+
+            if ($this->output && $this->output->isVeryVerbose()) {
+                $guzzleStack = \GuzzleHttp\HandlerStack::create();
+                $guzzleStack->push(\GuzzleHttp\Middleware::log(
+                    new \Monolog\Logger('main'),
+                    // new \GuzzleHttp\MessageFormatter('{req_body}')
+                    new \GuzzleHttp\MessageFormatter('[{code}] {req_body}')
+                ));
+                $parameters['http_handler'] = new \Aws\Handler\GuzzleV6\GuzzleHandler(new \GuzzleHttp\Client(['handler' => $guzzleStack]));
+            }
+
+            $this->sdk = new \Aws\Sdk($parameters);
         }
         return $this->sdk;
     }

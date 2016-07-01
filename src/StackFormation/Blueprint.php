@@ -65,21 +65,20 @@ class Blueprint {
             throw new \Exception('No template(s) found');
         }
 
-        $preProcessor = new Preprocessor();
+        // convert templates paths to template objects
+        $templates = $this->blueprintConfig['template'];
+        array_walk($templates, function(&$template) {
+            $template = new Template($template);
+        });
 
-        $templateContents = [];
-        foreach ($this->blueprintConfig['template'] as $key => $template) {
-            $templateContents[$key] = $preProcessor->processFile($template);
-        }
-
-        $templateMerger = new TemplateMerger();
-        $description = !empty($this->blueprintConfig['description']) ? $this->blueprintConfig['description'] : null;
         if ($gatherDependencies) {
             $this->gatherDependencies();
         }
+
+        $templateMerger = new TemplateMerger();
         return $templateMerger->merge(
-            $templateContents,
-            $description,
+            $templates,
+            !empty($this->blueprintConfig['description']) ? $this->blueprintConfig['description'] : null,
             ['Metadata' => [ Stack::METADATA_KEY => $this->getBlueprintReference() ]]
         );
     }
