@@ -1,6 +1,8 @@
 <?php
 
-class PreprocessorTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
+
+class PreprocessorTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @var \StackFormation\Preprocessor

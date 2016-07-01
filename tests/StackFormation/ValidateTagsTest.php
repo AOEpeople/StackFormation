@@ -1,13 +1,15 @@
 <?php
 
-class ValidateTagsTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
+
+class ValidateTagsTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @test
      * @dataProvider validTagsProvider
      */
     public function validTag(array $tag) {
-        StackFormation\Helper::validateTags([$tag]);
+        \StackFormation\Helper::validateTags([$tag]);
     }
 
     public function validTagsProvider() {
@@ -25,7 +27,7 @@ class ValidateTagsTest extends PHPUnit_Framework_TestCase {
      */
     public function invalidTag(array $tag) {
         $this->setExpectedException('Exception');
-        StackFormation\Helper::validateTags([$tag]);
+        \StackFormation\Helper::validateTags([$tag]);
     }
 
     public function invalidTagsProvider() {

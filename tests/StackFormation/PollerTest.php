@@ -1,6 +1,8 @@
 <?php
 
-class PollerTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
+
+class PollerTest extends \PHPUnit_Framework_TestCase {
 
     protected $counters = [];
 

@@ -36,7 +36,9 @@
     "autoload": {
         "psr-4": {
             "StackFormation\\": "src/StackFormation/",
-            "AwsInspector\\": "src/AwsInspector/"
+            "AwsInspector\\": "src/AwsInspector/",
+            "StackFormation\\Tests\\": "tests/StackFormation/",
+            "AwsInspector\\Tests\\": "tests/AwsInspector/"
         },
         "files": ["src/dotenv.php"]
     },

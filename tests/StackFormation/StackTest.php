@@ -1,6 +1,8 @@
 <?php
 
-class StackTest extends PHPUnit_Framework_TestCase
+namespace StackFormation\Tests;
+
+class StackTest extends \PHPUnit_Framework_TestCase
 {
 
     /**

@@ -1,13 +1,15 @@
 <?php
 
-class HelperTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
+
+class HelperTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @test
      * @dataProvider validStackNameProvider
      */
     public function validStackName($stackName) {
-        StackFormation\Helper::validateStackname($stackName);
+        \StackFormation\Helper::validateStackname($stackName);
     }
 
     public function validStackNameProvider() {
@@ -25,7 +27,7 @@ class HelperTest extends PHPUnit_Framework_TestCase {
      */
     public function invalidStackName($stackName) {
         $this->setExpectedException('Exception');
-        StackFormation\Helper::validateStackname($stackName);
+        \StackFormation\Helper::validateStackname($stackName);
     }
 
     public function invalidStackNameProvider() {

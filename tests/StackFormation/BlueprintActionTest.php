@@ -1,6 +1,8 @@
 <?php
 
-class BlueprintActionTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
+
+class BlueprintActionTest extends \PHPUnit_Framework_TestCase {
 
 
     /** @var PHPUnit_Framework_MockObject_MockObject */

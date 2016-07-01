@@ -1,6 +1,8 @@
 <?php
 
-class CacheTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
+
+class CacheTest extends \PHPUnit_Framework_TestCase {
 
     protected $cache;
 

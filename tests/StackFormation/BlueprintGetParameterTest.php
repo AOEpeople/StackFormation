@@ -1,6 +1,8 @@
 <?php
 
-class BlueprintGetParameterTest extends PHPUnit_Framework_TestCase {
+namespace StackFormation\Tests;
+
+class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase {
 
     protected function getMockedBlueprint($blueprintConfig, $name=null)
     {

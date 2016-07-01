@@ -1,6 +1,8 @@
 <?php
 
-class CurlTest extends PHPUnit_Framework_TestCase {
+namespace AwsInspector\Tests;
+
+class CurlTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * @var \AwsInspector\Helper\Curl

@@ -1,6 +1,8 @@
 <?php
 
-class ValueResolverTest extends PHPUnit_Framework_TestCase
+namespace StackFormation\Tests;
+
+class ValueResolverTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
