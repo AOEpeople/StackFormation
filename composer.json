@@ -20,7 +20,8 @@
         "aws/aws-sdk-php": "^3.8",
         "tedivm/jshrink": "^1.1",
         "vlucas/phpdotenv": "~2.1",
-        "php": ">=5.4.0"
+        "monolog/monolog": "~1",
+        "php": ">=5.5.0"
     },
     "suggest": {
         "aoepeople/vault": "Allows encrypting/decrypting ssh keys and profiles on the fly"
@@ -30,8 +31,7 @@
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^2.4",
-        "phpunit/phpunit": "~4.0",
-        "codeclimate/php-test-reporter": "dev-master"
+        "phpunit/phpunit": "~4.0"
     },
     "autoload": {
         "psr-4": {
