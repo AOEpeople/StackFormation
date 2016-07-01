@@ -90,8 +90,6 @@ class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-
-
     /**
      * @test
      */
@@ -105,7 +103,6 @@ class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('{env:DONTRESOVLE}', $parameters['Foo']);
     }
 
-
     /**
      * @test
      */
@@ -115,7 +112,6 @@ class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
         $blueprint = $this->getMockedBlueprint([]);
         $basePath = $blueprint->getBasePath();
     }
-
 
     /**
      * @test
@@ -127,7 +123,6 @@ class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
         $basePath = $blueprint->getBasePath();
     }
 
-
     /**
      * @test
      */
@@ -137,5 +132,4 @@ class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
         $basePath = $blueprint->getBasePath();
         $this->assertEquals(FIXTURE_ROOT.'Config', $basePath);
     }
-
 }

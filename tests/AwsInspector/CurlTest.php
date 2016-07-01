@@ -4,7 +4,6 @@ namespace AwsInspector\Tests;
 
 class CurlTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @var \AwsInspector\Helper\Curl
      */
@@ -58,5 +57,4 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertContains('<H1>301 Moved</H1>', $this->curl->getResponseBody());
     }
-
 }

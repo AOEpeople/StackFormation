@@ -4,7 +4,6 @@ namespace StackFormation\Tests;
 
 class PreprocessorTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @var \StackFormation\Preprocessor
      */
@@ -82,5 +81,4 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
             ["REGION='{Ref:AWS::Region}'", "REGION='\", {\"Ref\": \"AWS::Region\"}, \"'"],
         ];
     }
-
 }

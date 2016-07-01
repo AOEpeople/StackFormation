@@ -331,8 +331,6 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('DummyValue|ecom-t-all-ami-types-42-stack|VarnishAmi', $parameters['VarnishAmi']);
     }
 
-
-
     /**
      * @test
      */
@@ -420,6 +418,4 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
             'FOO3' => 'BAR3'
         ], $template['Metadata']['StackFormation']['EnvironmentVariables']);
     }
-
-
 }

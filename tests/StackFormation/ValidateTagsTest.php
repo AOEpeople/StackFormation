@@ -4,7 +4,6 @@ namespace StackFormation\Tests;
 
 class ValidateTagsTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @test
      * @dataProvider validTagsProvider
@@ -45,5 +44,4 @@ class ValidateTagsTest extends \PHPUnit_Framework_TestCase
             [['Key' => 'Name', 'Value' => str_repeat('A', 256)]],
         ];
     }
-
 }

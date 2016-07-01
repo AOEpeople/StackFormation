@@ -4,7 +4,6 @@ namespace StackFormation\Tests;
 
 class ValueResolverTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @var \StackFormation\ValueResolver
      */
@@ -291,5 +290,4 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
         $actualValue = $this->valueResolver->resolvePlaceholders('{md5:'.$file.'}');
         $this->assertEquals('e2fe08e5c455ef195f806dec2b7b6875', $actualValue);
     }
-
 }

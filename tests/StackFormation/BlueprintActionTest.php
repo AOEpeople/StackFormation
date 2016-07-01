@@ -4,8 +4,6 @@ namespace StackFormation\Tests;
 
 class BlueprintActionTest extends \PHPUnit_Framework_TestCase
 {
-
-
     /** @var PHPUnit_Framework_MockObject_MockObject */
     protected $profileManagerMock;
 
@@ -59,7 +57,6 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintAction->validateTemplate();
     }
 
-
     /**
      * @test
      */
@@ -84,7 +81,6 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $this->assertStringEqualsFile($testfile, 'HELLO WORLD');
         unlink($testfile);
     }
-
 
     /**
      * @test
@@ -166,6 +162,4 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
 
         $blueprintAction->executeBeforeScripts();
     }
-
-
 }

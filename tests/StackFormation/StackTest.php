@@ -4,7 +4,6 @@ namespace StackFormation\Tests;
 
 class StackTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @var \StackFormation\Stack
      */
@@ -85,6 +84,4 @@ class StackTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('Exception', "Resource 'DoesNotExist' not found in stack 'test-stack1'");
         $this->stack->getResource('DoesNotExist');
     }
-
-
 }

@@ -4,7 +4,6 @@ namespace StackFormation\Tests;
 
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @test
      */
@@ -74,6 +73,4 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     //    $config = new \StackFormation\Config([FIXTURE_ROOT.'/Config/blueprint.duplicateglobalvar.yml']);
     //    $vars = $config->getGlobalVars();
     //}
-
-
 }

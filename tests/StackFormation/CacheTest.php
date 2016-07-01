@@ -4,7 +4,6 @@ namespace StackFormation\Tests;
 
 class CacheTest extends \PHPUnit_Framework_TestCase
 {
-
     protected $cache;
 
     public function setUp()

@@ -4,7 +4,6 @@ namespace StackFormation\Tests;
 
 class HelperTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @test
      * @dataProvider validStackNameProvider
@@ -44,5 +43,4 @@ class HelperTest extends \PHPUnit_Framework_TestCase
             [str_repeat('a', 129)],
         ];
     }
-
 }
