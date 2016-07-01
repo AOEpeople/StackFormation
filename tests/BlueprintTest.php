@@ -310,7 +310,7 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.switch_profile.yml']);
 
         $valueResolver = new \StackFormation\ValueResolver(
-            new \StackFormation\DependencyTracker(),
+            null,
             $profileManagerMock,
             $config
         );
@@ -322,6 +322,96 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
         $parameters = \StackFormation\Helper::flatten($parameters, 'ParameterKey', 'ParameterValue');
 
         $this->assertEquals('DummyValue|ecom-t-all-ami-types-42-stack|VarnishAmi', $parameters['VarnishAmi']);
+    }
+
+
+
+    /**
+     * @test
+     */
+    public function blueprintDoesNotExist()
+    {
+        $this->setExpectedException('\StackFormation\Exception\BlueprintNotFoundException', "Blueprint 'doenotexist' does not exist.");
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+
+        $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+        $blueprint = $blueprintFactory->getBlueprint('doenotexist');
+    }
+
+    /**
+     * @test
+     */
+    public function getBlueprintReference()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.reference.yml']);
+
+        putenv('FOO3=BAR3');
+        putenv('FOO2=BAR2');
+        putenv('FOO1=BAR1');
+
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+
+        $valueResolver = new \StackFormation\ValueResolver(
+            null,
+            $profileManagerMock,
+            $config
+        );
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+        $blueprint = $blueprintFactory->getBlueprint('reference-fixture-{env:FOO1}');
+        $blueprint->gatherDependencies();
+        $this->assertEquals('reference-fixture-BAR1', $blueprint->getStackName());
+        $blueprintReference = $blueprint->getBlueprintReference();
+
+        $this->assertEquals('reference-fixture-{env:FOO1}', $blueprintReference['Blueprint']);
+        $this->assertEquals([
+            'FOO1' => 'BAR1',
+            'FOO2' => 'BAR2',
+            'FOO3' => 'BAR3'
+        ], $blueprintReference['EnvironmentVariables']);
+    }
+
+    /**
+     * @test
+     */
+    public function getPreprocessedTemplate()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+        $blueprint = $blueprintFactory->getBlueprint('fixture1');
+        $template = $blueprint->getPreprocessedTemplate();
+        $template = json_decode($template, true);
+        $this->assertArrayHasKey('Resources', $template);
+        $this->assertArrayHasKey('MyResource', $template['Resources']);
+        $this->assertEquals('AWS::CloudFormation::WaitConditionHandle', $template['Resources']['MyResource']['Type']);
+    }
+
+    /**
+     * @test
+     */
+    public function getPreprocessedTemplateContainsBlueprintReference()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.reference.yml']);
+        $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
+        $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
+        $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
+        $blueprint = $blueprintFactory->getBlueprint('reference-fixture-{env:FOO1}');
+        $template = $blueprint->getPreprocessedTemplate();
+        $template = json_decode($template, true);
+        $this->assertArrayHasKey('Metadata', $template);
+        $this->assertArrayHasKey('StackFormation', $template['Metadata']);
+        $this->assertArrayHasKey('Blueprint', $template['Metadata']['StackFormation']);
+        $this->assertEquals('reference-fixture-{env:FOO1}', $template['Metadata']['StackFormation']['Blueprint']);
+
+        $this->assertArrayHasKey('EnvironmentVariables', $template['Metadata']['StackFormation']);
+        $this->assertEquals([
+            'FOO1' => 'BAR1',
+            'FOO2' => 'BAR2',
+            'FOO3' => 'BAR3'
+        ], $template['Metadata']['StackFormation']['EnvironmentVariables']);
     }
 
 

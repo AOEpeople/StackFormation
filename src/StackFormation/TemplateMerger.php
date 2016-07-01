@@ -5,7 +5,7 @@ namespace StackFormation;
 class TemplateMerger
 {
 
-    public function merge(array $templates, $description = null)
+    public function merge(array $templates, $description = null, array $additionalData = [])
     {
         if (count($templates) == 0) {
             throw new \InvalidArgumentException('No templates given');
@@ -76,6 +76,8 @@ class TemplateMerger
         if (empty($mergedTemplate['Description'])) {
             $mergedTemplate['Description'] = 'Merged Template';
         }
+
+        $mergedTemplate = array_merge_recursive($mergedTemplate, $additionalData);
 
         $json = json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if (strlen($json) > 51200) { // that's the maximum allowed size of a CloudFormation template

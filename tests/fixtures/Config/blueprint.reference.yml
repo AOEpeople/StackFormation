@@ -1,0 +1,9 @@
+blueprints:
+
+  - stackname: 'reference-fixture-{env:FOO1}'
+    template: 'dummy.template'
+    vars:
+      MyVar: '{env:FOO2}'
+    parameters:
+      MyParam: '{env:FOO3}'
+      MyParam2: 'prefix{var:MyVar}'

@@ -1,43 +1,44 @@
 <?php
 
-namespace StackFormation;
+namespace StackFormation\Helper;
 
 /**
- * Class StaticCache
+ * Class Cache
  *
- * Quick'n'dirty static cache with convenience method
+ * Quick'n'dirty cache with convenience method
  *
  * Example:
- * StaticCache::get('message', function() { return 'Hello World'; });
+ * $cache->get('message', function() { return 'Hello World'; });
  *
  * Will return the message from cache if present and will generate it
  * by executing the callback and store it in the cache before returning the value.
  *
  * @author Fabrizio Branca
  */
-class StaticCache
+class Cache
 {
 
-    protected static $cache = [];
+    protected $cache = [];
 
     /**
      * Get (and generate)
      *
      * @param $key
      * @param callable|null $callback
+     * @param bool $fresh
      * @return mixed
      * @throws \Exception
      */
-    public static function get($key, callable $callback = null, $fresh = false)
+    public function get($key, callable $callback = null, $fresh = false)
     {
-        if ($fresh || !self::has($key)) {
+        if ($fresh || !$this->has($key)) {
             if (!is_null($callback)) {
-                self::set($key, $callback());
+                $this->set($key, $callback());
             } else {
                 throw new \Exception(sprintf("Cache key '%s' not found.", $key));
             }
         }
-        return self::$cache[$key];
+        return $this->cache[$key];
     }
 
     /**
@@ -46,9 +47,9 @@ class StaticCache
      * @param $key
      * @return bool
      */
-    public static function has($key)
+    public function has($key)
     {
-        return isset(self::$cache[$key]);
+        return isset($this->cache[$key]);
     }
 
     /**
@@ -57,9 +58,9 @@ class StaticCache
      * @param $key
      * @param $value
      */
-    public static function set($key, $value)
+    public function set($key, $value)
     {
-        self::$cache[$key] = $value;
+        $this->cache[$key] = $value;
     }
 
     /**
@@ -67,8 +68,8 @@ class StaticCache
      *
      * @param $key
      */
-    public static function delete($key)
+    public function delete($key)
     {
-        unset(self::$cache[$key]);
+        unset($this->cache[$key]);
     }
 }

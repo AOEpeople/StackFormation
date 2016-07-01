@@ -59,7 +59,7 @@ class Blueprint {
         return null;
     }
 
-    public function getPreprocessedTemplate()
+    public function getPreprocessedTemplate($gatherDependencies=true)
     {
         if (empty($this->blueprintConfig['template']) || !is_array($this->blueprintConfig['template'])) {
             throw new \Exception('No template(s) found');
@@ -74,7 +74,14 @@ class Blueprint {
 
         $templateMerger = new TemplateMerger();
         $description = !empty($this->blueprintConfig['description']) ? $this->blueprintConfig['description'] : null;
-        return $templateMerger->merge($templateContents, $description);
+        if ($gatherDependencies) {
+            $this->gatherDependencies();
+        }
+        return $templateMerger->merge(
+            $templateContents,
+            $description,
+            ['Metadata' => [ Stack::METADATA_KEY => $this->getBlueprintReference() ]]
+        );
     }
 
     public function getBlueprintConfig()
@@ -198,29 +205,24 @@ class Blueprint {
 
     public function getBlueprintReference()
     {
-        // this is how we reference a stack back to its blueprint
-        $blueprintReference = array_merge(
-            ['Name' => $this->name],
-            $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables()
-        );
-
-        $encodedValues = http_build_query($blueprintReference);
-
-        $reference = base64_encode($encodedValues);
-        if (strlen($reference) > 255) {
-            $encodedValues = 'gz:'.gzencode($encodedValues, 9);
-            $reference = base64_encode($encodedValues);
-        }
-        if (strlen($reference) > 255) {
-            throw new \Exception('Blueprint reference too long (even after compression): ' . strlen($reference) . ' chars');
-        }
-        return $reference;
+        return [
+            Stack::METADATA_KEY_BLUEPRINT => $this->getName(),
+            Stack::METADATA_KEY_ENVVARS => $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables()
+        ];
     }
 
+    /**
+     * Trigger traversing the whole configurating resolving all env vars
+     *
+     * @throws \Exception
+     */
     public function gatherDependencies()
     {
+        $this->getStackName();
+        $this->getProfile();
         $this->getParameters();
-        $this->getPreprocessedTemplate();
+        $this->getTags();
+        $this->getPreprocessedTemplate(false);
     }
 
 }
