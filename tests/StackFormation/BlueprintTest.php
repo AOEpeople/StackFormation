@@ -283,7 +283,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.switch_profile.yml']);
 
         $valueResolver = new \StackFormation\ValueResolver(
-            new \StackFormation\DependencyTracker(),
+            null,
             $profileManagerMock,
             $config
         );
