@@ -189,9 +189,8 @@ class Diff
     protected function normalizeJson($json)
     {
         $data = json_decode($json, true);
-        //if (isset($data['Metadata'])) {
-        //    unset($data['Metadata']);
-        //}
+        if (isset($data['Metadata'])) { unset($data['Metadata']); }
+        if (isset($data['Description'])) { unset($data['Description']); }
         return json_encode($data, JSON_PRETTY_PRINT);
     }
 }

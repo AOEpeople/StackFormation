@@ -41,7 +41,6 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
             $tmp = [];
             $tmp['stackName'] = $stackName;
             $tmp['blueprintName'] = '';
-            $tmp['env'] = '';
             $tmp['parameters'] = '';
             $tmp['template'] = '';
 
@@ -49,10 +48,13 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
             try {
                 $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
-                $tmp['env'] = Helper::assocArrayToString($stack->getUsedEnvVars());
+                $env = $stack->getUsedEnvVars();
                 $diff->setStack($stack);
                 $diff->setBlueprint($blueprint);
                 $tmp['blueprintName'] = $blueprint->getName();
+                if (count($env)) {
+                    $tmp['blueprintName'] .= "\n  -> ". Helper::assocArrayToString($stack->getUsedEnvVars());
+                }
                 $tmp = array_merge($tmp, $diff->compare());
             } catch (BlueprintReferenceNotFoundException $e) {
                 $tmp['blueprintName'] = '-';
@@ -67,7 +69,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $output->writeln('');
 
         $table = new Table($output);
-        $table->setHeaders(['Stack', 'Blueprint', 'Env', 'Parameters', 'Template']);
+        $table->setHeaders(['Stack', 'Blueprint', 'Parameters', 'Template']);
         $table->setRows($data);
         $table->render();
 
