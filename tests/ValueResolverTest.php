@@ -273,4 +273,14 @@ class ValueResolverTest extends PHPUnit_Framework_TestCase
         ];
     }
 
+    /**
+     * @test
+     */
+    public function resolveMd5()
+    {
+        $file = FIXTURE_ROOT . 'resolve_md5.txt';
+        $actualValue = $this->valueResolver->resolvePlaceholders('{md5:'.$file.'}');
+        $this->assertEquals('e2fe08e5c455ef195f806dec2b7b6875', $actualValue);
+    }
+
 }

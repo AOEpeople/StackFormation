@@ -6,6 +6,7 @@ use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\MissingEnvVarException;
 use StackFormation\Exception\StackNotFoundException;
 use StackFormation\Profile\Manager;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class ValueResolver {
 
@@ -58,6 +59,7 @@ class ValueResolver {
         $string = $this->resolveVar($string, $sourceBlueprint, $exceptionMsgAppendix);
         $string = $this->resolveConditionalValue($string, $sourceBlueprint);
         $string = $this->resolveTstamp($string);
+        $string = $this->resolveMd5($string, $sourceBlueprint, $exceptionMsgAppendix);
         $string = $this->resolveOutput($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
         $string = $this->resolveResource($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
         $string = $this->resolveParameter($string, $sourceBlueprint, $sourceType, $sourceKey, $exceptionMsgAppendix);
@@ -176,6 +178,37 @@ class ValueResolver {
         $string = str_replace('{tstamp}', $time, $string);
         return $string;
     }
+
+    /**
+     * {md5:...}
+     *
+     * @param $string
+     * @param Blueprint $sourceBlueprint
+     * @param $exceptionMsgAppendix
+     * @return mixed
+     */
+    protected function resolveMd5($string, Blueprint $sourceBlueprint=null, $exceptionMsgAppendix)
+    {
+        $string = preg_replace_callback(
+            '/\{md5:([^:\}\{]+?)\}/',
+            function ($matches) use ($sourceBlueprint, $exceptionMsgAppendix) {
+                $file = $matches[1];
+                $cwd = getcwd();
+                if ($sourceBlueprint) {
+                    chdir($sourceBlueprint->getBasePath());
+                }
+                if (!is_file($file)) {
+                    throw new FileNotFoundException("File '$file' not found.$exceptionMsgAppendix'");
+                }
+                $md5 = md5_file($file);
+                chdir($cwd);
+                return $md5;
+            },
+            $string
+        );
+        return $string;
+    }
+
 
     /**
      * {output:...:...}
