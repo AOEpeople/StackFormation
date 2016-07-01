@@ -10,9 +10,9 @@ class Repository
      */
     protected $asgClient;
 
-    public function __construct()
+    public function __construct($profile=null)
     {
-        $this->asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling');
+        $this->asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling', $profile);
     }
 
     public function findAutoScalingGroups()
@@ -52,6 +52,32 @@ class Repository
             }
         }
         return $collection;
+    }
+
+    public function findLaunchConfigurations()
+    {
+        $result = $this->asgClient->describeLaunchConfigurations();
+
+        $rows = $result->search('LaunchConfigurations[]');
+
+        $collection = new \AwsInspector\Model\Collection();
+        foreach ($rows as $row) {
+            $collection->attach(new LaunchConfiguration($row));
+        }
+        return $collection;
+    }
+
+    public function findLaunchConfigurationsGroupedByImageId()
+    {
+        $imageIds = [];
+        foreach ($this->findLaunchConfigurations() as $launchConfiguration) { /* @var $launchConfiguration LaunchConfiguration */
+            $imageId = $launchConfiguration->getImageId();
+            if (!isset($imageIds[$imageId])) {
+                $imageIds[$imageId] = [];
+            }
+            $imageIds[$imageId][] = $launchConfiguration;
+        }
+        return $imageIds;
     }
 
 }
