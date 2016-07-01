@@ -50,9 +50,9 @@ class Manager {
         if (!is_null($profile) && !is_string($profile)) {
             throw new \InvalidArgumentException('Profile parameter must be a string');
         }
-        $cacheKey = $client .'-'. ($profile ? $profile : '__empty__');
+        $cacheKey = md5(json_encode([$client, $profile, $args]));
         if (!isset($this->clients[$cacheKey])) {
-            if ($profile) {
+            if ($profile && !isset($args['credentials'])) {
                 $args['credentials'] = $this->credentialProvider->getCredentialsForProfile($profile);
             }
             $this->printDebug($client, $profile);
