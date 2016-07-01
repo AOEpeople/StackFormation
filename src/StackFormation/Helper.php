@@ -117,6 +117,9 @@ class Helper
 
     public static function validateStackname($stackName)
     {
+        if (!is_string($stackName)) {
+            throw new \InvalidArgumentException('Invalid stack name (must be a string)');
+        }
         // A stack name can contain only alphanumeric characters (case sensitive) and hyphens.
         // It must start with an alphabetic character and cannot be longer than 128 characters.
         if (!preg_match('/^[a-zA-Z][a-zA-Z0-9-]{0,127}$/', $stackName)) {
@@ -153,6 +156,15 @@ class Helper
             $tmp[$item[$keyKey]] = $item[$valueKey];
         }
         return $tmp;
+    }
+
+    public static function assocArrayToString(array $array, $itemSeparator='; ', $keyValueSeparator='=')
+    {
+        $tmp = [];
+        foreach($array as $key => $value) {
+            $tmp[] = "$key$keyValueSeparator$value";
+        }
+        return implode($itemSeparator, $tmp);
     }
 
     /**

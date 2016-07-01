@@ -2,6 +2,7 @@
 
 namespace StackFormation;
 
+use StackFormation\Exception\BlueprintReferenceNotFoundException;
 use StackFormation\Exception\OutputNotFoundException;
 use StackFormation\Exception\ParameterNotFoundException;
 use StackFormation\Exception\ResourceNotFoundException;
@@ -218,7 +219,7 @@ class Stack {
             $template = $this->getTemplate();
             $decodedTemplate = json_decode($template, true);
             if (!isset($decodedTemplate['Metadata']) || !isset($decodedTemplate['Metadata'][self::METADATA_KEY])) {
-                throw new \Exception('No blueprint reference found');
+                throw new BlueprintReferenceNotFoundException('No blueprint reference found');
             }
             return $decodedTemplate['Metadata'][self::METADATA_KEY];
         });

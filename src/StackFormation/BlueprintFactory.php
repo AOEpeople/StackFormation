@@ -23,7 +23,7 @@ class BlueprintFactory {
     public function getBlueprint($blueprintName)
     {
         if (!$this->blueprintExists($blueprintName)) {
-            throw new BlueprintNotFoundException("Blueprint '$blueprintName' does not exist.");
+            throw new BlueprintNotFoundException($blueprintName);
         }
         $blueprint = new Blueprint(
             $blueprintName,

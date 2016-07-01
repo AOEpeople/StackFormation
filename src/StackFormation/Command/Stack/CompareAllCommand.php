@@ -2,14 +2,14 @@
 
 namespace StackFormation\Command\Stack;
 
-use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Diff;
 use StackFormation\Exception\BlueprintNotFoundException;
+use StackFormation\Exception\BlueprintReferenceNotFoundException;
+use StackFormation\Helper;
 use StackFormation\Stack;
-use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CompareAllCommand extends \StackFormation\Command\AbstractCommand
@@ -19,18 +19,29 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
     {
         $this
             ->setName('stack:compare-all')
-            ->setDescription('Compare all live stacks with their corresponding blueprint');
+            ->setDescription('Compare all live stacks with their corresponding blueprint')
+            ->addOption(
+                'nameFilter',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Name Filter (regex). Example --nameFilter \'/^foo/\''
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stacks = $this->getStackFactory()->getStacksFromApi(false);
+        $nameFilter = $input->getOption('nameFilter');
+        $stacks = $this->getStackFactory()->getStacksFromApi(false, $nameFilter);
 
         $data = [];
         foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */
+
+            $this->dependencyTracker->reset();
+
             $tmp = [];
             $tmp['stackName'] = $stackName;
             $tmp['blueprintName'] = '';
+            $tmp['env'] = '';
             $tmp['parameters'] = '';
             $tmp['template'] = '';
 
@@ -38,12 +49,15 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
             try {
                 $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
+                $tmp['env'] = Helper::assocArrayToString($stack->getUsedEnvVars());
                 $diff->setStack($stack);
                 $diff->setBlueprint($blueprint);
                 $tmp['blueprintName'] = $blueprint->getName();
                 $tmp = array_merge($tmp, $diff->compare());
+            } catch (BlueprintReferenceNotFoundException $e) {
+                $tmp['blueprintName'] = '-';
             } catch (BlueprintNotFoundException $e) {
-                $tmp['blueprintName'] = '<fg=red>Not found</>';
+                $tmp['blueprintName'] = '<fg=red>Not found: '.$e->getBlueprintName().'</>';
             } catch (\Exception $e) {
                 $tmp['blueprintName'] = '<fg=red>Exception: '.$e->getMessage().'</>';
             }
@@ -53,7 +67,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $output->writeln('');
 
         $table = new Table($output);
-        $table->setHeaders(['Stack', 'Blueprint', 'Parameters', 'Template']);
+        $table->setHeaders(['Stack', 'Blueprint', 'Env', 'Parameters', 'Template']);
         $table->setRows($data);
         $table->render();
 

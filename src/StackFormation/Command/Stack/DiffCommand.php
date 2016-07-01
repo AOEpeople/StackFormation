@@ -32,8 +32,9 @@ class DiffCommand extends \StackFormation\Command\AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
-        Helper::validateStackname($stack);
+        $stackName = $input->getArgument('stack');
+        Helper::validateStackname($stackName);
+        $stack = $this->getStackFactory()->getStack($stackName);
 
         $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
 

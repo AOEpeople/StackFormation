@@ -104,7 +104,7 @@ class Config
     public function getBlueprintConfig($blueprintName)
     {
         if (!$this->blueprintExists($blueprintName)) {
-            throw new BlueprintNotFoundException("Blueprint '$blueprintName' not found.");
+            throw new BlueprintNotFoundException($blueprintName);
         }
         return $this->conf['blueprints'][$blueprintName];
     }

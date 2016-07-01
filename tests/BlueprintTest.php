@@ -331,13 +331,13 @@ class BlueprintTest extends PHPUnit_Framework_TestCase {
      */
     public function blueprintDoesNotExist()
     {
-        $this->setExpectedException('\StackFormation\Exception\BlueprintNotFoundException', "Blueprint 'doenotexist' does not exist.");
+        $this->setExpectedException('\StackFormation\Exception\BlueprintNotFoundException', "Blueprint 'doenotexist' not found.");
         $config = new \StackFormation\Config([FIXTURE_ROOT.'Config/blueprint.1.yml']);
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
 
         $valueResolver = new \StackFormation\ValueResolver(null, $profileManagerMock, $config);
         $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
-        $blueprint = $blueprintFactory->getBlueprint('doenotexist');
+        $blueprintFactory->getBlueprint('doenotexist');
     }
 
     /**

@@ -105,7 +105,7 @@ class Diff
 
             $templateStack = $this->normalizeJson($templateStack);
             $templateBlueprint = $this->normalizeJson($templateBlueprint);
-            $tmp['template'] = $templateStack === $templateBlueprint ? "<fg=green>equal</>" : "<fg=red>different</>";
+            $tmp['template'] = ($templateStack === $templateBlueprint) ? "<fg=green>equal</>" : "<fg=red>different</>";
         } catch (CloudFormationException $e) {
             $tmp['parameters'] = 'Stack not found';
             $tmp['template'] = 'Stack not found';
@@ -188,6 +188,10 @@ class Diff
 
     protected function normalizeJson($json)
     {
-        return json_encode(json_decode($json, true), JSON_PRETTY_PRINT);
+        $data = json_decode($json, true);
+        //if (isset($data['Metadata'])) {
+        //    unset($data['Metadata']);
+        //}
+        return json_encode($data, JSON_PRETTY_PRINT);
     }
 }
