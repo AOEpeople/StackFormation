@@ -87,9 +87,7 @@ class Diff
         try {
 
             // parameters
-            if (!$this->output->isQuiet()) {
-                $this->output->writeln($this->stack->getName(). ': Comparing parameters');
-            }
+            if ($this->output->isVerbose()) { $this->output->writeln($this->stack->getName(). ': Comparing parameters'); }
             $parametersStack = $this->stack->getParameters();
             $parametersBlueprint = $this->blueprint->getParameters(true);
             $parametersBlueprint = Helper::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
@@ -97,9 +95,7 @@ class Diff
             $tmp['parameters'] = $this->parametersAreEqual($parametersStack, $parametersBlueprint) ? "<fg=green>equal</>" : "<fg=red>different</>";
 
             // template
-            if (!$this->output->isQuiet()) {
-                $this->output->writeln($this->stack->getName(). ': Comparing template');
-            }
+            if ($this->output->isVerbose()) { $this->output->writeln($this->stack->getName(). ': Comparing template'); }
             $templateStack = trim($this->stack->getTemplate());
             $templateBlueprint = trim($this->blueprint->getPreprocessedTemplate());
 
@@ -121,7 +117,7 @@ class Diff
         $vars = $stack->getUsedEnvVars();
         foreach ($vars as $var => $value) {
             $string = "$var=$value";
-            echo "Loading env var: $string\n";
+            // echo "Loading env var: $string\n";
             putenv($string);
         }
     }

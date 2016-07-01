@@ -51,9 +51,9 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                 $env = $stack->getUsedEnvVars();
                 $diff->setStack($stack);
                 $diff->setBlueprint($blueprint);
-                $tmp['blueprintName'] = $blueprint->getName();
+                $tmp['blueprintName'] = '<fg=green>' . $blueprint->getName().'</>';
                 if (count($env)) {
-                    $tmp['blueprintName'] .= "\n  -> ". Helper::assocArrayToString($stack->getUsedEnvVars());
+                    $tmp['blueprintName'] .= "\n". wordwrap(Helper::assocArrayToString($stack->getUsedEnvVars()), 80, "\n");
                 }
                 $tmp = array_merge($tmp, $diff->compare());
             } catch (BlueprintReferenceNotFoundException $e) {
