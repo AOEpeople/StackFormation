@@ -2,8 +2,6 @@
 
 namespace AwsInspector\Helper;
 
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
-
 class Curl
 {
 
