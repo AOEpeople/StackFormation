@@ -2,7 +2,8 @@
 
 namespace StackFormation\Tests;
 
-class PreprocessorTest extends \PHPUnit_Framework_TestCase {
+class PreprocessorTest extends \PHPUnit_Framework_TestCase
+{
 
     /**
      * @var \StackFormation\Preprocessor

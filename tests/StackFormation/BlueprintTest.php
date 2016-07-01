@@ -2,7 +2,8 @@
 
 namespace StackFormation\Tests;
 
-class BlueprintTest extends \PHPUnit_Framework_TestCase {
+class BlueprintTest extends \PHPUnit_Framework_TestCase
+{
 
     protected function getMockedBlueprintFactory(\StackFormation\Config $config)
     {
@@ -207,7 +208,8 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($expectedProfile, $profile);
     }
 
-    public function testselectProfileConditionalProvider() {
+    public function testselectProfileConditionalProvider()
+    {
         return [
             ['Val1', 'a'],
             ['Val2', 'b'],
@@ -229,7 +231,8 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($expectedValue, $parameters['Parameter1']);
     }
 
-    public function testConditionalGlobalProvider() {
+    public function testConditionalGlobalProvider()
+    {
         return [
             ['Val1', 'a'],
             ['Val2', 'b'],
@@ -254,7 +257,8 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase {
     /**
      * @test
      */
-    public function testSwitchProfile() {
+    public function testSwitchProfile()
+    {
         $profileManagerMock = $this->getMock('\StackFormation\Profile\Manager', [], [], '', false);
         $profileManagerMock
             ->expects($this->exactly(2))
@@ -295,7 +299,8 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase {
     /**
      * @test
      */
-    public function testSwitchProfileComplex() {
+    public function testSwitchProfileComplex()
+    {
 
         putenv('ACCOUNT=t');
         putenv('BASE_TYPE_VERSION=42');

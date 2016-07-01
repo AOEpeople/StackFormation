@@ -10,12 +10,14 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
      */
     protected $valueResolver;
 
-    public function setUp() {
+    public function setUp()
+    {
         $this->valueResolver = $this->getMockedPlaceholderResolver();
         parent::setUp();
     }
 
-    public function getMockedPlaceholderResolver() {
+    public function getMockedPlaceholderResolver()
+    {
         $config = $this->getMock('\StackFormation\Config', [], [], '', false);
         $config->method('getGlobalVars')->willReturn([
             'GlobalFoo' => 'GlobalBar',
@@ -66,7 +68,8 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
      * @test
      * @dataProvider isConditionDataProvider
      */
-    public function checkKey($key, $expectedValue, $putenv=null) {
+    public function checkKey($key, $expectedValue, $putenv=null)
+    {
 
         $blueprint = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprint->method('getVars')->willReturn(['BlueprintFoo' => 'BlueprintBar']);
@@ -119,12 +122,14 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
      * @test
      * @dataProvider invalidConditionProvider
      */
-    public function invalidCondition($key) {
+    public function invalidCondition($key)
+    {
         $this->setExpectedException('Exception', 'Invalid condition');
         $this->valueResolver->isTrue($key);
     }
 
-    public function invalidConditionProvider() {
+    public function invalidConditionProvider()
+    {
         return [
             ['foo'],
             ['foo=bar'],
@@ -148,7 +153,8 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedValue, $actualValue);
     }
 
-    public function resolveDataProvider() {
+    public function resolveDataProvider()
+    {
         return [
             [['default' => 42], 42],
             [['default' => '{env:FOO}'], '{env:FOO}', 'FOO=lala'],
@@ -236,7 +242,8 @@ class ValueResolverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedCleanValue, $actualCleanValue);
     }
 
-    public function dirtyValueProvider() {
+    public function dirtyValueProvider()
+    {
         return [
             ['1.2.3', '123'],
             ['123', '123'],

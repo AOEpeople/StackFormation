@@ -2,7 +2,8 @@
 
 namespace StackFormation\Tests;
 
-class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase {
+class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
+{
 
     protected function getMockedBlueprint($blueprintConfig, $name=null)
     {
@@ -45,7 +46,8 @@ class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($expectedResolvedValue, $parameters['Foo']);
     }
 
-    public function getParameterProvider() {
+    public function getParameterProvider()
+    {
         return [
             ['Foo', 'Foo'],
             [' Foo ', ' Foo '],

@@ -2,7 +2,8 @@
 
 namespace StackFormation\Tests;
 
-class ConfigTest extends \PHPUnit_Framework_TestCase {
+class ConfigTest extends \PHPUnit_Framework_TestCase
+{
 
     /**
      * @test

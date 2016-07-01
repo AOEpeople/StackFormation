@@ -2,17 +2,20 @@
 
 namespace StackFormation\Tests;
 
-class HelperTest extends \PHPUnit_Framework_TestCase {
+class HelperTest extends \PHPUnit_Framework_TestCase
+{
 
     /**
      * @test
      * @dataProvider validStackNameProvider
      */
-    public function validStackName($stackName) {
+    public function validStackName($stackName)
+    {
         \StackFormation\Helper::validateStackname($stackName);
     }
 
-    public function validStackNameProvider() {
+    public function validStackNameProvider()
+    {
         return [
             ['ecom-t-stack'],
             ['ecom123'],
@@ -25,12 +28,14 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @test
      * @dataProvider invalidStackNameProvider
      */
-    public function invalidStackName($stackName) {
+    public function invalidStackName($stackName)
+    {
         $this->setExpectedException('Exception');
         \StackFormation\Helper::validateStackname($stackName);
     }
 
-    public function invalidStackNameProvider() {
+    public function invalidStackNameProvider()
+    {
         return [
             ['ecom_t_stack'],
             [''],

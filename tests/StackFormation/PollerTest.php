@@ -2,7 +2,8 @@
 
 namespace StackFormation\Tests;
 
-class PollerTest extends \PHPUnit_Framework_TestCase {
+class PollerTest extends \PHPUnit_Framework_TestCase
+{
 
     protected $counters = [];
 

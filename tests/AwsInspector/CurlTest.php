@@ -2,7 +2,8 @@
 
 namespace AwsInspector\Tests;
 
-class CurlTest extends \PHPUnit_Framework_TestCase {
+class CurlTest extends \PHPUnit_Framework_TestCase
+{
 
     /**
      * @var \AwsInspector\Helper\Curl
@@ -30,26 +31,31 @@ class CurlTest extends \PHPUnit_Framework_TestCase {
         $this->curl = new \AwsInspector\Helper\Curl('http://google.com', [], $connectionMock);
     }
 
-    public function testSingleHeader() {
+    public function testSingleHeader()
+    {
         $this->assertEquals('http://www.google.com/', $this->curl->getResponseHeader('Location'));
     }
 
-    public function testHeaders() {
+    public function testHeaders()
+    {
         $this->assertEquals([
             'Content-Type' => 'text/html; charset=UTF-8',
             'Location' => 'http://www.google.com/',
         ], $this->curl->getResponseHeaders());
     }
 
-    public function testResponseStatus() {
+    public function testResponseStatus()
+    {
         $this->assertEquals('HTTP/1.1 301 Moved Permanently', $this->curl->getResponseStatus());
     }
 
-    public function testStatusCode() {
+    public function testStatusCode()
+    {
         $this->assertEquals('301', $this->curl->getResponseCode());
     }
 
-    public function testBody() {
+    public function testBody()
+    {
         $this->assertContains('<H1>301 Moved</H1>', $this->curl->getResponseBody());
     }
 
