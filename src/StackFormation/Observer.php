@@ -50,7 +50,12 @@ class Observer
 
         $this->printStatus($lastStatus);
         $this->printOutputs();
-        return in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'STACK_GONE']) ? 0 : 1;
+        return $this->isSuccessfulStatus($lastStatus) ? 0 : 1;
+    }
+
+    protected function isSuccessfulStatus($status)
+    {
+        return in_array($status, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'STACK_GONE']);
     }
 
     protected function printOutputs()
@@ -79,9 +84,9 @@ class Observer
     protected function printStatus($lastStatus)
     {
         $formatter = new FormatterHelper();
-        $formattedBlock = (strpos($lastStatus, 'FAILED') !== false)
-            ? $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true)
-            : $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true);
+        $formattedBlock = $this->isSuccessfulStatus($lastStatus)
+            ? $formatter->formatBlock(['Completed', 'Last Status: ' . $lastStatus], 'info', true)
+            : $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true);
         $this->output->writeln("\n\n$formattedBlock\n\n");
     }
 }

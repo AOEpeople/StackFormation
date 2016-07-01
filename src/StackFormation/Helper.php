@@ -66,6 +66,10 @@ class Helper
 
     public static function decorateStatus($status)
     {
+        // it's so easy to miss this one...
+        if ($status == 'UPDATE_ROLLBACK_COMPLETE') {
+            return "<fg=green>UPDATE</><fg=red>_ROLLBACK_</><fg=green>COMPLETE</>";
+        }
         if (strpos($status, 'IN_PROGRESS') !== false) {
             return "<fg=yellow>$status</>";
         }
@@ -75,7 +79,6 @@ class Helper
         if (strpos($status, 'FAILED') !== false) {
             return "<fg=red>$status</>";
         }
-
         return $status;
     }
 
