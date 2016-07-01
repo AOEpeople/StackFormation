@@ -25,8 +25,8 @@ class ValueResolver {
      */
     public function __construct(DependencyTracker $dependencyTracker=null, Manager $profileManager=null, Config $config, $forceProfile=null)
     {
-        $this->dependencyTracker = $dependencyTracker ? $dependencyTracker : new DependencyTracker();
-        $this->profileManager = $profileManager ? $profileManager : new Manager();
+        $this->dependencyTracker = $dependencyTracker ?: new DependencyTracker();
+        $this->profileManager = $profileManager ?: new Manager();
         $this->forceProfile = $forceProfile;
         $this->config = $config;
     }
