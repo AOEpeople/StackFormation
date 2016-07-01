@@ -30,7 +30,6 @@ class Observer
 
     public function observeStackActivity($pollInterval = 20)
     {
-        $returnValue = 0;
         $printedEvents = [];
         $first = true;
         $stackGone = false;
@@ -100,10 +99,6 @@ class Observer
             }
         } while (!$stackGone && strpos($lastStatus, 'IN_PROGRESS') !== false);
 
-        if (!in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'DELETE_IN_PROGRESS'])) {
-            $returnValue = 1;
-        }
-
         $formatter = new FormatterHelper();
         $formattedBlock = (strpos($lastStatus, 'FAILED') !== false)
             ? $formatter->formatBlock(['Error!', 'Last Status: ' . $lastStatus], 'error', true)
@@ -127,6 +122,6 @@ class Observer
             // never mind...
         }
 
-        return $returnValue;
+        return in_array($lastStatus, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'DELETE_IN_PROGRESS']) ? 0 : 1;
     }
 }
