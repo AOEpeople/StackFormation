@@ -2,35 +2,23 @@
 
 namespace StackFormation\Command\Blueprint\Show;
 
+use StackFormation\Blueprint;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DependenciesCommand extends \StackFormation\Command\AbstractCommand
+class DependenciesCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintCommand
 {
 
     protected function configure()
     {
         $this
             ->setName('blueprint:show:dependencies')
-            ->setDescription('Show (incoming) dependencies to stacks and environment variables')
-            ->addArgument(
-                'blueprint',
-                InputArgument::REQUIRED,
-                'Blueprint'
-            );
+            ->setDescription('Show (incoming) dependencies to stacks and environment variables');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithBlueprint(Blueprint $blueprint, InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForBlueprint($input, $output);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
-
         // trigger resolving all placeholders
         $this->dependencyTracker->reset();
         $blueprint->gatherDependencies();

@@ -4,36 +4,22 @@ namespace StackFormation\Command\Stack;
 
 use StackFormation\Helper;
 use StackFormation\Helper\Validator;
-use Symfony\Component\Console\Input\InputArgument;
+use StackFormation\Stack;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TimelineCommand extends \StackFormation\Command\AbstractCommand
+class TimelineCommand extends \StackFormation\Command\Stack\AbstractStackCommand
 {
 
     protected function configure()
     {
         $this
             ->setName('stack:timeline')
-            ->setDescription('Generate HTML timeline of stack events')
-            ->addArgument(
-                'stack',
-                InputArgument::REQUIRED,
-                'Stack'
-            );
+            ->setDescription('Generate HTML timeline of stack events');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithStack(Stack $stack, InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForStack($input, $output);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $stackName = $input->getArgument('stack');
-        Validator::validateStackname($stackName);
-        $stack = $this->getStackFactory()->getStack($stackName);
-
         $events = $stack->getEvents();
 
         $groups = [];

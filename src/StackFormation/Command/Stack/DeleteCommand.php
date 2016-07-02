@@ -55,7 +55,6 @@ class DeleteCommand extends \StackFormation\Command\AbstractCommand
 
     protected function getResolvedStacks(InputInterface $input)
     {
-        $helper = new Helper();
         $stacks = Finder::find(
             (array)$input->getArgument('stack'),
             $this->getStacks()

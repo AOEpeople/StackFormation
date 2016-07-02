@@ -2,33 +2,22 @@
 
 namespace StackFormation\Command\Blueprint\Show;
 
-use Symfony\Component\Console\Input\InputArgument;
+use StackFormation\Blueprint;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class StacknameCommand extends \StackFormation\Command\AbstractCommand
+class StacknameCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintCommand
 {
 
     protected function configure()
     {
         $this
             ->setName('blueprint:show:stackname')
-            ->setDescription('Return stack name for given blueprint name (resolving placeholders)')
-            ->addArgument(
-                'blueprint',
-                InputArgument::REQUIRED,
-                'Blueprint'
-            );
+            ->setDescription('Return stack name for given blueprint name (resolving placeholders)');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithBlueprint(Blueprint $blueprint, InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForBlueprint($input, $output);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
         $output->writeln($blueprint->getStackName());
     }
 }

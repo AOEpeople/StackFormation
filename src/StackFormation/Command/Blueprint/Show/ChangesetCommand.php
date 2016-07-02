@@ -2,38 +2,24 @@
 
 namespace StackFormation\Command\Blueprint\Show;
 
-use StackFormation\BlueprintAction;
-use StackFormation\Helper;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ChangesetCommand extends \StackFormation\Command\AbstractCommand
+class ChangesetCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintCommand
 {
 
     protected function configure()
     {
         $this
             ->setName('blueprint:show:changeset')
-            ->setDescription('Preview changeset')
-            ->addArgument(
-                'blueprint',
-                InputArgument::REQUIRED,
-                'Blueprint'
-            );
+            ->setDescription('Preview changeset');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithBlueprint(\StackFormation\Blueprint $blueprint, InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForBlueprint($input, $output);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
-        $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $output);
+        $blueprintAction = new \StackFormation\BlueprintAction($blueprint, $this->profileManager, $output);
         $changeSetResult = $blueprintAction->getChangeSet();
-        $table = new Helper\ChangeSetTable($output);
+        $table = new \StackFormation\Helper\ChangeSetTable($output);
         $table->render($changeSetResult);
     }
 }

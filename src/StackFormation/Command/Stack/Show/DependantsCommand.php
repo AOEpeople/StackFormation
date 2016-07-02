@@ -4,36 +4,24 @@ namespace StackFormation\Command\Stack\Show;
 
 use StackFormation\Helper;
 use StackFormation\Helper\Validator;
+use StackFormation\Stack;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DependantsCommand extends \StackFormation\Command\AbstractCommand
+class DependantsCommand extends \StackFormation\Command\Stack\AbstractStackCommand
 {
 
     protected function configure()
     {
         $this
             ->setName('stack:show:dependants')
-            ->setDescription('Show (outgoing) dependencies to blueprints')
-            ->addArgument(
-                'stack',
-                InputArgument::REQUIRED,
-                'Stack'
-            );
+            ->setDescription('Show (outgoing) dependencies to blueprints');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithStack(Stack $stack, InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForStack($input, $output);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $stack = $this->getStackFactory()->getStack($input->getArgument('stack'));
-        Validator::validateStackname($stack);
-
         $this->dependencyTracker->reset();
         foreach ($this->blueprintFactory->getAllBlueprints() as $blueprint) {
             $blueprint->gatherDependencies();

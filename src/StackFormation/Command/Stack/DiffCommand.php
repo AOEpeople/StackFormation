@@ -5,38 +5,23 @@ namespace StackFormation\Command\Stack;
 use StackFormation\Diff;
 use StackFormation\Helper;
 use StackFormation\Helper\Validator;
+use StackFormation\Stack;
 use Symfony\Component\Console\Helper\FormatterHelper;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DiffCommand extends \StackFormation\Command\AbstractCommand
+class DiffCommand extends \StackFormation\Command\Stack\AbstractStackCommand
 {
 
     protected function configure()
     {
         $this
             ->setName('stack:diff')
-            ->setDescription('Compare a stack\'s template and input parameters with its blueprint')
-            ->addArgument(
-                'stack',
-                InputArgument::REQUIRED,
-                'Stack name'
-            );
+            ->setDescription('Compare a stack\'s template and input parameters with its blueprint');
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithStack(Stack $stack, InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForStack($input, $output);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $stackName = $input->getArgument('stack');
-        Validator::validateStackname($stackName);
-        $stack = $this->getStackFactory()->getStack($stackName);
-
         $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);
 
         $diff = new Diff($output);

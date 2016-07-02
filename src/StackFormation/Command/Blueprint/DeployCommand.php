@@ -3,6 +3,7 @@
 namespace StackFormation\Command\Blueprint;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\Blueprint;
 use StackFormation\BlueprintAction;
 use StackFormation\Exception\OperationAbortedException;
 use StackFormation\Exception\StackCannotBeUpdatedException;
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class DeployCommand extends \StackFormation\Command\AbstractCommand
+class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintCommand
 {
 
     protected function configure()
@@ -27,11 +28,6 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
         $this
             ->setName('blueprint:deploy')
             ->setDescription('Deploy blueprint')
-            ->addArgument(
-                'blueprint',
-                InputArgument::REQUIRED,
-                'Blueprint'
-            )
             ->addOption(
                 'no-observe',
                 's',
@@ -70,7 +66,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             );
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithBlueprint(Blueprint $blueprint, InputInterface $input, OutputInterface $output)
     {
         $dryRun = $input->getOption('dryrun');
         if ($dryRun) {
@@ -78,16 +74,11 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
             $formattedBlock = $formatter->formatBlock(['Dry Run!'], 'error', true);
             $output->writeln("\n$formattedBlock\n");
         }
-        $this->interactAskForBlueprint($input, $output);
-    }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
         if ($input->getOption('observe')) {
             $output->writeln('-o/--observe is deprecated now. Deployments are being observed by default. Please remove this option.');
         }
 
-        $blueprint = $this->blueprintFactory->getBlueprint($input->getArgument('blueprint'));
         $stackName = $blueprint->getStackName();
 
         $dryRun = $input->getOption('dryrun');

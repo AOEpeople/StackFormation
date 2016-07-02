@@ -4,12 +4,13 @@ namespace StackFormation\Command\Stack\Show;
 
 use StackFormation\Helper;
 use StackFormation\Helper\Validator;
+use StackFormation\Stack;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class AbstractShowCommand extends \StackFormation\Command\AbstractCommand
+abstract class AbstractShowCommand extends \StackFormation\Command\Stack\AbstractStackCommand
 {
 
     protected $property;
@@ -24,28 +25,14 @@ abstract class AbstractShowCommand extends \StackFormation\Command\AbstractComma
             ->setName('stack:show:'.$this->property)
             ->setDescription('Show a live stack\'s '.$this->property)
             ->addArgument(
-                'stack',
-                InputArgument::REQUIRED,
-                'Stack'
-            )
-            ->addArgument(
                 'key',
                 InputArgument::OPTIONAL,
                 'key'
             );
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function executeWithStack(Stack $stack, InputInterface $input, OutputInterface $output)
     {
-        $this->interactAskForStack($input, $output);
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $stackName = $input->getArgument('stack');
-        Validator::validateStackname($stackName);
-        $stack = $this->getStackFactory()->getStack($stackName);
-
         $methodName = 'get'.ucfirst($this->property);
 
         $key = $input->getArgument('key');

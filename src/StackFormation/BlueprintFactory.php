@@ -61,8 +61,13 @@ class BlueprintFactory {
         foreach ($this->config->getBlueprintNames() as $blueprintName) {
             try {
                 $effectiveStackName = $this->getBlueprint($blueprintName)->getStackName();
-            } catch (MissingEnvVarException $e) {
-                $effectiveStackName = '<fg=red>[Missing env var "'.$e->getEnvVar().'"]</>';
+            } catch (\StackFormation\Exception\ValueResolverException $e) {
+                $previousException = $e->getPrevious();
+                if ($previousException instanceof MissingEnvVarException) {
+                    $effectiveStackName = '<fg=red>[Missing env var "' . $previousException->getEnvVar() . '"]</>';
+                } else {
+                    throw $e;
+                }
             }
             $label = $blueprintName;
 
