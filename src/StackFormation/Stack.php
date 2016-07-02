@@ -8,6 +8,7 @@ use StackFormation\Exception\ParameterNotFoundException;
 use StackFormation\Exception\ResourceNotFoundException;
 use StackFormation\Exception\TagNotFoundException;
 use StackFormation\Helper\Cache;
+use StackFormation\Helper\Div;
 
 class Stack {
 
@@ -77,12 +78,10 @@ class Stack {
      */
     public function getParameters()
     {
-        $parameters = [];
-        $res = isset($this->data['Parameters']) ? $this->data['Parameters'] : [];
-        foreach ($res as $parameter) {
-            $parameters[$parameter['ParameterKey']] = $parameter['ParameterValue'];
+        if (!isset($this->data['Parameters'])) {
+            return [];
         }
-        return $parameters;
+        return Div::flatten($this->data['Parameters'], 'ParameterKey', 'ParameterValue');
     }
 
     /**
@@ -111,12 +110,10 @@ class Stack {
      */
     public function  getOutputs()
     {
-        $outputs = [];
-        $res = isset($this->data['Outputs']) ? $this->data['Outputs'] : [];
-        foreach ($res as $output) {
-            $outputs[$output['OutputKey']] = $output['OutputValue'];
+        if (!isset($this->data['Outputs'])) {
+            return [];
         }
-        return $outputs;
+        return Div::flatten($this->data['Outputs'], 'OutputKey', 'OutputValue');
     }
 
     /**
