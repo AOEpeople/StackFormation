@@ -27,7 +27,9 @@ namespace AwsInspector\Model\AutoScaling;
  */
 class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
 {
-
+    /**
+     * @var array
+     */
     protected $availableProcesses = [
         'Launch',
         'Terminate',
@@ -39,73 +41,114 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
         'AddToLoadBalancer'
     ];
 
+    /**
+     * @param array $loadBalancers
+     * @return \Aws\Result
+     */
     public function attachLoadBalancers(array $loadBalancers) {
+        /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+        $asgClient = $this->profileManager->getClient('AutoScaling');
         $loadBalancerNames = $this->validateElbParam($loadBalancers);
-        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+
         $result = $asgClient->attachLoadBalancers([
             'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
             'LoadBalancerNames' => $loadBalancerNames,
         ]);
+        
         return $result;
     }
 
+    /**
+     * @param array $loadBalancers
+     * @return \Aws\Result
+     */
     public function detachLoadBalancers(array $loadBalancers) {
+        /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+        $asgClient = $this->profileManager->getClient('AutoScaling');
         $loadBalancerNames = $this->validateElbParam($loadBalancers);
-        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+
         $result = $asgClient->detachLoadBalancers([
             'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
             'LoadBalancerNames' => $loadBalancerNames,
         ]);
+
         return $result;
     }
 
-    public function suspendProcesses($processes='all') {
+    /**
+     * @param string $processes
+     */
+    public function suspendProcesses($processes = 'all') {
+        /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+        $asgClient = $this->profileManager->getClient('AutoScaling');
         $processes = $this->validateProcessesParam($processes);
-        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+
         $asgClient->suspendProcesses([
             'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
             'ScalingProcesses' => $processes,
         ]);
+
         // will throw exception if it didn't work
     }
 
-    public function resumeProcesses($processes='all') {
+    /**
+     * @param string $processes
+     */
+    public function resumeProcesses($processes = 'all') {
+        /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+        $asgClient = $this->profileManager->getClient('AutoScaling');
         $processes = $this->validateProcessesParam($processes);
-        $asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling'); /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
+
         $asgClient->resumeProcesses([
             'AutoScalingGroupName' => $this->getAutoScalingGroupName(),
             'ScalingProcesses' => $processes,
         ]);
+
         // will throw exception if it didn't work
     }
 
+    /**
+     * @param $processes
+     * @return array|string
+     */
     protected function validateProcessesParam($processes) {
         if (is_string($processes) && $processes == 'all') {
             $processes = $this->availableProcesses;
         }
+
         if (!is_array($processes)) {
             throw new \InvalidArgumentException('Argument must be "all" or an array of processes');
         }
+
         foreach ($processes as $process) {
             if (!in_array($process, $this->availableProcesses)) {
                 throw new \InvalidArgumentException("Process '$processes' is invalid'");
             }
         }
+
         return $processes;
     }
 
+    /**
+     * @param array $loadBalancers
+     * @return array
+     */
     protected function validateElbParam(array $loadBalancers) {
         $loadBalancerNames = [];
         foreach ($loadBalancers as $loadBalancer) {
             if (is_string($loadBalancer)) {
                 $loadBalancerNames[] = $loadBalancer;
-            } elseif (is_object($loadBalancer) && $loadBalancer instanceof \AwsInspector\Model\Elb\Elb) {
-                $loadBalancerNames[] = $loadBalancer->getLoadBalancerName();
-            } else {
-                throw new \InvalidArgumentException('Argument must be an array of strings or \AwsInspector\Model\Elb\Elb objects');
+                continue;
             }
+
+            if (is_object($loadBalancer) && $loadBalancer instanceof \AwsInspector\Model\Elb\Elb) {
+                $loadBalancerNames[] = $loadBalancer->getLoadBalancerName();
+                continue;
+            }
+
+            throw new \InvalidArgumentException('Argument must be an array of strings or \AwsInspector\Model\Elb\Elb objects');
         }
+
         return $loadBalancerNames;
     }
-
 }
