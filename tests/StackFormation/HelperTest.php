@@ -48,6 +48,10 @@ class HelperTest extends \PHPUnit_Framework_TestCase
     public function invalidStackNameProvider()
     {
         return [
+            [new \stdClass()],
+            [ []],
+            [ null ],
+            [ 42 ],
             ['ecom_t_stack'],
             [''],
             ['stackname with whitespace'],

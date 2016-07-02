@@ -56,4 +56,35 @@ class ValidateTagsTest extends \PHPUnit_Framework_TestCase
             [['Key' => 'Name', 'Value' => str_repeat('A', 256)]],
         ];
     }
+
+    /**
+     * @test
+     */
+    public function valueIsMissing()
+    {
+        $this->setExpectedException('Exception', 'Tag value is missing');
+        Validator::validateTags([['Key' => 'foo']]);
+    }
+
+    /**
+     * @test
+     */
+    public function keyIsMissing()
+    {
+        $this->setExpectedException('Exception', 'Tag key is missing');
+        Validator::validateTags([['Value' => 'foo']]);
+    }
+
+    /**
+     * @test
+     */
+    public function moreThanTenTags()
+    {
+        $this->setExpectedException('Exception', 'No more than 10 tags are allowed');
+        $tags = [];
+        for ($i=0; $i<11; $i++) {
+            $tags[] = ['Key' => "Key$i", 'Value' => "Value$i"];
+        }
+        Validator::validateTags($tags);
+    }
 }
