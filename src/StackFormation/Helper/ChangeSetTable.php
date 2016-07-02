@@ -22,7 +22,7 @@ class ChangeSetTable extends \Symfony\Component\Console\Helper\Table {
                 $resourceChange['LogicalResourceId'],
                 isset($resourceChange['PhysicalResourceId']) ? $resourceChange['PhysicalResourceId'] : '',
                 $resourceChange['ResourceType'],
-                isset($resourceChange['Replacement']) ? Helper::decorateChangesetReplacement($resourceChange['Replacement']) : '',
+                isset($resourceChange['Replacement']) ? Decorator::decorateChangesetReplacement($resourceChange['Replacement']) : '',
             ];
         }
         return $rows;

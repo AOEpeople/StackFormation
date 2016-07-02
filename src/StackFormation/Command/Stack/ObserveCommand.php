@@ -3,6 +3,7 @@
 namespace StackFormation\Command\Stack;
 
 use StackFormation\Helper;
+use StackFormation\Helper\Validator;
 use StackFormation\Observer;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,7 +39,7 @@ class ObserveCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stackName = $input->getArgument('stack');
-        Helper::validateStackname($stackName);
+        Validator::validateStackname($stackName);
 
         $stack = $this->getStackFactory()->getStack($stackName);
 

@@ -2,6 +2,8 @@
 
 namespace StackFormation;
 
+use StackFormation\Helper\Validator;
+
 class Blueprint {
     
     /**
@@ -11,7 +13,7 @@ class Blueprint {
     protected $blueprintConfig;
     protected $valueResolver;
 
-    public function __construct($name, array $blueprintConfig, ValueResolver $valueResolver)
+    public function __construct($name, array $blueprintConfig, \StackFormation\ValueResolver\ValueResolver $valueResolver)
     {
         if (!is_string($name)) {
             throw new \InvalidArgumentException('Name must be a string');
@@ -43,7 +45,7 @@ class Blueprint {
     public function getStackName()
     {
         $stackName = $this->valueResolver->resolvePlaceholders($this->name, $this, 'stackname');
-        Helper::validateStackname($stackName);
+        Validator::validateStackname($stackName);
         return $stackName;
     }
 

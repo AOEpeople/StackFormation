@@ -9,6 +9,7 @@ use StackFormation\Exception\StackCannotBeUpdatedException;
 use StackFormation\Exception\StackNotFoundException;
 use StackFormation\Exception\StackNoUpdatesToBePerformedException;
 use StackFormation\Helper\ChangeSetTable;
+use StackFormation\Helper\Exception;
 use StackFormation\Observer;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
@@ -143,7 +144,7 @@ class DeployCommand extends \StackFormation\Command\AbstractCommand
                 $output->writeln("Triggered deployment of stack '$stackName'.");
 
             } catch (CloudFormationException $exception) {
-                throw \StackFormation\Helper::refineException($exception);
+                throw Exception::refineException($exception);
             }
         } catch (StackNoUpdatesToBePerformedException $e) {
             $output->writeln('No updates are to be performed.');

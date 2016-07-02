@@ -4,6 +4,7 @@ namespace StackFormation\Command\Stack;
 
 use StackFormation\Diff;
 use StackFormation\Helper;
+use StackFormation\Helper\Validator;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,7 +34,7 @@ class DiffCommand extends \StackFormation\Command\AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stackName = $input->getArgument('stack');
-        Helper::validateStackname($stackName);
+        Validator::validateStackname($stackName);
         $stack = $this->getStackFactory()->getStack($stackName);
 
         $blueprint = $this->blueprintFactory->getBlueprintByStack($stack);

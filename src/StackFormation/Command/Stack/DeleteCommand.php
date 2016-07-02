@@ -3,6 +3,7 @@
 namespace StackFormation\Command\Stack;
 
 use StackFormation\Helper;
+use StackFormation\Helper\Finder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -55,7 +56,7 @@ class DeleteCommand extends \StackFormation\Command\AbstractCommand
     protected function getResolvedStacks(InputInterface $input)
     {
         $helper = new Helper();
-        $stacks = $helper->find(
+        $stacks = Finder::find(
             (array)$input->getArgument('stack'),
             $this->getStacks()
         );

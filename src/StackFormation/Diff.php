@@ -3,6 +3,7 @@
 namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
+use StackFormation\Helper\Div;
 
 class Diff
 {
@@ -43,7 +44,7 @@ class Diff
     {
         $parametersStack = $this->stack->getParameters();
         $parametersBlueprint = $this->blueprint->getParameters(true);
-        $parametersBlueprint = Helper::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
+        $parametersBlueprint = Div::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
         if ($this->parametersAreEqual($parametersStack, $parametersBlueprint)) { // normalizes passwords!
             $this->output->writeln('No changes'."\n");
             return;
@@ -90,7 +91,7 @@ class Diff
             if ($this->output->isVerbose()) { $this->output->writeln($this->stack->getName(). ': Comparing parameters'); }
             $parametersStack = $this->stack->getParameters();
             $parametersBlueprint = $this->blueprint->getParameters(true);
-            $parametersBlueprint = Helper::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
+            $parametersBlueprint = Div::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
 
             $tmp['parameters'] = $this->parametersAreEqual($parametersStack, $parametersBlueprint) ? "<fg=green>equal</>" : "<fg=red>different</>";
 

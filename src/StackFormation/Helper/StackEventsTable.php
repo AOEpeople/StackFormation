@@ -21,7 +21,7 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
             if (!in_array($eventId, $this->printedEventIds)) {
                 $this->printedEventIds[] = $eventId;
                 $rows[] = [
-                    Helper::decorateStatus($event['Status']),
+                    Decorator::decorateStatus($event['Status']),
                     $event['ResourceType'],
                     $event['LogicalResourceId'],
                     wordwrap($event['ResourceStatusReason'], 40, "\n"),
@@ -64,7 +64,7 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
         if (preg_match('/See the details in CloudWatch Log Stream: (.*)/', $resourceStatusReason, $matches)) {
             $logStream = $matches[1];
 
-            $logGroupName = Helper::findCloudWatchLogGroupByStream($logStream);
+            $logGroupName = Finder::findCloudWatchLogGroupByStream($logStream);
 
             $params = [
                 'limit' => 20,

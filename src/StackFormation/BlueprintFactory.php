@@ -4,7 +4,8 @@ namespace StackFormation;
 
 use StackFormation\Exception\BlueprintNotFoundException;
 use StackFormation\Exception\MissingEnvVarException;
-use StackFormation\Exception\TagNotFoundException;
+use StackFormation\Helper\Finder;
+use StackFormation\ValueResolver\ValueResolver;
 
 class BlueprintFactory {
 
@@ -13,11 +14,8 @@ class BlueprintFactory {
 
     public function __construct(Config $config=null, ValueResolver $valueResolver=null)
     {
-        $this->config = $config ? $config : new Config();
-        if (is_null($valueResolver)) {
-            $valueResolver = new ValueResolver(null, null, $this->config, null);
-        }
-        $this->valueResolver = $valueResolver;
+        $this->config = $config ?: new Config();
+        $this->valueResolver = $valueResolver ?: new ValueResolver(null, null, $this->config, null);
     }
 
     public function getBlueprint($blueprintName)
@@ -68,7 +66,7 @@ class BlueprintFactory {
             }
             $label = $blueprintName;
 
-            if (!is_null($filter) && !Helper::matchWildcard($filter, $label)) {
+            if (!is_null($filter) && !Finder::matchWildcard($filter, $label)) {
                 continue;
             }
 

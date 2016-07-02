@@ -6,6 +6,7 @@ use StackFormation\Diff;
 use StackFormation\Exception\BlueprintNotFoundException;
 use StackFormation\Exception\BlueprintReferenceNotFoundException;
 use StackFormation\Helper;
+use StackFormation\Helper\Div;
 use StackFormation\Stack;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -53,7 +54,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                 $diff->setBlueprint($blueprint);
                 $tmp['blueprintName'] = '<fg=green>' . $blueprint->getName().'</>';
                 if (count($env)) {
-                    $tmp['blueprintName'] .= "\n". wordwrap(Helper::assocArrayToString($stack->getUsedEnvVars()), 80, "\n");
+                    $tmp['blueprintName'] .= "\n". wordwrap(Div::assocArrayToString($stack->getUsedEnvVars()), 80, "\n");
                 }
                 $tmp = array_merge($tmp, $diff->compare());
             } catch (BlueprintReferenceNotFoundException $e) {

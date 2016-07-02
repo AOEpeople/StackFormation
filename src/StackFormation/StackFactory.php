@@ -3,6 +3,7 @@
 namespace StackFormation;
 
 use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Helper\Finder;
 
 class StackFactory {
 
@@ -63,7 +64,7 @@ class StackFactory {
         }
 
         $helper = new \StackFormation\Helper();
-        $stacks = $helper->find($stackName, array_keys($this->getStacksFromApi()));
+        $stacks = Finder::find($stackName, array_keys($this->getStacksFromApi()));
 
         if (count($stacks) == 0) {
             throw new \Exception("No matching stack found for '$stackName'");
