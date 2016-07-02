@@ -4,24 +4,58 @@ namespace AwsInspector\Helper;
 
 class Curl
 {
-
+    /**
+     * @var string
+     */
     protected $url;
+
+    /**
+     * @var array
+     */
     protected $headers=[];
+
+    /**
+     * @var int
+     */
     protected $maxTime;
+
+    /**
+     * @var \AwsInspector\Ssh\Connection|\AwsInspector\Ssh\LocalConnection|null
+     */
     protected $connection;
+
+    /**
+     * @var string
+     */
     protected $responseStatus;
+
+    /**
+     * @var array
+     */
     protected $responseHeaders = [];
+
+    /**
+     * @var string
+     */
     protected $responseBody;
 
-    public function __construct($url, $headers=[], \AwsInspector\Ssh\Connection $connection=null, $maxTime=5)
+    /**
+     * @param string $url
+     * @param array $headers
+     * @param \AwsInspector\Ssh\Connection|null $connection
+     * @param int $maxTime
+     */
+    public function __construct($url, $headers = [], \AwsInspector\Ssh\Connection $connection = null, $maxTime = 5)
     {
         $this->url = $url;
         $this->headers = $headers;
         $this->connection = is_null($connection) ? new \AwsInspector\Ssh\LocalConnection() : $connection;
         $this->maxTime = $maxTime;
-        $this->doRequest();
     }
 
+    /**
+     * @return string
+     */
     protected function getCurlCommand() {
         $command = [];
         $command[] = 'curl';
@@ -38,11 +72,16 @@ class Curl
         return implode(' ', $command);
     }
 
+    /**
+     * @param string $line
+     * @throws \Exception
+     */
     protected function parseHeader($line) {
         $line = trim($line);
         if (empty($line)) {
             return;
         }
+
         if (strpos($line, ':') === false) {
             throw new \Exception('Header without colon found: ' . $line);
         }
@@ -60,6 +99,10 @@ class Curl
         }
     }
 
+    /**
+     * @return $this
+     * @throws \Exception
+     */
     public function doRequest() {
         $command = $this->getCurlCommand();
 
@@ -81,7 +124,7 @@ class Curl
             // I wish we'd be able to separate header and body in a cleaner way
             // but we can't do this with exec(), and proc_open also doesn't make things easier
             if (preg_match('|HTTP/\d\.\d\s+(\d+)\s+.*|', $line, $matches)) {
-                $this->responseStatus = $matches[0];
+                $this->setResponseCode($matches[0]);
                 $httpLine = true;
 
                 // put the rest back since it belongs to the response body
@@ -91,6 +134,9 @@ class Curl
                 }
             }
             if (!$httpLine && !empty($line)) {
+
+                var_dump($line);
+
                 $this->parseHeader($line);
             }
         } while(!$httpLine);
@@ -99,14 +145,44 @@ class Curl
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getResponseStatus() {
         return $this->responseStatus;
     }
 
+    /**
+     * @return array
+     */
     public function getResponseHeaders() {
         return $this->responseHeaders;
     }
 
+    /**
+     * @param string $header
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getResponseHeader($header) {
+        if (!isset($this->responseHeaders[$header])) {
+            throw new \Exception("Header '$header' not found.");
+        }
+        return $this->responseHeaders[$header];
+    }
+
+    /**
+     * @param string $status
+     */
+    public function setResponseCode($status)
+    {
+        $this->responseStatus = $status;
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getResponseCode() {
         if (empty($this->responseStatus)) {
             throw new \Exception('No response status found');
@@ -116,17 +192,17 @@ class Curl
         return $matches[1];
     }
 
-    public function getResponseHeader($header) {
-        if (!isset($this->responseHeaders[$header])) {
-            throw new \Exception("Header '$header' not found.'");
-        }
-        return $this->responseHeaders[$header];
-    }
-
+    /**
+     * @return mixed
+     */
     public function getResponseBody() {
         return $this->responseBody;
     }
 
+    /**
+     * @param string $exitCode
+     * @return mixed|string
+     */
     protected function getCurlError($exitCode)
     {
         $map = $this->getCurleMap();
@@ -135,6 +211,9 @@ class Curl
         return $errorMessage;
     }
 
+    /**
+     * @return array
+     */
     protected function getCurleMap()
     {
         $map = [];
@@ -147,6 +226,4 @@ class Curl
         }
         return $map;
     }
-
 }
-

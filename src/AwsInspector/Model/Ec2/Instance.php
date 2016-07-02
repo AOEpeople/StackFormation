@@ -185,6 +185,7 @@ class Instance extends \AwsInspector\Model\AbstractResource
     public function getHttpStatusCode($url)
     {
         $curlHelper = new Curl($url, [], $this->getSshConnection());
+        $curlHelper->doRequest();
         return $curlHelper->getResponseCode();
     }
 
