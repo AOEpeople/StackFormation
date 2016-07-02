@@ -1,9 +1,6 @@
 <?php
 
-namespace StackFormation\ValueResolver;
-
-use StackFormation\Helper;
-use StackFormation\ValueResolver;
+namespace StackFormation\ValueResolver\Stage;
 
 class ProfileSwitcher extends AbstractValueResolverStage
 {
@@ -14,7 +11,7 @@ class ProfileSwitcher extends AbstractValueResolverStage
             '/\[profile:([^:\]\[]+?):([^\]\[]+?)\]/',
             function ($matches) {
                 // recursively create another ValueResolver, but this time with a different profile
-                $subValueResolver = new ValueResolver(
+                $subValueResolver = new \StackFormation\ValueResolver\ValueResolver(
                     $this->valueResolver->getDependencyTracker(),
                     $this->valueResolver->getProfileManager(),
                     $this->valueResolver->getConfig(),

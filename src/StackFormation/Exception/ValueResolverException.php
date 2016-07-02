@@ -11,13 +11,17 @@ class ValueResolverException extends \Exception
     protected $sourceType;
     protected $sourceKey;
 
-    public function __construct(Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, \Exception $previous = null)
+    public function __construct($value, Blueprint $sourceBlueprint=null, $sourceType=null, $sourceKey=null, \Exception $previous = null)
     {
         $this->sourceBlueprint = $sourceBlueprint;
         $this->sourceType = $sourceType;
         $this->sourceKey = $sourceKey;
 
-        $message = 'Error resolving value' . $this->getExceptionMessageAppendix();
+        if (!is_scalar($value)) {
+            $value = var_export($value, true);
+        }
+
+        $message = "Error resolving value '$value'" . $this->getExceptionMessageAppendix();
         parent::__construct($message, 0, $previous);
     }
 

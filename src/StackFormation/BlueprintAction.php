@@ -4,6 +4,8 @@ namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Helper\Exception;
+use StackFormation\Helper\Validator;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class BlueprintAction {
@@ -96,7 +98,7 @@ class BlueprintAction {
                 return ($result['Status'] != 'CREATE_COMPLETE') ? false : $result;
             });
         } catch (CloudFormationException $e) {
-            throw Helper::refineException($e); // will try to create a StackNotFoundException
+            throw Exception::refineException($e); // will try to create a StackNotFoundException
         }
         return $result;
     }
@@ -153,7 +155,7 @@ class BlueprintAction {
             $arguments['StackPolicyBody'] = $policy;
         }
 
-        Helper::validateTags($arguments['Tags']);
+        Validator::validateTags($arguments['Tags']);
 
         return $arguments;
     }

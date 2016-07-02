@@ -2,6 +2,8 @@
 
 namespace StackFormation;
 
+use StackFormation\Helper\Div;
+
 class TemplateMerger
 {
 
@@ -57,7 +59,7 @@ class TemplateMerger
 
             $array = json_decode($templateBody, true);
             if (!is_array($array)) {
-                if (Helper::isProgramInstalled('jq')) {
+                if (Div::isProgramInstalled('jq')) {
                     $tmpfile = tempnam(sys_get_temp_dir(), 'json_validate_');
                     file_put_contents($tmpfile, $templateBody);
                     passthru('jq . ' . $tmpfile);

@@ -12,9 +12,16 @@ class Pipeline
      */
     protected $stages = [];
 
+    /**
+     * Add stage
+     *
+     * @param callable $stage
+     * @return $this
+     */
     public function addStage(callable $stage)
     {
         $this->stages[] = $stage;
+        return $this;
     }
 
     /**

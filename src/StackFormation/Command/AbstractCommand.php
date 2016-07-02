@@ -6,8 +6,10 @@ use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\BlueprintFactory;
 use StackFormation\Config;
 use StackFormation\DependencyTracker;
+use StackFormation\Exception\StackNoUpdatesToBePerformedException;
+use StackFormation\Helper;
+use StackFormation\Helper\Exception;
 use StackFormation\Profile\Manager;
-use StackFormation\ValueResolver;
 use StackFormation\StackFactory;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,16 +19,24 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 
 abstract class AbstractCommand extends Command
 {
-    /* @var BlueprintFactory */
+    /**
+     * @var BlueprintFactory
+     */
     protected $blueprintFactory;
 
-    /* @var StackFactory */
+    /**
+     * @var StackFactory
+     */
     protected $stackFactory;
 
-    /* @var DependencyTracker */
+    /**
+     * @var DependencyTracker
+     */
     protected $dependencyTracker;
 
-    /* @var Manager */
+    /**
+     * @var Manager
+     */
     protected $profileManager;
 
     protected function initialize(InputInterface $input, OutputInterface $output)
@@ -37,12 +47,7 @@ abstract class AbstractCommand extends Command
         $this->dependencyTracker = new DependencyTracker();
         $this->blueprintFactory = new BlueprintFactory(
             $config,
-            new ValueResolver(
-                $this->dependencyTracker,
-                $this->profileManager,
-                $config,
-                null // don't load a specific profile
-            )
+            new \StackFormation\ValueResolver\ValueResolver($this->dependencyTracker, $this->profileManager, $config)
         );
     }
 
@@ -67,9 +72,7 @@ abstract class AbstractCommand extends Command
             } else {
                 $helper = $this->getHelper('question');
                 $question = new ChoiceQuestion('Please select a blueprint', $choices);
-
                 $question->setErrorMessage('Blueprint %s is invalid.');
-
                 $blueprint = $helper->ask($input, $output, $question);
             }
             $output->writeln('Selected blueprint: ' . $blueprint);
@@ -91,19 +94,15 @@ abstract class AbstractCommand extends Command
         $stack = $input->getArgument('stack');
         if (empty($stack)) {
             $choices = $this->getStacks($nameFilter, $statusFilter);
-
             if (count($choices) == 0) {
                 throw new \Exception('No valid stacks found.');
             }
             if (count($choices) == 1) {
                 $stack = end($choices);
             } else {
-
                 $helper = $this->getHelper('question');
                 $question = new ChoiceQuestion('Please select a stack', $choices);
-
                 $question->setErrorMessage('Stack %s is invalid.');
-
                 $stack = $helper->ask($input, $output, $question);
             }
             $output->writeln('Selected Stack: ' . $stack);
@@ -117,25 +116,22 @@ abstract class AbstractCommand extends Command
     public function run(InputInterface $input, OutputInterface $output)
     {
         try {
-            return parent::run($input, $output);
-        } catch (CloudFormationException $exception) {
-            
-            $message = \StackFormation\Helper::extractMessage($exception);
-            if (strpos($message, 'No updates are to be performed.') !== false) {
-                $output->writeln('No updates are to be performed.');
-
-                return 0; // exit code
-            } else {
-                $formatter = new FormatterHelper();
-                $formattedBlock = $formatter->formatBlock(['[CloudFormationException]', '', $message], 'error', true);
-                $output->writeln("\n\n$formattedBlock\n\n");
-
-                if ($output->isVerbose()) {
-                    $output->writeln($exception->getTraceAsString());
-                }
-
-                return 1; // exit code
+            try {
+                return parent::run($input, $output);
+            } catch (CloudFormationException $exception) {
+                throw Exception::refineException($exception);
             }
+        } catch (StackNoUpdatesToBePerformedException $e) {
+            $output->writeln('No updates are to be performed.');
+            return 0; // exit code
+        } catch (\Exception $exception) {
+            $formatter = new FormatterHelper();
+            $formattedBlock = $formatter->formatBlock(['[CloudFormationException]', '', $exception->getMessage()], 'error', true);
+            $output->writeln("\n\n$formattedBlock\n\n");
+            if ($output->isVerbose()) {
+                $output->writeln($exception->getTraceAsString());
+            }
+            return 1; // exit code
         }
     }
 

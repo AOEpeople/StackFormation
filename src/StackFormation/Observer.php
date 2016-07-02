@@ -4,6 +4,7 @@ namespace StackFormation;
 
 use Aws\CloudFormation\Exception\CloudFormationException;
 use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Helper\Exception;
 use StackFormation\Helper\StackEventsTable;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
@@ -39,7 +40,7 @@ class Observer
                     $this->output->writeln("-> Polling... (Stack Status: {$this->stack->getStatus()})");
                     $eventTable->render($this->stack->getEvents());
                 } catch (CloudFormationException $exception) {
-                    throw \StackFormation\Helper::refineException($exception);
+                    throw Exception::refineException($exception);
                 }
             } catch (StackNotFoundException $exception) {
                 $this->output->writeln("-> Stack gone.");

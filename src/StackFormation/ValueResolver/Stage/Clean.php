@@ -1,6 +1,6 @@
 <?php
 
-namespace StackFormation\ValueResolver;
+namespace StackFormation\ValueResolver\Stage;
 
 
 class Clean extends AbstractValueResolverStage

@@ -2,6 +2,8 @@
 
 namespace StackFormation\Tests;
 
+use StackFormation\Helper\Validator;
+
 class ValidateTagsTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -12,7 +14,7 @@ class ValidateTagsTest extends \PHPUnit_Framework_TestCase
      */
     public function validTag(array $tag)
     {
-        \StackFormation\Helper::validateTags([$tag]);
+        Validator::validateTags([$tag]);
     }
 
     /**
@@ -37,7 +39,7 @@ class ValidateTagsTest extends \PHPUnit_Framework_TestCase
     public function invalidTag(array $tag)
     {
         $this->setExpectedException('Exception');
-        \StackFormation\Helper::validateTags([$tag]);
+        Validator::validateTags([$tag]);
     }
 
     /**

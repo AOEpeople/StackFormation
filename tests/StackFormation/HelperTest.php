@@ -2,6 +2,8 @@
 
 namespace StackFormation\Tests;
 
+use StackFormation\Helper\Validator;
+
 class HelperTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -12,7 +14,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase
      */
     public function validStackName($stackName)
     {
-        \StackFormation\Helper::validateStackname($stackName);
+        Validator::validateStackname($stackName);
     }
 
     /**
@@ -37,7 +39,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase
     public function invalidStackName($stackName)
     {
         $this->setExpectedException('Exception');
-        \StackFormation\Helper::validateStackname($stackName);
+        Validator::validateStackname($stackName);
     }
 
     /**

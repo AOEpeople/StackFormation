@@ -1,14 +1,8 @@
 <?php
 
-namespace StackFormation\ValueResolver;
+namespace StackFormation\ValueResolver\Stage;
 
-use League\Pipeline\StageInterface;
-use StackFormation\Blueprint;
-use StackFormation\Exception\ValueResolverException;
-use StackFormation\StackFactory;
-use StackFormation\ValueResolver;
-
-abstract class AbstractValueResolverStage implements StageInterface
+abstract class AbstractValueResolverStage
 {
 
     protected $valueResolver; // reference to parent
@@ -17,8 +11,8 @@ abstract class AbstractValueResolverStage implements StageInterface
     protected $sourceKey;
 
     public function __construct(
-        ValueResolver $valueResolver,
-        Blueprint $sourceBlueprint=null,
+        \StackFormation\ValueResolver\ValueResolver $valueResolver,
+        \StackFormation\Blueprint $sourceBlueprint=null,
         $sourceType=null,
         $sourceKey=null
     ) {
@@ -33,7 +27,7 @@ abstract class AbstractValueResolverStage implements StageInterface
         try {
             return $this->invoke($string);
         } catch (\Exception $e) {
-            throw new ValueResolverException($this->sourceBlueprint, $this->sourceType, $this->sourceKey, $e);
+            throw new \StackFormation\Exception\ValueResolverException($string, $this->sourceBlueprint, $this->sourceType, $this->sourceKey, $e);
         }
     }
 
@@ -42,7 +36,7 @@ abstract class AbstractValueResolverStage implements StageInterface
     /**
      * Convenience method
      *
-     * @return StackFactory
+     * @return \StackFormation\StackFactory
      */
     protected function getStackFactory()
     {

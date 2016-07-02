@@ -2,6 +2,7 @@
 
 namespace StackFormation\Command\Stack;
 
+use StackFormation\Helper\Decorator;
 use StackFormation\Stack;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,7 +40,7 @@ class ListCommand extends \StackFormation\Command\AbstractCommand
 
         $rows = [];
         foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */
-            $rows[] = [$stackName, \StackFormation\Helper::decorateStatus($stack->getStatus())];
+            $rows[] = [$stackName, Decorator::decorateStatus($stack->getStatus())];
         }
 
         $table = new Table($output);
