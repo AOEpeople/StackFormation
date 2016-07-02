@@ -14,9 +14,9 @@ class EnvironmentVariable extends AbstractValueResolverStage
             function ($matches) {
                 $value = getenv($matches[1]);
                 if (!$value) {
-                    throw new MissingEnvVarException($matches[1], $this->getExceptionMessageAppendix());
+                    throw new MissingEnvVarException($matches[1]);
                 }
-                $this->dependencyTracker->trackEnvUsage($matches[1], false, $value, $this->sourceBlueprint, $this->sourceType, $this->sourceKey);
+                $this->valueResolver->getDependencyTracker()->trackEnvUsage($matches[1], false, $value, $this->sourceBlueprint, $this->sourceType, $this->sourceKey);
                 return getenv($matches[1]);
             },
             $string

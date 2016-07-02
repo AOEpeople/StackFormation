@@ -21,7 +21,6 @@
         "tedivm/jshrink": "^1.1",
         "vlucas/phpdotenv": "~2.1",
         "monolog/monolog": "~1",
-        "league/pipeline": "0.2.2",
         "php": ">=5.5.0"
     },
     "suggest": {

@@ -12,7 +12,7 @@ class EnvironmentVariableWithFallback extends AbstractValueResolverStage
             function ($matches) {
                 $value = getenv($matches[1]);
                 $value = $value ? $value : $matches[2];
-                $this->dependencyTracker->trackEnvUsage($matches[1], true, $value, $this->sourceBlueprint, $this->sourceType, $this->sourceKey);
+                $this->valueResolver->getDependencyTracker()->trackEnvUsage($matches[1], true, $value, $this->sourceBlueprint, $this->sourceType, $this->sourceKey);
                 return $value;
             },
             $string

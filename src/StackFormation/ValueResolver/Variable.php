@@ -11,12 +11,12 @@ class Variable extends AbstractValueResolverStage
         $string = preg_replace_callback(
             '/\{var:([^:\}\{]+?)\}/',
             function ($matches) {
-                $vars = $this->config->getGlobalVars();
+                $vars = $this->valueResolver->getConfig()->getGlobalVars();
                 if ($this->sourceBlueprint) {
                     $vars = array_merge($vars, $this->sourceBlueprint->getVars());
                 }
                 if (!isset($vars[$matches[1]])) {
-                    throw new \Exception("Variable '{$matches[1]}' not found{$this->getExceptionMessageAppendix()}");
+                    throw new \Exception("Variable '{$matches[1]}' not found");
                 }
                 $value = $vars[$matches[1]];
                 if (is_array($value)) {

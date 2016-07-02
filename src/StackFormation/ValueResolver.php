@@ -2,13 +2,8 @@
 
 namespace StackFormation;
 
-use Aws\CloudFormation\Exception\CloudFormationException;
-use League\Pipeline\Pipeline;
-use League\Pipeline\PipelineBuilder;
-use StackFormation\Exception\MissingEnvVarException;
-use StackFormation\Exception\StackNotFoundException;
+use StackFormation\Helper\Pipeline;
 use StackFormation\Profile\Manager;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class ValueResolver {
 
@@ -64,9 +59,9 @@ class ValueResolver {
             '\StackFormation\ValueResolver\Clean',
         ];
 
-        $pipelineBuilder = new PipelineBuilder();
+        $pipeline = new Pipeline();
         foreach ($stageClasses as $stageClass) {
-            $pipelineBuilder->add(new $stageClass(
+            $pipeline->addStage(new $stageClass(
                 $this,
                 $this->profileManager,
                 $this->config,
@@ -78,7 +73,7 @@ class ValueResolver {
         }
 
         $originalString = $string;
-        $string = $pipelineBuilder->build()->process($string);
+        $string = $pipeline->process($string);
 
         return ($string == $originalString)
             ? $string :
@@ -88,6 +83,22 @@ class ValueResolver {
     public function getDependencyTracker()
     {
         return $this->dependencyTracker;
+    }
+
+    /**
+     * @return Manager
+     */
+    public function getProfileManager()
+    {
+        return $this->profileManager;
+    }
+
+    /**
+     * @return Config
+     */
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     public function getStackFactory(Blueprint $sourceBlueprint=null)

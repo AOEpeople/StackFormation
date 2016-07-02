@@ -4,7 +4,6 @@ namespace StackFormation;
 
 use StackFormation\Exception\BlueprintNotFoundException;
 use StackFormation\Exception\MissingEnvVarException;
-use StackFormation\Exception\TagNotFoundException;
 
 class BlueprintFactory {
 

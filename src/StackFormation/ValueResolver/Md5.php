@@ -18,7 +18,7 @@ class Md5 extends AbstractValueResolverStage
                     chdir($this->sourceBlueprint->getBasePath());
                 }
                 if (!is_file($file)) {
-                    throw new FileNotFoundException("File '$file' not found.{$this->getExceptionMessageAppendix()}'");
+                    throw new FileNotFoundException("File '$file' not found.");
                 }
                 $md5 = md5_file($file);
                 chdir($cwd);
