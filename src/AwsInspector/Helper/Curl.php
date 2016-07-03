@@ -134,9 +134,6 @@ class Curl
                 }
             }
             if (!$httpLine && !empty($line)) {
-
-                var_dump($line);
-
                 $this->parseHeader($line);
             }
         } while(!$httpLine);

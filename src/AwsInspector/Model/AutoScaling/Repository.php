@@ -4,17 +4,24 @@ namespace AwsInspector\Model\AutoScaling;
 
 class Repository
 {
-
     /**
      * @var \Aws\AutoScaling\AutoScalingClient
      */
     protected $asgClient;
 
-    public function __construct($profile=null)
+    /**
+     * @param null $profile
+     * @param \StackFormation\Profile\Manager|null $profileManager
+     */
+    public function __construct($profile = null, \StackFormation\Profile\Manager $profileManager = null)
     {
-        $this->asgClient = \AwsInspector\SdkFactory::getClient('AutoScaling', $profile);
+        $this->profileManager = is_null($profileManager) ? new  \StackFormation\Profile\Manager() : $profileManager;
+        $this->asgClient = $this->profileManager->getClient('AutoScaling', $profile);
     }
 
+    /**
+     * @return \AwsInspector\Model\Collection
+     */
     public function findAutoScalingGroups()
     {
         $result = $this->asgClient->describeAutoScalingGroups();
@@ -25,6 +32,7 @@ class Repository
         foreach ($rows as $row) {
             $collection->attach(new AutoScalingGroup($row));
         }
+
         return $collection;
     }
 
@@ -43,6 +51,10 @@ class Repository
         return $collection;
     }
 
+    /**
+     * @param string $regex
+     * @return \AwsInspector\Model\Collection
+     */
     public function findByAutoScalingGroupName($regex)
     {
         $collection = new \AwsInspector\Model\Collection();
@@ -51,9 +63,13 @@ class Repository
                 $collection->attach($autoScalingGroup);
             }
         }
+
         return $collection;
     }
 
+    /**
+     * @return \AwsInspector\Model\Collection
+     */
     public function findLaunchConfigurations()
     {
         $result = $this->asgClient->describeLaunchConfigurations();
@@ -64,9 +80,13 @@ class Repository
         foreach ($rows as $row) {
             $collection->attach(new LaunchConfiguration($row));
         }
+
         return $collection;
     }
 
+    /**
+     * @return array
+     */
     public function findLaunchConfigurationsGroupedByImageId()
     {
         $imageIds = [];
@@ -77,7 +97,7 @@ class Repository
             }
             $imageIds[$imageId][] = $launchConfiguration;
         }
+
         return $imageIds;
     }
-
 }

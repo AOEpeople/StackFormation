@@ -76,9 +76,11 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
     }
 
     /**
-     * @param string $processes
+     * @param string|array $processes
      */
-    public function suspendProcesses($processes = 'all') {
+    public function suspendProcesses($processes) {
+        if (!$processes) { $processes = 'all'; }
+
         /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
         $asgClient = $this->profileManager->getClient('AutoScaling');
         $processes = $this->validateProcessesParam($processes);
@@ -92,9 +94,11 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
     }
 
     /**
-     * @param string $processes
+     * @param string|array $processes
      */
-    public function resumeProcesses($processes = 'all') {
+    public function resumeProcesses($processes) {
+        if (!$processes) { $processes = 'all'; }
+
         /* @var $asgClient \Aws\AutoScaling\AutoScalingClient */
         $asgClient = $this->profileManager->getClient('AutoScaling');
         $processes = $this->validateProcessesParam($processes);
@@ -108,8 +112,8 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
     }
 
     /**
-     * @param $processes
-     * @return array|string
+     * @param string|array $processes
+     * @return array
      */
     protected function validateProcessesParam($processes) {
         if (is_string($processes) && $processes == 'all') {
@@ -122,7 +126,7 @@ class AutoScalingGroup extends \AwsInspector\Model\AbstractResource
 
         foreach ($processes as $process) {
             if (!in_array($process, $this->availableProcesses)) {
-                throw new \InvalidArgumentException("Process '$processes' is invalid'");
+                throw new \InvalidArgumentException("Process '$process' is invalid'");
             }
         }
 
