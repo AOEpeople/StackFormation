@@ -3,7 +3,6 @@
 namespace StackFormation\Command\Stack\Show;
 
 use StackFormation\Helper;
-use StackFormation\Helper\Validator;
 use StackFormation\Stack;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,12 +22,12 @@ abstract class AbstractShowCommand extends \StackFormation\Command\Stack\Abstrac
 
         $this
             ->setName('stack:show:'.$this->property)
-            ->setDescription('Show a live stack\'s '.$this->property)
-            ->addArgument(
-                'key',
-                InputArgument::OPTIONAL,
-                'key'
-            );
+            ->setDescription('Show a live stack\'s '.$this->property);
+    }
+
+    protected function afterConfigure()
+    {
+        $this->addArgument('key', InputArgument::OPTIONAL, 'key');
     }
 
     protected function executeWithStack(Stack $stack, InputInterface $input, OutputInterface $output)

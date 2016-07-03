@@ -13,6 +13,12 @@ abstract class AbstractStackCommand extends \StackFormation\Command\AbstractComm
     {
         parent::__construct($name);
         $this->addArgument('stack', InputArgument::REQUIRED, 'Stack');
+        $this->afterConfigure();
+    }
+
+    protected function afterConfigure()
+    {
+        // overwrite this in your inheriting class (e.g. for adding optional arguments)
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
