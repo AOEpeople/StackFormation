@@ -160,4 +160,29 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
         $blueprintAction->executeBeforeScripts();
     }
+
+    /**
+     * @test
+     */
+    public function beforeScriptsWhereCommandInBetweenFails()
+    {
+        $this->setExpectedException('Exception', 'Error executing commands');
+
+        chdir(FIXTURE_ROOT.'ProfileManager/fixture_before_scripts');
+
+        $profileManager = new \StackFormation\Profile\Manager();
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'echo "Hello World"',
+            '(exit 1)',
+            'echo "Foo"',
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
+        $blueprintAction->executeBeforeScripts();
+    }
 }
