@@ -14,7 +14,7 @@ class Repository
 
     public function __construct()
     {
-        $this->iamClient = \AwsInspector\SdkFactory::getClient('Iam', 'default', ['region' => 'us-east-1']);
+        $this->iamClient = \AwsInspector\SdkFactory::getClient('Iam');
     }
 
     /**
