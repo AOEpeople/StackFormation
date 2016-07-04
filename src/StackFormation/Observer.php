@@ -51,7 +51,7 @@ class Observer
 
         $this->printStatus($lastStatus);
         $this->printOutputs();
-        return $this->isSuccessfulStatus($lastStatus) ? 0 : 1;
+        return $this->isSuccessfulStatus($lastStatus);
     }
 
     protected function isSuccessfulStatus($status)

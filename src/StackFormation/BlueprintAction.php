@@ -44,9 +44,8 @@ class BlueprintAction {
     }
 
 
-    public function executeBeforeScripts()
+    protected function executeScripts(array $scripts)
     {
-        $scripts = $this->blueprint->getBeforeScripts();
         if (count($scripts) == 0) {
             return;
         }
@@ -69,7 +68,24 @@ class BlueprintAction {
         if ($returnVar !== 0) {
             throw new \Exception('Error executing commands');
         }
+
     }
+
+    public function executeBeforeScripts()
+    {
+        $scripts = $this->blueprint->getScripts('before');
+        $this->executeScripts($scripts);
+    }
+
+    public function executeAfterScripts($success)
+    {
+        $scripts = $this->blueprint->getScripts($success ? 'after_success' : 'after_failure');
+        $this->executeScripts($scripts);
+
+        $scripts = $this->blueprint->getScripts('after_always');
+        $this->executeScripts($scripts);
+    }
+
     /**
      * @return \Aws\Result
      * @throws \Exception

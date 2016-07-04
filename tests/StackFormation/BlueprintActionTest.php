@@ -37,6 +37,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $this->blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $this->blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $this->blueprintMock->method('getTags')->willReturn([]);
+        $this->blueprintMock->method('getScripts')->willReturn([]);
     }
 
     public function testFailingChangeSet()
@@ -73,7 +74,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
+        $blueprintMock->method('getScripts')->with('before')->willReturn([
             'echo -n "HELLO WORLD" > ' . $testfile
         ]);
 
@@ -98,7 +99,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(FIXTURE_ROOT.'RunBeforeScript');
-        $blueprintMock->method('getBeforeScripts')->willReturn([
+        $blueprintMock->method('getScripts')->with('before')->willReturn([
             'cat foo.txt > ' . $testfile
         ]);
 
@@ -127,7 +128,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
+        $blueprintMock->method('getScripts')->with('before')->willReturn([
             'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > ' . $testfile
         ]);
 
@@ -153,7 +154,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
+        $blueprintMock->method('getScripts')->with('before')->willReturn([
             'exit 1'
         ]);
 
@@ -176,7 +177,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
+        $blueprintMock->method('getScripts')->with('before')->willReturn([
             'echo "Hello World"',
             '(exit 1)',
             'echo "Foo"',

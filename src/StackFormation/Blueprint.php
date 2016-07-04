@@ -147,18 +147,24 @@ class Blueprint {
     }
 
     /**
+     * @param string $key
      * @return array
      * @throws \Exception
      */
-    public function getBeforeScripts()
+    public function getScripts($key)
     {
+        if (!in_array($key, ['before', 'after_success', 'after_failure', 'after_always'])) {
+            throw new \InvalidArgumentException('Invalid scripts key');
+        }
+
         $scripts = [];
-        if (isset($this->blueprintConfig['before']) && is_array($this->blueprintConfig['before']) && count($this->blueprintConfig['before']) > 0) {
-            $scripts = $this->blueprintConfig['before'];
+        if (isset($this->blueprintConfig[$key]) && is_array($this->blueprintConfig[$key]) && count($this->blueprintConfig[$key]) > 0) {
+            $scripts = $this->blueprintConfig[$key];
         }
         foreach ($scripts as &$script) {
             $script = $this->valueResolver->resolvePlaceholders($script, $this, 'script');
             $script = str_replace('###CWD###', CWD, $script);
+            $script = str_replace('###STACKNAME###', CWD, $this->getStackName());
         }
         return $scripts;
     }

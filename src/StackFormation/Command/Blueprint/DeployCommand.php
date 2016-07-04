@@ -188,7 +188,10 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
                 $stack = $stackFactory->getStack($stackName, true);
                 $observer = new Observer($stack, $stackFactory, $output);
                 if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
-                return $observer->observeStackActivity();
+
+                $success =  $observer->observeStackActivity();
+                $blueprintAction->executeAfterScripts($success);
+                return $success ? 0 : 1; // exit codes!
             }
         }
     }
