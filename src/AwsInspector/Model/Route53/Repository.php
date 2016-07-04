@@ -15,7 +15,7 @@ class Repository {
      */
     public function __construct($hostedZoneId)
     {
-        $r53Client = SdkFactory::getClient('Route53', 'default', ['region' => 'us-east-1']); /* @var $r53Client \Aws\Route53\Route53Client */
+        $r53Client = SdkFactory::getClient('Route53'); /* @var $r53Client \Aws\Route53\Route53Client */
         $nextRecordName = null;
         do {
             $res = $r53Client->listResourceRecordSets([
