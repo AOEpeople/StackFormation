@@ -12,6 +12,7 @@ use StackFormation\Exception\StackNoUpdatesToBePerformedException;
 use StackFormation\Helper\ChangeSetTable;
 use StackFormation\Helper\Exception;
 use StackFormation\Observer;
+use StackFormation\Stack;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -139,6 +140,7 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
             }
         } catch (StackNoUpdatesToBePerformedException $e) {
             $output->writeln('No updates are to be performed.');
+            $blueprintAction->executeAfterScripts(Stack::STATUS_NO_UPDATES_PERFORMED);
             return 0; // exit code
         } catch (StackCannotBeUpdatedException $e) {
             $questionHelper = $this->getHelper('question'); /* @var $questionHelper QuestionHelper */
@@ -189,9 +191,9 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
                 $observer = new Observer($stack, $stackFactory, $output);
                 if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
 
-                $success =  $observer->observeStackActivity();
-                $blueprintAction->executeAfterScripts($success);
-                return $success ? 0 : 1; // exit codes!
+                $status =  $observer->observeStackActivity();
+                $blueprintAction->executeAfterScripts($status);
+                return $observer->isSuccessfulStatus($status) ? 0 : 1; // exit codes!
             }
         }
     }

@@ -16,6 +16,9 @@ class Stack {
     CONST METADATA_KEY_BLUEPRINT = 'Blueprint';
     CONST METADATA_KEY_ENVVARS = 'EnvironmentVariables';
 
+    CONST STATUS_NO_UPDATES_PERFORMED = 'NO_UPDATES_PERFORMED';
+    CONST STATUS_STACK_GONE = 'STACK_GONE';
+
     /**
      * @var string
      */

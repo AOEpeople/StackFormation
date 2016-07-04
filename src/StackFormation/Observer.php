@@ -44,19 +44,19 @@ class Observer
                 }
             } catch (StackNotFoundException $exception) {
                 $this->output->writeln("-> Stack gone.");
-                return 'STACK_GONE'; // this is != false and will stop the poller
+                return Stack::STATUS_STACK_GONE; // this is != false and will stop the poller
             }
             return $this->stack->isInProgress() ? false : $this->stack->getStatus();
         }, $pollInterval, 1000);
 
         $this->printStatus($lastStatus);
         $this->printOutputs();
-        return $this->isSuccessfulStatus($lastStatus);
+        return $lastStatus;
     }
 
-    protected function isSuccessfulStatus($status)
+    public function isSuccessfulStatus($status)
     {
-        return in_array($status, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'STACK_GONE']);
+        return in_array($status, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', Stack::STATUS_STACK_GONE]);
     }
 
     protected function printOutputs()

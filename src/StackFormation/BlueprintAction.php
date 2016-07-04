@@ -44,22 +44,25 @@ class BlueprintAction {
     }
 
 
-    protected function executeScripts(array $scripts)
+    protected function executeScripts(array $scripts, $type)
     {
         if (count($scripts) == 0) {
             return;
         }
 
-        if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("Running scripts:"); }
+        if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("Running scripts ($type)"); }
 
-        $envVars = $this->profileManager->getEnvVarsFromProfile($this->blueprint->getProfile());
-        if (empty($envVars)) {
-            $envVars = [];
+        $envVars = [
+            "BLUEPRINT=".$this->blueprint->getName(),
+            "STACKNAME=".$this->blueprint->getStackName(),
+        ];
+        if ($this->blueprint->getProfile()) {
+            $envVars = array_merge($envVars, $this->profileManager->getEnvVarsFromProfile($this->blueprint->getProfile()));
         }
 
         $basePath = $this->blueprint->getBasePath();
 
-        $tmpfile = tempnam(sys_get_temp_dir(), 'before_scripts_');
+        $tmpfile = tempnam(sys_get_temp_dir(), 'scripts_');
         file_put_contents($tmpfile, implode("\n", $scripts));
 
         $command = "cd $basePath && " . implode(' ', $envVars) . " /usr/bin/env bash -ex $tmpfile";
@@ -73,17 +76,15 @@ class BlueprintAction {
 
     public function executeBeforeScripts()
     {
-        $scripts = $this->blueprint->getScripts('before');
-        $this->executeScripts($scripts);
+        $scriptSet = $this->blueprint->getBeforeScripts();
+        $this->executeScripts($scriptSet, 'before');
     }
 
-    public function executeAfterScripts($success)
+    public function executeAfterScripts($status)
     {
-        $scripts = $this->blueprint->getScripts($success ? 'after_success' : 'after_failure');
-        $this->executeScripts($scripts);
-
-        $scripts = $this->blueprint->getScripts('after_always');
-        $this->executeScripts($scripts);
+        foreach ($this->blueprint->getAfterScripts($status) as $pattern => $scriptSet) {
+            $this->executeScripts($scriptSet, "after: $pattern");
+        }
     }
 
     /**

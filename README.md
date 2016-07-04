@@ -388,6 +388,33 @@ blueprints:
 
 ```
 
+### `after`
+
+Similar to `before` scripts you can define scripts that are being executed after the stack has been deployed.
+Please note this only work if you're 'observing' the deploying (no if you deployed with '--no-observe' or if you're 
+stopping the process (e.g. CTRL+C) during the deployment.
+
+The `after` configuration is slightly different than the `before` configuration: There's an extra level of keys with regex patterns
+that are being matches against the stack status. (Special status values in addition to the default ones like 'CREATE_COMPLETE',...
+are 'NO_UPDATES_PERFORMED' and 'STACK_GONE')
+
+All matching script sets will be executed in order. You can have multiple patterns matching the same status
+
+Example
+```
+blueprints:
+
+  - stackname: 'my-static-website'
+    description: 'Static website hosted in S3'
+    template: 'website.template'
+    after:
+      '/^(UPDATE|CREATE)_COMPLETE|NO_UPDATES_PERFORMED$/':
+        - 'aws s3 sync --delete content/ s3://mystaticwebsite.com/'
+      '/.*/':
+        - 'echo "Done deploying blueprint \"$BLUEPRINT\" to \"$STACKNAME\""'
+```
+
+
 ### AWS SDK
 
 StackFormation uses the AWS SDK for PHP. You should configure your keys in env vars:

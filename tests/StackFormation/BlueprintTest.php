@@ -421,7 +421,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function stackNameIsReplaced()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
-        $beforeScripts = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture10')->getScripts('before');
+        $beforeScripts = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture10')->getBeforeScripts();
         $this->assertEquals('echo -n "fixture10"', $beforeScripts[0]);
     }
 
@@ -431,7 +431,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     public function cwdNameIsReplaced()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
-        $beforeScripts = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture9')->getScripts('before');
+        $beforeScripts = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture9')->getBeforeScripts();
         $this->assertEquals('echo -n "'.getcwd().'"', $beforeScripts[0]);
     }
 }
