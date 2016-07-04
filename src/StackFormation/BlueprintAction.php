@@ -44,7 +44,7 @@ class BlueprintAction {
     }
 
 
-    protected function executeScripts(array $scripts, $type)
+    protected function executeScripts(array $scripts, $envVars=[], $type)
     {
         if (count($scripts) == 0) {
             return;
@@ -52,10 +52,10 @@ class BlueprintAction {
 
         if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("Running scripts ($type)"); }
 
-        $envVars = [
+        $envVars = array_merge([
             "BLUEPRINT=".$this->blueprint->getName(),
             "STACKNAME=".$this->blueprint->getStackName(),
-        ];
+        ], $envVars);
         if ($this->blueprint->getProfile()) {
             $envVars = array_merge($envVars, $this->profileManager->getEnvVarsFromProfile($this->blueprint->getProfile()));
         }
@@ -77,13 +77,13 @@ class BlueprintAction {
     public function executeBeforeScripts()
     {
         $scriptSet = $this->blueprint->getBeforeScripts();
-        $this->executeScripts($scriptSet, 'before');
+        $this->executeScripts($scriptSet, [], 'before');
     }
 
     public function executeAfterScripts($status)
     {
         foreach ($this->blueprint->getAfterScripts($status) as $pattern => $scriptSet) {
-            $this->executeScripts($scriptSet, "after: $pattern");
+            $this->executeScripts($scriptSet, ["STATUS=$status"], "after: $pattern");
         }
     }
 

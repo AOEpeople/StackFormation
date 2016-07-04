@@ -425,7 +425,8 @@ When a profile is being used (even if the profile is loaded via the `profiles.ym
 set in the script context, so you can safely call the aws cli tool in the same context the blueprint is being deployed.
 
 In addition to that `${BLUEPRINT}` will hold the current blueprint's name and `${STACKNAME}` the current resulting stack name 
-(this is similar to the static replacement of the ###STACKNAME### placeholder)
+(this is similar to the static replacement of the `###STACKNAME###` placeholder)
+Also `${STATUS}` will hold the last status of the stack that has just been deployed.
 
 ### AWS SDK
 
