@@ -414,4 +414,24 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
             'FOO3' => 'BAR3'
         ], $template['Metadata']['StackFormation']['EnvironmentVariables']);
     }
+
+    /**
+     * @test
+     */
+    public function stackNameIsReplaced()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
+        $beforeScripts = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture10')->getScripts('before');
+        $this->assertEquals('echo -n "fixture10"', $beforeScripts[0]);
+    }
+
+    /**
+     * @test
+     */
+    public function cwdNameIsReplaced()
+    {
+        $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
+        $beforeScripts = $this->getMockedBlueprintFactory($config)->getBlueprint('fixture9')->getScripts('before');
+        $this->assertEquals('echo -n "'.getcwd().'"', $beforeScripts[0]);
+    }
 }

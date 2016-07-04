@@ -43,3 +43,15 @@ blueprints:
     profile: 'before_scripts_profile'
     before:
     - 'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > {env:TESTFILE}'
+
+
+  - stackname: 'fixture9'
+    template: 'dummy.template'
+    before:
+    - 'echo -n "###CWD###"'
+
+
+  - stackname: 'fixture10'
+    template: 'dummy.template'
+    before:
+    - 'echo -n "###STACKNAME###"'

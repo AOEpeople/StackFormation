@@ -161,10 +161,11 @@ class Blueprint {
         if (isset($this->blueprintConfig[$key]) && is_array($this->blueprintConfig[$key]) && count($this->blueprintConfig[$key]) > 0) {
             $scripts = $this->blueprintConfig[$key];
         }
-        foreach ($scripts as &$script) {
-            $script = $this->valueResolver->resolvePlaceholders($script, $this, 'script');
-            $script = str_replace('###CWD###', CWD, $script);
-            $script = str_replace('###STACKNAME###', CWD, $this->getStackName());
+
+        foreach ($scripts as &$line) {
+            $line = $this->valueResolver->resolvePlaceholders($line, $this, 'script');
+            $line = str_replace('###CWD###', CWD, $line);
+            $line = str_replace('###STACKNAME###', $this->getStackName(), $line);
         }
         return $scripts;
     }
