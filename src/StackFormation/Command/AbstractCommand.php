@@ -124,14 +124,6 @@ abstract class AbstractCommand extends Command
         } catch (StackNoUpdatesToBePerformedException $e) {
             $output->writeln('No updates are to be performed.');
             return 0; // exit code
-        } catch (\Exception $exception) {
-            $formatter = new FormatterHelper();
-            $formattedBlock = $formatter->formatBlock(['[CloudFormationException]', '', $exception->getMessage()], 'error', true);
-            $output->writeln("\n\n$formattedBlock\n\n");
-            if ($output->isVerbose()) {
-                $output->writeln($exception->getTraceAsString());
-            }
-            return 1; // exit code
         }
     }
 
