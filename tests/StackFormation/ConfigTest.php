@@ -51,7 +51,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($config->blueprintExists('fixture1'));
         $this->assertTrue($config->blueprintExists('fixture2'));
         $names = $config->getBlueprintNames();
-        $this->assertArraySubset(['fixture1', 'fixture2'], $names);
+        $this->assertTrue(in_array('fixture1', $names));
+        $this->assertTrue(in_array('fixture2', $names));
     }
 
     /**
