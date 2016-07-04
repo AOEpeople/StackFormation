@@ -394,39 +394,30 @@ Similar to `before` scripts you can define scripts that are being executed after
 Please note this only work if you're 'observing' the deploying (no if you deployed with '--no-observe' or if you're 
 stopping the process (e.g. CTRL+C) during the deployment.
 
-The `after` configuration is slightly different than the `before` configuration: There's an extra level of keys with regex patterns
-that are being matches against the stack status. (Special status values in addition to the default ones like 'CREATE_COMPLETE',...
+The `after` configuration equals the `before` configuration with the addition that you have access to the status in the `${STATUS}` variable/
+(Special status values in addition to the default ones like 'CREATE_COMPLETE',...
 are 'NO_UPDATES_PERFORMED' and 'STACK_GONE')
-
-All matching script sets will be executed in order. You can have multiple patterns matching the same status
 
 Example
 ```
 blueprints:
-
   - stackname: 'my-static-website'
     description: 'Static website hosted in S3'
     template: 'website.template'
     after:
-      '/^(UPDATE|CREATE)_COMPLETE|NO_UPDATES_PERFORMED$/':
-        - 'aws s3 sync --delete content/ s3://mystaticwebsite.com/'
-      '/.*/':
-        - 'echo "Done deploying blueprint \"$BLUEPRINT\" to \"$STACKNAME\""'
+      - 'if [[ $STATUS =~ ^(UPDATE|CREATE)_COMPLETE|NO_UPDATES_PERFORMED$ ]] ; then aws s3 sync --delete content/ s3://www-tst.aoeplay.net/; fi'
 ```
 
 ### `before` and `after`
 
 `before` or `after` are being executed in the base directory of the current blueprint (that's the directory the blueprint's blueprint.yml file is located at).
-But you can switch directories in your script. The `###CWD###` placeholder will automatically be replaced with the current working directory (the project root).
-
-In addition to that `###STACKNAME###` will be replaced with the current resulting stack name. 
+But you can switch directories in your script. The `${CWD}` variable holds the current working directory (the project root) in case you want to switch to that.
 
 When a profile is being used (even if the profile is loaded via the `profiles.yml` file) the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` variables will be 
 set in the script context, so you can safely call the aws cli tool in the same context the blueprint is being deployed.
 
 In addition to that `${BLUEPRINT}` will hold the current blueprint's name and `${STACKNAME}` the current resulting stack name 
-(this is similar to the static replacement of the `###STACKNAME###` placeholder)
-Also `${STATUS}` will hold the last status of the stack that has just been deployed.
+Also `${STATUS}` will hold the last status of the stack that has just been deployed (`after` scripts only).
 
 ### AWS SDK
 

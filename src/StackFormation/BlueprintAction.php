@@ -55,6 +55,7 @@ class BlueprintAction {
         $envVars = array_merge([
             "BLUEPRINT=".$this->blueprint->getName(),
             "STACKNAME=".$this->blueprint->getStackName(),
+            "CWD=".CWD,
         ], $envVars);
         if ($this->blueprint->getProfile()) {
             $envVars = array_merge($envVars, $this->profileManager->getEnvVarsFromProfile($this->blueprint->getProfile()));
@@ -82,9 +83,8 @@ class BlueprintAction {
 
     public function executeAfterScripts($status)
     {
-        foreach ($this->blueprint->getAfterScripts($status) as $pattern => $scriptSet) {
-            $this->executeScripts($scriptSet, ["STATUS=$status"], "after: $pattern");
-        }
+        $scriptSet = $this->blueprint->getAfterScripts();
+        $this->executeScripts($scriptSet, ["STATUS=$status"], 'after');
     }
 
     /**

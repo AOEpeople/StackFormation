@@ -147,12 +147,12 @@ class Blueprint {
     }
 
     /**
+     * @param string $key
      * @return array
      * @throws \Exception
      */
-    public function getBeforeScripts()
+    protected function getScripts($key)
     {
-        $key = 'before';
         if (!isset($this->blueprintConfig[$key])
             || !is_array($this->blueprintConfig[$key])
             || count($this->blueprintConfig[$key]) == 0) {
@@ -161,32 +161,24 @@ class Blueprint {
         return $this->customizeScripts($this->blueprintConfig[$key]);
     }
 
-    public function getAfterScripts($status)
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getBeforeScripts()
     {
-        $key = 'after';
-        if (!isset($this->blueprintConfig[$key])
-            || !is_array($this->blueprintConfig[$key])
-            || count($this->blueprintConfig[$key]) == 0) {
-            return [];
-        }
-        $scriptSets = [];
-        foreach ($this->blueprintConfig[$key] as $pattern => $scriptSet) {
-            if (!is_array($scriptSet)) {
-                throw new \Exception('Invalid script set.');
-            }
-            if (preg_match($pattern, $status)) {
-                $scriptSets[$pattern] = $this->customizeScripts($scriptSet);
-            }
-        }
-        return $scriptSets;
+        return $this->getScripts('before');
+    }
+
+    public function getAfterScripts()
+    {
+        return $this->getScripts('after');
     }
 
     protected function customizeScripts(array $scripts)
     {
         array_walk($scripts, function(&$line) {
             $line = $this->valueResolver->resolvePlaceholders($line, $this, 'script');
-            $line = str_replace('###CWD###', CWD, $line);
-            $line = str_replace('###STACKNAME###', $this->getStackName(), $line);
         });
         return $scripts;
     }

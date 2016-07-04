@@ -186,4 +186,109 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
         $blueprintAction->executeBeforeScripts();
     }
+
+    /**
+     * @test
+     */
+    public function stackNameVariable()
+    {
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getStackName')->willReturn('FooStackName');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'echo -n "$STACKNAME" > ' . $testfile
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $this->profileManagerMock
+        );
+
+        $blueprintAction->executeBeforeScripts();
+
+        $this->assertStringEqualsFile($testfile, 'FooStackName');
+        unlink($testfile);
+    }
+
+    /**
+     * @test
+     */
+    public function blueprintVariable()
+    {
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getStackName')->willReturn('FooStackName');
+        $blueprintMock->method('getName')->willReturn('FooBlueprint');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'echo -n "$BLUEPRINT" > ' . $testfile
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $this->profileManagerMock
+        );
+
+        $blueprintAction->executeBeforeScripts();
+
+        $this->assertStringEqualsFile($testfile, 'FooBlueprint');
+        unlink($testfile);
+    }
+
+    /**
+     * @test
+     */
+    public function cwdVariable()
+    {
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getStackName')->willReturn('FooStackName');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getBeforeScripts')->willReturn([
+            'echo -n "$CWD" > ' . $testfile
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $this->profileManagerMock
+        );
+
+        $blueprintAction->executeBeforeScripts();
+
+        $this->assertStringEqualsFile($testfile, getcwd());
+        unlink($testfile);
+    }
+
+    /**
+     * @test
+     */
+    public function statusVariable()
+    {
+        $testfile = tempnam(sys_get_temp_dir(), __FUNCTION__);
+
+        $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
+        $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
+        $blueprintMock->method('getStackName')->willReturn('FooStackName');
+        $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
+        $blueprintMock->method('getAfterScripts')->willReturn([
+            'echo -n "$STATUS" > ' . $testfile
+        ]);
+
+        $blueprintAction = new \StackFormation\BlueprintAction(
+            $blueprintMock,
+            $this->profileManagerMock
+        );
+
+        $blueprintAction->executeAfterScripts('FOOSTATUS');
+
+        $this->assertStringEqualsFile($testfile, 'FOOSTATUS');
+        unlink($testfile);
+    }
 }
