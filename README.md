@@ -414,6 +414,18 @@ blueprints:
         - 'echo "Done deploying blueprint \"$BLUEPRINT\" to \"$STACKNAME\""'
 ```
 
+### `before` and `after`
+
+`before` or `after` are being executed in the base directory of the current blueprint (that's the directory the blueprint's blueprint.yml file is located at).
+But you can switch directories in your script. The `###CWD###` placeholder will automatically be replaced with the current working directory (the project root).
+
+In addition to that `###STACKNAME###` will be replaced with the current resulting stack name. 
+
+When a profile is being used (even if the profile is loaded via the `profiles.yml` file) the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` variables will be 
+set in the script context, so you can safely call the aws cli tool in the same context the blueprint is being deployed.
+
+In addition to that `${BLUEPRINT}` will hold the current blueprint's name and `${STACKNAME}` the current resulting stack name 
+(this is similar to the static replacement of the ###STACKNAME### placeholder)
 
 ### AWS SDK
 
