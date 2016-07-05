@@ -47,6 +47,12 @@ class SshCommand extends AbstractCommand
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Command'
+            )
+            ->addOption(
+                'tunnel',
+                'L',
+                InputOption::VALUE_OPTIONAL,
+                'Tunnel'
             );
     }
 
@@ -140,7 +146,12 @@ class SshCommand extends AbstractCommand
             return 0;
         }
 
-        $connection->connect();
+        if ($input->getOption('tunnel')) {
+            $output->writeln('Establishing tunnel... (CTRL-C to close connection)');
+            $connection->tunnel($input->getOption('tunnel'));
+        } else {
+            $connection->connect();
+        }
         return 0;
     }
 

@@ -140,5 +140,30 @@ class Connection
         }
     }
 
+    /**
+     * Interactive connection
+     */
+    public function tunnel($configuration)
+    {
+        list($localPort, $remoteHost, $remotePort) = explode(':', $configuration);
+        if (!ctype_digit($localPort)) {
+            throw new \InvalidArgumentException('Invalid local port');
+        }
+        if (empty($remoteHost)) {
+            throw new \InvalidArgumentException('Invalid remote host');
+        }
+        if (!ctype_digit($remotePort)) {
+            throw new \InvalidArgumentException('Invalid remote port');
+        }
+
+        $descriptorSpec = [0 => STDIN, 1 => STDOUT, 2 => STDERR];
+        $pipes = [];
+        $command = $this->__toString() . ' -L ' . $configuration . ' -N';
+        $process = proc_open($command, $descriptorSpec, $pipes);
+        if (is_resource($process)) {
+            proc_close($process);
+        }
+    }
+
 
 }
