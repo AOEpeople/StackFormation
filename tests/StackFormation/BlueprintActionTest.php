@@ -37,7 +37,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $this->blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $this->blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $this->blueprintMock->method('getTags')->willReturn([]);
-        $this->blueprintMock->method('getBeforeScripts')->willReturn([]);
+        $this->blueprintMock->method('getBeforeScript')->willReturn([]);
     }
 
     public function testFailingChangeSet()
@@ -74,16 +74,14 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo -n "HELLO WORLD" > ' . $testfile
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn('echo -n "HELLO WORLD" > ' . $testfile);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $blueprintMock,
             $this->profileManagerMock
         );
 
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
 
         $this->assertStringEqualsFile($testfile, 'HELLO WORLD');
         unlink($testfile);
@@ -99,16 +97,14 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock = $this->getMock('\StackFormation\Blueprint', [], [], '', false);
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(FIXTURE_ROOT.'RunBeforeScript');
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'cat foo.txt > ' . $testfile
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn('cat foo.txt > ' . $testfile);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $blueprintMock,
             $this->profileManagerMock
         );
 
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
 
         $this->assertStringEqualsFile($testfile, 'HELLO WORLD FROM FILE');
         unlink($testfile);
@@ -128,12 +124,10 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > ' . $testfile
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn('echo -n "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" > ' . $testfile);
 
         $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
 
         $this->assertStringEqualsFile($testfile, 'TESTACCESSKEY1:TESTSECRETKEY1');
         unlink($testfile);
@@ -154,12 +148,10 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'exit 1'
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn('exit 1');
 
         $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
     }
 
     /**
@@ -177,14 +169,14 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getProfile')->willReturn('before_scripts_profile');
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo "Hello World"',
-            '(exit 1)',
-            'echo "Foo"',
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn(
+            'echo "Hello World"' . "\n" .
+            '(exit 1)' . "\n" .
+            'echo "Foo"'
+        );
 
         $blueprintAction = new \StackFormation\BlueprintAction($blueprintMock, $profileManager);
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
     }
 
     /**
@@ -198,16 +190,14 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getStackName')->willReturn('FooStackName');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo -n "$STACKNAME" > ' . $testfile
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn('echo -n "$STACKNAME" > ' . $testfile);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $blueprintMock,
             $this->profileManagerMock
         );
 
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
 
         $this->assertStringEqualsFile($testfile, 'FooStackName');
         unlink($testfile);
@@ -225,16 +215,14 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getStackName')->willReturn('FooStackName');
         $blueprintMock->method('getName')->willReturn('FooBlueprint');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo -n "$BLUEPRINT" > ' . $testfile
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn('echo -n "$BLUEPRINT" > ' . $testfile);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $blueprintMock,
             $this->profileManagerMock
         );
 
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
 
         $this->assertStringEqualsFile($testfile, 'FooBlueprint');
         unlink($testfile);
@@ -251,16 +239,14 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getStackName')->willReturn('FooStackName');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getBeforeScripts')->willReturn([
-            'echo -n "$CWD" > ' . $testfile
-        ]);
+        $blueprintMock->method('getBeforeScript')->willReturn('echo -n "$CWD" > ' . $testfile);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $blueprintMock,
             $this->profileManagerMock
         );
 
-        $blueprintAction->executeBeforeScripts();
+        $blueprintAction->executeBeforeScript();
 
         $this->assertStringEqualsFile($testfile, getcwd());
         unlink($testfile);
@@ -277,16 +263,14 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
         $blueprintMock->method('getBlueprintReference')->willReturn('FOO');
         $blueprintMock->method('getStackName')->willReturn('FooStackName');
         $blueprintMock->method('getBasePath')->willReturn(sys_get_temp_dir());
-        $blueprintMock->method('getAfterScripts')->willReturn([
-            'echo -n "$STATUS" > ' . $testfile
-        ]);
+        $blueprintMock->method('getAfterScript')->willReturn('echo -n "$STATUS" > ' . $testfile);
 
         $blueprintAction = new \StackFormation\BlueprintAction(
             $blueprintMock,
             $this->profileManagerMock
         );
 
-        $blueprintAction->executeAfterScripts('FOOSTATUS');
+        $blueprintAction->executeAfterScript('FOOSTATUS');
 
         $this->assertStringEqualsFile($testfile, 'FOOSTATUS');
         unlink($testfile);

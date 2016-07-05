@@ -140,7 +140,7 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
             }
         } catch (StackNoUpdatesToBePerformedException $e) {
             $output->writeln('No updates are to be performed.');
-            $blueprintAction->executeAfterScripts(Stack::STATUS_NO_UPDATES_PERFORMED);
+            $blueprintAction->executeAfterScript(Stack::STATUS_NO_UPDATES_PERFORMED);
             return 0; // exit code
         } catch (StackCannotBeUpdatedException $e) {
             $questionHelper = $this->getHelper('question'); /* @var $questionHelper QuestionHelper */
@@ -192,7 +192,7 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
                 if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
 
                 $status =  $observer->observeStackActivity();
-                $blueprintAction->executeAfterScripts($status);
+                $blueprintAction->executeAfterScript($status);
                 return $observer->isSuccessfulStatus($status) ? 0 : 1; // exit codes!
             }
         }

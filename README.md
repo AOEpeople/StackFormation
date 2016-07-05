@@ -419,6 +419,25 @@ set in the script context, so you can safely call the aws cli tool in the same c
 In addition to that `${BLUEPRINT}` will hold the current blueprint's name and `${STACKNAME}` the current resulting stack name 
 Also `${STATUS}` will hold the last status of the stack that has just been deployed (`after` scripts only).
 
+You can separate the script lines in an array (that will then be concatenated with `\n` before executing:
+```
+blueprints:
+  - stackname: 'my-static-website'
+    [...]
+    after:
+      - 'echo "Line 1"'
+      - 'echo "Line 2"'
+```
+
+or you can use the YAML multiline notation:
+```
+blueprints:
+  - stackname: 'my-static-website'
+    [...]
+    after: |
+      echo "Line 1"
+      echo "Line 2"
+```
 ### AWS SDK
 
 StackFormation uses the AWS SDK for PHP. You should configure your keys in env vars:

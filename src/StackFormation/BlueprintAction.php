@@ -44,10 +44,13 @@ class BlueprintAction {
     }
 
 
-    protected function executeScripts(array $scripts, $envVars=[], $type)
+    protected function executeScript($script, $envVars=[], $type)
     {
-        if (count($scripts) == 0) {
+        if (empty($script)) {
             return;
+        }
+        if (!is_string($script)) {
+            throw new \InvalidArgumentException('Script must be a string');
         }
 
         if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("Running scripts ($type)"); }
@@ -63,28 +66,28 @@ class BlueprintAction {
 
         $basePath = $this->blueprint->getBasePath();
 
-        $tmpfile = tempnam(sys_get_temp_dir(), 'scripts_');
-        file_put_contents($tmpfile, implode("\n", $scripts));
+        $tmpfile = tempnam(sys_get_temp_dir(), 'script_');
+        file_put_contents($tmpfile, $script);
 
         $command = "cd $basePath && " . implode(' ', $envVars) . " /usr/bin/env bash -ex $tmpfile";
         passthru($command, $returnVar);
         unlink($tmpfile);
         if ($returnVar !== 0) {
-            throw new \Exception('Error executing commands');
+            throw new \Exception('Error executing script');
         }
 
     }
 
-    public function executeBeforeScripts()
+    public function executeBeforeScript()
     {
-        $scriptSet = $this->blueprint->getBeforeScripts();
-        $this->executeScripts($scriptSet, [], 'before');
+        $script = $this->blueprint->getBeforeScript();
+        $this->executeScript($script, [], 'before');
     }
 
-    public function executeAfterScripts($status)
+    public function executeAfterScript($status)
     {
-        $scriptSet = $this->blueprint->getAfterScripts();
-        $this->executeScripts($scriptSet, ["STATUS=$status"], 'after');
+        $script = $this->blueprint->getAfterScript();
+        $this->executeScript($script, ["STATUS=$status"], 'after');
     }
 
     /**
@@ -96,7 +99,7 @@ class BlueprintAction {
         $arguments = $this->prepareArguments();
 
         try {
-            $this->executeBeforeScripts();
+            $this->executeBeforeScript();
 
             if (isset($arguments['StackPolicyBody'])) {
                 unset($arguments['StackPolicyBody']);
@@ -125,7 +128,7 @@ class BlueprintAction {
         $arguments = $this->prepareArguments();
 
         if (!$dryRun) {
-            $this->executeBeforeScripts();
+            $this->executeBeforeScript();
         }
 
         try {

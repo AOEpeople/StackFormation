@@ -148,39 +148,30 @@ class Blueprint {
 
     /**
      * @param string $key
-     * @return array
+     * @return string
      * @throws \Exception
      */
-    protected function getScripts($key)
+    protected function getScript($key)
     {
-        if (!isset($this->blueprintConfig[$key])
-            || !is_array($this->blueprintConfig[$key])
-            || count($this->blueprintConfig[$key]) == 0) {
-            return [];
+        if (!isset($this->blueprintConfig[$key])) {
+            return null;
         }
-        return $this->customizeScripts($this->blueprintConfig[$key]);
+        $script = is_array($this->blueprintConfig[$key]) ? implode("\n", $this->blueprintConfig[$key]) : $this->blueprintConfig[$key];
+        return $this->valueResolver->resolvePlaceholders($script, $this, 'script');
     }
 
     /**
      * @return array
      * @throws \Exception
      */
-    public function getBeforeScripts()
+    public function getBeforeScript()
     {
-        return $this->getScripts('before');
+        return $this->getScript('before');
     }
 
-    public function getAfterScripts()
+    public function getAfterScript()
     {
-        return $this->getScripts('after');
-    }
-
-    protected function customizeScripts(array $scripts)
-    {
-        array_walk($scripts, function(&$line) {
-            $line = $this->valueResolver->resolvePlaceholders($line, $this, 'script');
-        });
-        return $scripts;
+        return $this->getScript('after');
     }
 
     public function getBasePath()
