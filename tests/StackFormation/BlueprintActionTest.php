@@ -138,7 +138,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
      */
     public function beforeScriptsThatFail()
     {
-        $this->setExpectedException('Exception', 'Error executing commands');
+        $this->setExpectedException('Exception', 'Error executing script');
 
         chdir(FIXTURE_ROOT.'ProfileManager/fixture_before_scripts');
 
@@ -159,7 +159,7 @@ class BlueprintActionTest extends \PHPUnit_Framework_TestCase
      */
     public function beforeScriptsWhereCommandInBetweenFails()
     {
-        $this->setExpectedException('Exception', 'Error executing commands');
+        $this->setExpectedException('Exception', 'Error executing script');
 
         chdir(FIXTURE_ROOT.'ProfileManager/fixture_before_scripts');
 
