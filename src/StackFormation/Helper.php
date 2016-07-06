@@ -114,6 +114,12 @@ class Helper
         return null;
     }
 
+    /**
+     * Validates the stack name, throwing an exception if it is invalid
+     *
+     * @param String $stackName
+     * @throws \Exception
+     */
     public static function validateStackname($stackName)
     {
         // A stack name can contain only alphanumeric characters (case sensitive) and hyphens.
