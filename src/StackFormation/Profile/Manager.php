@@ -34,19 +34,56 @@ class Manager {
                 'http' => [ 'connect_timeout' => 20 ]
             ];
 
-            if ($this->output && $this->output->isVeryVerbose()) {
-                $guzzleStack = \GuzzleHttp\HandlerStack::create();
-                $guzzleStack->push(\GuzzleHttp\Middleware::log(
-                    new \Monolog\Logger('main'),
-                    // new \GuzzleHttp\MessageFormatter('{req_body}')
-                    new \GuzzleHttp\MessageFormatter('[{code}] {req_body}')
-                ));
-                $parameters['http_handler'] = new \Aws\Handler\GuzzleV6\GuzzleHandler(new \GuzzleHttp\Client(['handler' => $guzzleStack]));
-            }
+            $parameters['http_handler'] = $this->getHttpHandler();
 
             $this->sdk = new \Aws\Sdk($parameters);
         }
         return $this->sdk;
+    }
+
+    /**
+     * @return \Aws\Handler\GuzzleV6\GuzzleHandler
+     */
+    private function getHttpHandler()
+    {
+        $guzzleStack = \GuzzleHttp\HandlerStack::create();
+
+        $guzzleStack->push(\GuzzleHttp\Middleware::retry(
+            function (
+                $retries,
+                \GuzzleHttp\Psr7\Request $request,
+                \GuzzleHttp\Psr7\Response $response = null,
+                \GuzzleHttp\Exception\RequestException $exception = null
+            )
+            {
+                if ($retries >= 5) {
+                    return false;
+                }
+
+                if ($exception instanceof \GuzzleHttp\Exception\ConnectException) {
+                    return true;
+                }
+
+                if ($response) {
+                    if ($response->getStatusCode() == 400) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        ));
+
+        if ($this->output && $this->output->isVeryVerbose()) {
+            #$guzzleStack = \GuzzleHttp\HandlerStack::create();
+            $guzzleStack->push(\GuzzleHttp\Middleware::log(
+                new \Monolog\Logger('main'),
+                // new \GuzzleHttp\MessageFormatter('{req_body}')
+                new \GuzzleHttp\MessageFormatter('[{code}] {req_body}')
+            ));
+
+        }
+
+        return new \Aws\Handler\GuzzleV6\GuzzleHandler(new \GuzzleHttp\Client(['handler' => $guzzleStack]));
     }
 
     /**
