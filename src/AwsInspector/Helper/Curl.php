@@ -71,6 +71,7 @@ class Curl
             $command[] = '--max-time '.$this->maxTime;
         }
         $command[] = '--dump-header /dev/stdout';
+        $command[] = '--user-agent AwsInspectorCurl';
         $command[] = escapeshellarg($this->url);
         return implode(' ', $command);
     }
@@ -108,7 +109,6 @@ class Curl
      */
     public function doRequest() {
         $command = $this->getCurlCommand();
-
         $result = $this->connection->exec($command);
         if ($result['returnVar'] != 0) {
             throw new \Exception('Curl error: ' . $this->getCurlError($result['returnVar']));
