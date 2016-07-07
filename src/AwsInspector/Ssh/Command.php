@@ -23,9 +23,9 @@ class Command {
 
     public function __toString() {
         return sprintf(
-            '%s %s',
+            "%s %s",
             $this->connection,
-            $this->command
+            escapeshellarg($this->command)
         );
     }
 
