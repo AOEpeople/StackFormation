@@ -14,7 +14,7 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
      */
     protected $output;
 
-    public function render(array $events) {
+    public function renderEvents(array $events) {
         $detailedLog = [];
         $rows = [];
         foreach ($events as $eventId => $event) {
