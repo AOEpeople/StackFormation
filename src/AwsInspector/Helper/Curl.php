@@ -59,7 +59,10 @@ class Curl
     protected function getCurlCommand() {
         $command = [];
         $command[] = 'curl';
-        foreach ($this->headers as $header) {
+        foreach ($this->headers as $key => $header) {
+            if (!is_int($key)) {
+                throw new \InvalidArgumentException("Don't use an associative array. Pass headers like this: [ 'Host: myhost', 'X-Forwarded-Proto: https']");
+            }
             $command[] = "--header '$header'";
         }
         $command[] = '--insecure';
