@@ -119,11 +119,12 @@ class Connection
      * Execute command on this connection
      *
      * @param string $command
+     * @param string $asUser
      * @return array
      */
-    public function exec($command)
+    public function exec($command, $asUser=null)
     {
-        $command = new Command($this, $command);
+        $command = new Command($this, $command, $asUser);
         return $command->exec();
     }
 
@@ -165,5 +166,44 @@ class Connection
         }
     }
 
+    /**
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->host;
+    }
+
+    /**
+     * @return PrivateKey
+     */
+    public function getPrivateKey()
+    {
+        return $this->privateKey;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isMultiplex()
+    {
+        return $this->multiplex;
+    }
+
+    /**
+     * @return \AwsInspector\Model\Ec2\Instance
+     */
+    public function getJumpHost()
+    {
+        return $this->jumpHost;
+    }
 
 }
