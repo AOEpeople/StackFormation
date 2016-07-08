@@ -195,8 +195,17 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function exceptionUsingAssocArray()
+    {
+        $this->setExpectedException('InvalidArgumentException', 'Don\'t use an associative array.');
+        $this->getCurlObject([], ['test1' => 1]);
+    }
+
+    /**
+     * @test
+     */
     public function getCurlCommandIncludesHeaderOption()
     {
-        $void = $this->getCurlObject([], ['test' => 1]);
+        $void = $this->getCurlObject([], ['test: 1']);
     }
 }

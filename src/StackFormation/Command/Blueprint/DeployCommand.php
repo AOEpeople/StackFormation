@@ -15,7 +15,6 @@ use StackFormation\Observer;
 use StackFormation\Stack;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,6 +27,7 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
     {
         $this
             ->setName('blueprint:deploy')
+            ->setAliases(['deploy'])
             ->setDescription('Deploy blueprint')
             ->addOption(
                 'no-observe',

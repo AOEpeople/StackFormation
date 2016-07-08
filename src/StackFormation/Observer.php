@@ -38,7 +38,7 @@ class Observer
                 try {
                     $this->stack = $this->stackFactory->getStack($this->stack->getName(), true); // load fresh instance for updated status
                     $this->output->writeln("-> Polling... (Stack Status: {$this->stack->getStatus()})");
-                    $eventTable->render($this->stack->getEvents());
+                    $eventTable->renderEvents($this->stack->getEvents());
                 } catch (CloudFormationException $exception) {
                     throw Exception::refineException($exception);
                 }
