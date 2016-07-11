@@ -1,27 +1,36 @@
 sudo: false
 language: php
 php:
-  - 5.5
-  - 5.6
-  - 7.0
+- 5.5
+- 5.6
+- 7.0
 branches:
   except:
-    - /^(\d+\.)+\d+$/
+  - /^(\d+\.)+\d+$/
 before_script:
-  #- curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-  - composer install --no-progress --no-interaction
+- composer install --no-progress --no-interaction
 script:
-  # Code Style
-  #- php phpcs.phar --standard=./phpcs.xml --encoding=utf-8 --report-width=180 ./src
-  - phpunit --debug --coverage-clover build/logs/clover.xml --log-junit build/logs/junit.xml
+- phpunit --debug --coverage-clover build/logs/clover.xml --log-junit build/logs/junit.xml
 after_script:
-  - vendor/bin/test-reporter
+- vendor/bin/test-reporter
 notifications:
   email:
-    recipients: [ travisci@fabrizio-branca.de ]
+    recipients:
+    - travisci@fabrizio-branca.de
     on_success: always
     on_failure: always
 addons:
   code_climate:
     repo_token:
-      secure: "Qhy+BuyLPC7D87NFvKJC47CLUyJmRzIcxQSY1VIZoKWerxD42THMLlwU4DwIbIdHjTMDVV6F+fYvX10XddXksjMSt7iCrlCU8ICF9VmT2QbGFgn910FBydSQCB5yrqgEASsZnAzxnO34Hcea8545gMhCNfFnpCcWjnMjNSKU8JgwYuowb+9aneLibWuMsOBixAS9ziBmxrw34Uozn6nLE2y3i9DVxdl4J3D9qslzc+qp76U5zGx14Jl4aZ0IrR8oQZZnSmiJqSGtk2WJK/R8lOFp/v/+a76Jhu/OJA0Xfx7hGSwvk8luF0K/uuIdHfOO91T0DvK7lBuMEPL1eytN+mIzuplDk58+DMORMTKsriqHLI6l+gblwMg3k/rvI29mwjhvYkdunP5WwckdZYEGMcAa3J475C9vtkjntc+8amGQ3+FeeU9V+mff852raYWs4KYCfvuMF5Gmy7aixpqZAHxn3tXenfv8HIFP67P2qbE5w+ErtbVJMl7HVY2t4pWVS+GMitbBvjqnunbIvAK9fThqlDkAD3PZ5nQR3Ad6LvLlMR2KIEnNdjaA9+XxsLpsqNfG2WbrKFmQBPOfXDFguiB2wEqtpB1YLtSZIk+aGmLHOqOC9f6ZklrtuxijIA0G46I9wJI9tASjRTdXtxzuMeiqJJEKzNRFfjxMIZaWuX0="
+      secure: Qhy+BuyLPC7D87NFvKJC47CLUyJmRzIcxQSY1VIZoKWerxD42THMLlwU4DwIbIdHjTMDVV6F+fYvX10XddXksjMSt7iCrlCU8ICF9VmT2QbGFgn910FBydSQCB5yrqgEASsZnAzxnO34Hcea8545gMhCNfFnpCcWjnMjNSKU8JgwYuowb+9aneLibWuMsOBixAS9ziBmxrw34Uozn6nLE2y3i9DVxdl4J3D9qslzc+qp76U5zGx14Jl4aZ0IrR8oQZZnSmiJqSGtk2WJK/R8lOFp/v/+a76Jhu/OJA0Xfx7hGSwvk8luF0K/uuIdHfOO91T0DvK7lBuMEPL1eytN+mIzuplDk58+DMORMTKsriqHLI6l+gblwMg3k/rvI29mwjhvYkdunP5WwckdZYEGMcAa3J475C9vtkjntc+8amGQ3+FeeU9V+mff852raYWs4KYCfvuMF5Gmy7aixpqZAHxn3tXenfv8HIFP67P2qbE5w+ErtbVJMl7HVY2t4pWVS+GMitbBvjqnunbIvAK9fThqlDkAD3PZ5nQR3Ad6LvLlMR2KIEnNdjaA9+XxsLpsqNfG2WbrKFmQBPOfXDFguiB2wEqtpB1YLtSZIk+aGmLHOqOC9f6ZklrtuxijIA0G46I9wJI9tASjRTdXtxzuMeiqJJEKzNRFfjxMIZaWuX0=
+before_deploy:
+- curl -LSs https://box-project.github.io/box2/installer.php | php
+- box.phar build
+deploy:
+  provider: releases
+  api_key:
+    secure: PRTuXlZ9Y83g22H+nukMCpK2HmchmpNNJIS7aT3ywxXOV8qbtmGITEBKe0RgkFo4odANGy4P762RpmOxWY+e081q/4gVztr+fjTmLjzvRSGvD5dPs8j298uedJ25zdo57Raq5E0WC3FEkar91SIk37S73IvDhtzKFMJAkKPSmZ5vYFMRu0CUIQ2wN/T/gMnMytjQbcgVn1vGai3xilN/YNukuv4iuj1aBIEZXnJNKUkz6gpo3nNqHb8PHoYkv7SfxMwEda7joYNFu4p6eU5mlwHoY1gv1iUNKHLRYvFOQAXthbbp2NxImHehtxOy1UFHiz+onL1nTciBgQbjysQgKpZz0ByEB7OKGu/59x1P2F2g9cxUSpqjx4i4M9bI7ALweE7BnyfZj4vHW57kFOmsGlAwaEsJIdJwZS8PXHDy575x3HGY2HdXVBySBRHBbyjUdlKnhp42W8R9+wA56wBK836DBlFFJgxRBdViuZsu08mcR4VnsPMU8oykhfhI8QNCnSV8A5/Hcz2NGfXJi5UV9MMMXfiPLYfe4K2nABBiWu7P6gxQwjPbz4N3CipzFD0cOakGanWnjDIsshTqA/Tn+pl7BGbqfkXciZe5hUuEbhGGk/Jj8i5IsU7ZipArK1sRCMwSSpSEqKQ9EvTxlgceiNw0LBVWrsBxGOvUN88GV3I=
+  file: stackformation.phar
+  on:
+    repo: AOEpeople/StackFormation
+    tags: true
