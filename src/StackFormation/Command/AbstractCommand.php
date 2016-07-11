@@ -11,7 +11,6 @@ use StackFormation\Helper;
 use StackFormation\Helper\Exception;
 use StackFormation\Profile\Manager;
 use StackFormation\StackFactory;
-use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;

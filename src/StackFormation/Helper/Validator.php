@@ -2,6 +2,8 @@
 
 namespace StackFormation\Helper;
 
+use StackFormation\Exception\InvalidStackNameException;
+
 class Validator
 {
 
@@ -14,7 +16,7 @@ class Validator
         // A stack name can contain only alphanumeric characters (case sensitive) and hyphens.
         // It must start with an alphabetic character and cannot be longer than 128 characters.
         if (!preg_match('/^[a-zA-Z][a-zA-Z0-9-]{0,127}$/', $stackName)) {
-            throw new \Exception('Invalid stack name: ' . $stackName);
+            throw new InvalidStackNameException($stackName);
         }
     }
 

@@ -61,6 +61,8 @@ class BlueprintFactory {
         foreach ($this->config->getBlueprintNames() as $blueprintName) {
             try {
                 $effectiveStackName = $this->getBlueprint($blueprintName)->getStackName();
+            } catch (\StackFormation\Exception\InvalidStackNameException $e) {
+                $effectiveStackName = '<fg=red>[Invalid stack name "' . $e->getStackName() . '"]</>';
             } catch (\StackFormation\Exception\ValueResolverException $e) {
                 $previousException = $e->getPrevious();
                 if ($previousException instanceof MissingEnvVarException) {
