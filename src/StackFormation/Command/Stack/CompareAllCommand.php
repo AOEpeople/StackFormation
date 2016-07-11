@@ -41,6 +41,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
 
             $tmp = [];
             $tmp['stackName'] = $stackName;
+            $tmp['status'] = Helper\Decorator::decorateStatus($stack->getStatus());
             $tmp['blueprintName'] = '';
             $tmp['parameters'] = '';
             $tmp['template'] = '';
@@ -70,7 +71,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $output->writeln('');
 
         $table = new Table($output);
-        $table->setHeaders(['Stack', 'Blueprint', 'Parameters', 'Template']);
+        $table->setHeaders(['Stack', 'Status', 'Blueprint', 'Parameters', 'Template']);
         $table->setRows($data);
         $table->render();
 
