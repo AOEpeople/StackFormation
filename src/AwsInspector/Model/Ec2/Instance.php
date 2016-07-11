@@ -129,7 +129,7 @@ class Instance extends \AwsInspector\Model\AbstractResource
      * @return Connection
      * @throws \Exception
      */
-    public function getSshConnection()
+    public function getSshConnection($multiplex=null)
     {
         $jumpHost = $this->getJumpHost();
         return new Connection(
@@ -137,7 +137,7 @@ class Instance extends \AwsInspector\Model\AbstractResource
             $jumpHost ? $this->getPrivateIpAddress() : $this->getConnectionIp(),
             $this->getPrivateKey(),
             $jumpHost,
-            $this->multiplexSshConnection
+            !is_null($multiplex) ? $multiplex : $this->multiplexSshConnection
         );
     }
 

@@ -18,6 +18,7 @@ class SshCommand extends AbstractCommand
     {
         $this
             ->setName('ec2:ssh')
+            ->setAliases(['ssh'])
             ->setDescription('SSH into an EC2 instance')
             ->addArgument(
                 'instance',
