@@ -7,22 +7,26 @@ php:
 branches:
   except:
   - /^(\d+\.)+\d+$/
+
 before_script:
 - composer install --no-progress --no-interaction
 script:
 - phpunit --debug --coverage-clover build/logs/clover.xml --log-junit build/logs/junit.xml
 after_script:
 - vendor/bin/test-reporter
+
 notifications:
   email:
     recipients:
     - travisci@fabrizio-branca.de
     on_success: always
     on_failure: always
+
 addons:
   code_climate:
     repo_token:
       secure: Qhy+BuyLPC7D87NFvKJC47CLUyJmRzIcxQSY1VIZoKWerxD42THMLlwU4DwIbIdHjTMDVV6F+fYvX10XddXksjMSt7iCrlCU8ICF9VmT2QbGFgn910FBydSQCB5yrqgEASsZnAzxnO34Hcea8545gMhCNfFnpCcWjnMjNSKU8JgwYuowb+9aneLibWuMsOBixAS9ziBmxrw34Uozn6nLE2y3i9DVxdl4J3D9qslzc+qp76U5zGx14Jl4aZ0IrR8oQZZnSmiJqSGtk2WJK/R8lOFp/v/+a76Jhu/OJA0Xfx7hGSwvk8luF0K/uuIdHfOO91T0DvK7lBuMEPL1eytN+mIzuplDk58+DMORMTKsriqHLI6l+gblwMg3k/rvI29mwjhvYkdunP5WwckdZYEGMcAa3J475C9vtkjntc+8amGQ3+FeeU9V+mff852raYWs4KYCfvuMF5Gmy7aixpqZAHxn3tXenfv8HIFP67P2qbE5w+ErtbVJMl7HVY2t4pWVS+GMitbBvjqnunbIvAK9fThqlDkAD3PZ5nQR3Ad6LvLlMR2KIEnNdjaA9+XxsLpsqNfG2WbrKFmQBPOfXDFguiB2wEqtpB1YLtSZIk+aGmLHOqOC9f6ZklrtuxijIA0G46I9wJI9tASjRTdXtxzuMeiqJJEKzNRFfjxMIZaWuX0=
+
 before_deploy:
 - curl -LSs https://box-project.github.io/box2/installer.php | php
 - box.phar build
