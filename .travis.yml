@@ -26,6 +26,7 @@ addons:
 
 before_deploy:
 - curl -LSs https://box-project.github.io/box2/installer.php | php
+- env
 - php box.phar --no-interaction build
 deploy:
   provider: releases
@@ -36,3 +37,4 @@ deploy:
     repo: AOEpeople/StackFormation
     branch: master
     tags: true
+    php: 5.6
