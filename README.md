@@ -40,21 +40,68 @@ chmod +x /usr/local/bin/stackformation
 
 ### Quickstart
 
-Create a `blueprints.yml` in your current directory
+#### Setup
 
+Create a `.env.default` file (and add it yo your gitignore: `echo .env.default >> .gitignore`)
+```
+AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY_HERE
+AWS_SECRET_ACCESS_KEY=INSERT_YOUR_SECRET_KEY_HERE
+AWS_DEFAULT_REGION=INSERT_YOUR_DEFAULT_REGION_HERE
+```
+
+#### Your first blueprint
+
+Create a `blueprints.yml` in your current directory:
 ```
 blueprints:
   - stackname: my-stack
-    template: templates/my-stack.template
-    parameters:
-      foo: 42
-      bar: 43
-  - stackname: my-second-stack
-    template: templates/my-stack.template
-    parameters:
-      foo: 42
-      bar: 43
+    template: my-stack.template
 ```
+
+Create you CloudFormation template `my-stack.template`:
+```
+{
+  "Resources": { 
+    "MyResource1": { "Type": "AWS::CloudFormation::WaitConditionHandle" }
+  }
+}
+```
+
+Deploy your stack:
+```
+bin/stackformation.php deploy my-stack
+```
+
+#### Adding parameters
+
+Add parameters in your `my-stack.template`:
+```
+{
+  "Parameters: {
+    "MyParameter1": { "Type": "String" }
+  },
+  "Resources": { 
+    "MyResource1": { "Type": "AWS::CloudFormation::WaitConditionHandle" }
+  }
+}
+```
+
+...and configure that parameter in the `blueprint.yml` file:
+```
+blueprints:
+  - stackname: my-stack
+    template: my-stack.template
+    parameters:
+      MyParameter1: 'Hello World'
+```
+
+#### Referencing outputs/resources/parameters from other stacks
+
+TODO
+
+#### Inject user data
+
+TODO
 
 ### Structuring your blueprints
 
@@ -134,7 +181,6 @@ blueprints:
 
 ### Parameter Values
 
-- Empty value: keep previous value (when updating existing stack)
 - Output lookup: `{output:<stack>:<output>}` -> output value
 - Resource lookup: `{resource:<stack>:<logicalResource>}` -> physical Id of that resource
 - Parameter lookup: `{parameter:<stack>:<logicalResource>}` -> parameter value (note that some parameters will not be shown if they're 'no_echo')
