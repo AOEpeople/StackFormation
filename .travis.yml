@@ -34,4 +34,5 @@ deploy:
   file: stackformation.phar
   on:
     repo: AOEpeople/StackFormation
+    branch: master
     tags: true
