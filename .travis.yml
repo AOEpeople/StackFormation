@@ -26,7 +26,7 @@ addons:
 
 before_deploy:
 - curl -LSs https://box-project.github.io/box2/installer.php | php
-- box.phar build
+- php box.phar --no-interaction build
 deploy:
   provider: releases
   api_key:
