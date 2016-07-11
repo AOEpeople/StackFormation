@@ -71,7 +71,8 @@ class Instance extends \AwsInspector\Model\AbstractResource
     {
         $keyName = $this->getKeyName();
         if (empty($keyName)) {
-            throw new \Exception('No KeyName found');
+            return null;
+            // throw new \Exception('No KeyName found');
         }
         return PrivateKey::get('keys/' . $keyName . '.pem');
     }
@@ -151,11 +152,7 @@ class Instance extends \AwsInspector\Model\AbstractResource
 
     public function exec($command, $asUser=null)
     {
-        if ($asUser) {
-            $command = 'bash -c ' . escapeshellarg($command);
-            $command = 'sudo -u '.escapeshellarg($asUser) . ' '. escapeshellarg($command);
-        }
-        return $this->getSshConnection()->exec($command);
+        return $this->getSshConnection()->exec($command, $asUser);
     }
 
     public function fileExists($file, $asUser=null)
