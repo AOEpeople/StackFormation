@@ -186,4 +186,17 @@ class Instance extends \AwsInspector\Model\AbstractResource
         return $curlHelper->getResponseCode();
     }
 
+    public function canConnectTo($hostname, $port, $timeout=1)
+    {
+        $result = $this->exec(sprintf('nc -z -w%s %s %s',
+            escapeshellarg($timeout),
+            escapeshellarg($hostname),
+            escapeshellarg($port)
+        ));
+        if ($result['returnVar'] != 0) {
+            throw new \Exception("Can't connect to $hostname:$port");
+        }
+        return true;
+    }
+
 }
