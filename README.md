@@ -15,6 +15,29 @@ Contributors:
  - [Lee Saferite](https://github.com/LeeSaferite)
  - [Julian Kleinhans](https://github.com/kj187)
 
+### Installation
+
+#### Via composer
+
+[Install composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx) first, then:
+```
+composer require aoepeople/stackformation
+```
+
+#### Using the phar
+
+Grab the latest release from https://github.com/AOEpeople/StackFormation/releases/latest
+or use this shortcut (requires `jq` to be installed)
+```
+wget $(curl -s https://api.github.com/repos/AOEpeople/StackFormation/releases/latest | jq -r '.assets[0].browser_download_url')
+```
+
+If you want to use stackformation globally:
+```
+mv stackformation.phar /usr/local/bin/stackformation
+chmod +x /usr/local/bin/stackformation
+```
+
 ### Quickstart
 
 Create a `blueprints.yml` in your current directory
