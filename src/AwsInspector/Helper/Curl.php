@@ -20,6 +20,11 @@ class Curl
     protected $maxTime;
 
     /**
+     * @var string
+     */
+    protected $postData;
+
+    /**
      * @var \AwsInspector\Ssh\Connection|\AwsInspector\Ssh\LocalConnection|null
      */
     protected $connection;
@@ -69,6 +74,9 @@ class Curl
         $command[] = '--silent';
         if ($this->maxTime) {
             $command[] = '--max-time '.$this->maxTime;
+        }
+        if ($this->postData) {
+            $command[] = '--data "'.$this->postData.'"';
         }
         $command[] = '--dump-header /dev/stdout';
         $command[] = '--user-agent AwsInspectorCurl';
@@ -143,6 +151,13 @@ class Curl
 
         $this->responseBody = implode("\n", $result['output']);
         return $this;
+    }
+
+    /**
+     * @param string $postData
+     */
+    public function setPostData($postData) {
+        $this->postData = $postData;
     }
 
     /**
