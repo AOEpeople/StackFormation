@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ListCommand extends AbstractCommand
 {
+    private $sortColumn;
 
     protected function configure()
     {
@@ -27,6 +28,12 @@ class ListCommand extends AbstractCommand
                 'c',
                 InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
                 'Extra column (tag)'
+            )
+            ->addOption(
+                'sort',
+                's',
+                InputOption::VALUE_OPTIONAL,
+                'Sort by column'
             );
     }
 
@@ -63,6 +70,9 @@ class ListCommand extends AbstractCommand
             $rows[] = $instance->extractData($mapping);
         }
 
+        $this->sortColumn = $input->getOption('sort');
+        usort($rows, [$this, 'sortByColumn']);
+
         if (count($rows)) {
             $table = new \Symfony\Component\Console\Helper\Table($output);
             $table
@@ -74,4 +84,11 @@ class ListCommand extends AbstractCommand
         }
     }
 
+    private function sortByColumn($a, $b)
+    {
+        if ($this->sortColumn === null || !isset($a[$this->sortColumn])) {
+            return 0;
+        }
+        return strcmp($a[$this->sortColumn], $b[$this->sortColumn]);
+    }
 }
