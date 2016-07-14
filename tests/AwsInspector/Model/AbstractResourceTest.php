@@ -98,12 +98,12 @@ class AbstractTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function getAssocTagsThrowsExceptionIfTagsAreNotSupported()
-    {
-        $stub = $this->getMockForAbstractClass('\AwsInspector\Model\AbstractResource', [[]], '', true, true, true, ['__call']);
-        $this->setExpectedException('Exception', 'Tags are not supported');
-        $stub->getAssocTags();
-    }
+    //public function getAssocTagsThrowsExceptionIfTagsAreNotSupported()
+    //{
+    //    $stub = $this->getMockForAbstractClass('\AwsInspector\Model\AbstractResource', [[]], '', true, true, true, ['__call']);
+    //    $this->setExpectedException('Exception', 'Tags are not supported');
+    //    $stub->getAssocTags();
+    //}
 
     /**
      * @test
