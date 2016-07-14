@@ -18,6 +18,7 @@ class CommandRegistry
             new Command\Stack\Show\ParametersCommand(),
             new Command\Stack\Show\ResourcesCommand(),
             new Command\Stack\Show\DependantsCommand(),
+            new Command\Stack\DependencyGraphCommand(),
 
             new Command\Blueprint\DeployCommand(),
             new Command\Blueprint\ValidateCommand(),
