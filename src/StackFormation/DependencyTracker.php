@@ -100,13 +100,16 @@ class DependencyTracker
                 $sourcesList = [];
                 foreach ($tmp['sources'] as $source) {
                     unset($source['blueprint']);
+                    if (empty($source['key'])) {
+                        unset($source['key']);
+                    }
                     $sourcesList[] = implode(':', $source);
                 }
                 $rows[] = [
-                    implode("\n", $sourcesList),
-                    $type,
                     $envVar,
-                    $tmp['value']
+                    $tmp['value'],
+                    $type,
+                    implode("\n", $sourcesList)
                 ];
             }
         }

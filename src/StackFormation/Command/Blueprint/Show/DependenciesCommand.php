@@ -32,7 +32,7 @@ class DependenciesCommand extends \StackFormation\Command\Blueprint\AbstractBlue
 
         $output->writeln("Blueprint '{$blueprint->getName()} depends on following environment variables:");
         $table = new Table($output);
-        $table->setHeaders(['Origin ('.$blueprint->getName().')', 'Type', 'Var', 'Current Value'])
+        $table->setHeaders(['Var', 'Current Value', 'Type', 'Origin (within "'.$blueprint->getName().'")'])
             ->setRows($this->dependencyTracker->getEnvDependenciesAsFlatList())
             ->render();
     }
