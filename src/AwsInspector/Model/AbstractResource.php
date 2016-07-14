@@ -72,10 +72,10 @@ abstract class AbstractResource
      */
     public function getAssocTags()
     {
-        if (!isset($this->apiData['Tags']) && !method_exists($this, 'getTags')) {
-            throw new \Exception('Tags are not supported');
-        }
-        return $this->convertToAssocArray($this->getTags());
+        //if (!isset($this->apiData['Tags']) && !method_exists($this, 'getTags')) {
+        //    throw new \Exception('Tags are not supported');
+        //}
+        return $this->convertToAssocArray($this->getTags() ?: []);
     }
 
     /**
