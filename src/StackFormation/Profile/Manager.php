@@ -31,7 +31,10 @@ class Manager {
                 'version' => 'latest',
                 'region' => $region,
                 'retries' => 5,
-                'http' => [ 'connect_timeout' => 20 ]
+                'http' => [
+                    'connect_timeout' => 20,
+                    'verify' => false
+                ]
             ];
 
             $parameters['http_handler'] = $this->getHttpHandler();
