@@ -42,6 +42,12 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
                 'Deprecated. Deployments are being observed by default now'
             )
             ->addOption(
+                'force',
+                'f',
+                InputOption::VALUE_NONE,
+                'Force update even if there are no changes'
+            )
+            ->addOption(
                 'review-parameters',
                 'p',
                 InputOption::VALUE_NONE,
@@ -132,7 +138,7 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
                 }
 
                 $blueprintAction = new BlueprintAction($blueprint, $this->profileManager, $output);
-                $blueprintAction->deploy($dryRun);
+                $blueprintAction->deploy($dryRun, $input->getOption('force'));
                 $output->writeln("Triggered deployment of stack '$stackName'.");
 
             } catch (CloudFormationException $exception) {
