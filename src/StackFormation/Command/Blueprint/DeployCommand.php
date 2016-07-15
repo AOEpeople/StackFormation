@@ -88,7 +88,6 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
 
         $stackName = $blueprint->getStackName();
 
-        $dryRun = $input->getOption('dryrun');
         $deleteOnTerminate = $input->getOption('deleteOnTerminate');
         $noObserve = $input->getOption('no-observe');
 
