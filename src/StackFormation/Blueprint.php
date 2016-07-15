@@ -73,14 +73,14 @@ class Blueprint {
             $template = new Template($template);
         });
 
+        // Create blueprint reference
+        if ($gatherDependencies) {
+            $this->gatherDependencies();
+        }
         $additionalData = ['Metadata' => [ Stack::METADATA_KEY => $this->getBlueprintReference() ]];
 
         if ($force) {
             $additionalData['Resources'] = [ 'Force'.time() => [ 'Type' => 'AWS::CloudFormation::WaitConditionHandle' ] ];
-        }
-
-        if ($gatherDependencies) {
-            $this->gatherDependencies();
         }
 
         $templateMerger = new TemplateMerger();
