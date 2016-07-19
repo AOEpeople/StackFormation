@@ -2,20 +2,16 @@
 
 namespace StackFormation\Helper;
 
-use StackFormation\Helper;
-
 class Finder
 {
-
 
     public static function matchWildcard($wildcard_pattern, $haystack)
     {
         $regex = str_replace(
             ["\*", "\?"],
             ['.*', '.'],
-            preg_quote($wildcard_pattern)
+            preg_quote($wildcard_pattern, '/')
         );
-
         return preg_match('/^' . $regex . '$/is', $haystack);
     }
 
