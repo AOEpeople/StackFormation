@@ -123,9 +123,9 @@ class BlueprintAction {
         return $result;
     }
 
-    public function deploy($dryRun=false)
+    public function deploy($dryRun=false, $force=false)
     {
-        $arguments = $this->prepareArguments();
+        $arguments = $this->prepareArguments($force);
 
         if (!$dryRun) {
             $this->executeBeforeScript();
@@ -152,14 +152,14 @@ class BlueprintAction {
         }
     }
 
-    protected function prepareArguments()
+    protected function prepareArguments($force=false)
     {
         if ($this->output && !$this->output->isQuiet()) { $this->output->write("Preparing parameters... "); }
         $parameters = $this->blueprint->getParameters();
         if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("done."); }
 
         if ($this->output && !$this->output->isQuiet()) { $this->output->write("Preparing template... "); }
-        $template = $this->blueprint->getPreprocessedTemplate();
+        $template = $this->blueprint->getPreprocessedTemplate(true, $force);
         if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("done."); }
 
         $arguments = [

@@ -61,7 +61,7 @@ class Blueprint {
         return null;
     }
 
-    public function getPreprocessedTemplate($gatherDependencies=true)
+    public function getPreprocessedTemplate($gatherDependencies=true, $force=false)
     {
         if (empty($this->blueprintConfig['template']) || !is_array($this->blueprintConfig['template'])) {
             throw new \Exception('No template(s) found');
@@ -73,15 +73,21 @@ class Blueprint {
             $template = new Template($template);
         });
 
+        // Create blueprint reference
         if ($gatherDependencies) {
             $this->gatherDependencies();
+        }
+        $additionalData = ['Metadata' => [ Stack::METADATA_KEY => $this->getBlueprintReference() ]];
+
+        if ($force) {
+            $additionalData['Resources'] = [ 'Force'.time() => [ 'Type' => 'AWS::CloudFormation::WaitConditionHandle' ] ];
         }
 
         $templateMerger = new TemplateMerger();
         return $templateMerger->merge(
             $templates,
             !empty($this->blueprintConfig['description']) ? $this->blueprintConfig['description'] : null,
-            ['Metadata' => [ Stack::METADATA_KEY => $this->getBlueprintReference() ]]
+            $additionalData
         );
     }
 
