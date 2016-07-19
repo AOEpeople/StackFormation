@@ -34,6 +34,8 @@ class Finder
 
     public static function findCloudWatchLogGroupByStream($stream, $logGroupNamePrefix = null)
     {
+        // TODO: refactor this to use \AwsInspector\Model\CloudWatchLogs\Repository
+
         $cloudWatchLogClient = \AwsInspector\SdkFactory::getClient('CloudWatchLogs');
         /* @var $cloudWatchLogClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
         $params = [];

@@ -29,6 +29,8 @@ class SetRetentionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // TODO: refactor this to use \AwsInspector\Model\CloudWatchLogs\Repository
+
         $days = $input->getArgument('days');
         $days = intval($days);
         if ($days == 0) {

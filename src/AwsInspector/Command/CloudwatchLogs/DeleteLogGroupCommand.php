@@ -2,6 +2,8 @@
 
 namespace AwsInspector\Command\CloudwatchLogs;
 
+use AwsInspector\Model\CloudWatchLogs\LogGroup;
+use AwsInspector\Model\CloudWatchLogs\Repository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,29 +27,11 @@ class DeleteLogGroupCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $groupPattern = $input->getArgument('group');
-
-        $cloudwatchLogsClient = \AwsInspector\SdkFactory::getClient('cloudwatchlogs'); /* @var $cloudwatchLogsClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
-
-        $nextToken = null;
-        do {
-            $params = ['limit' => 50];
-            if ($nextToken) {
-                $params['nextToken'] = $nextToken;
-            }
-            $result = $cloudwatchLogsClient->describeLogGroups($params);
-            foreach ($result->get('logGroups') as $logGroup) {
-                $name = $logGroup['logGroupName'];
-                if (preg_match('#'.$groupPattern.'#', $name)) {
-                    $output->writeln('Deleting ' . $logGroup['logGroupName']);
-                    $cloudwatchLogsClient->deleteLogGroup([
-                        'logGroupName' => $name
-                    ]);
-                } else {
-                    $output->writeln('Does not match pattern: ' . $logGroup['logGroupName']);
-                }
-            }
-            $nextToken = $result->get("nextToken");
-        } while ($nextToken);
+        $repository = new Repository();
+        foreach ($repository->findLogGroups($groupPattern) as $logGroup) { /* @var $logGroup LogGroup */
+            $output->writeln('Deleting ' . $logGroup->getLogGroupName());
+            $repository->deleteLogGroup($logGroup->getLogGroupName());
+        }
     }
 
 }

@@ -11,4 +11,12 @@ class Collection extends \SplObjectStorage
         $this->rewind();
         return $this->current();
     }
+
+    public function flatten($method) {
+        $flattenedObjects = [];
+        foreach ($this as $item) {
+            $flattenedObjects[] = $item->$method();
+        }
+        return $flattenedObjects;
+    }
 }
