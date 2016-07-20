@@ -17,7 +17,7 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param string $fixtureDirectory
-     * @throws Exception
+     * @throws \Exception
      * @test
      * @dataProvider processFileDataProvider
      */
@@ -46,7 +46,7 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     /**
      * @param string $inputJson
      * @param string $expectedJson
-     * @throws Exception
+     * @throws \Exception
      * @test
      * @dataProvider processJsonDataProvider
      */
@@ -82,6 +82,9 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
             // replace ref
             ["WAIT_CONDITION_HANDLE='{Ref:WaitConditionHandle}'", "WAIT_CONDITION_HANDLE='\", {\"Ref\": \"WaitConditionHandle\"}, \"'"],
             ["REGION='{Ref:AWS::Region}'", "REGION='\", {\"Ref\": \"AWS::Region\"}, \"'"],
+            ['"Aliases": { "Fn::Split": [",", "a,b,c"] }', '"Aliases": ["a", "b", "c"]'],
+            ['"Aliases": { "Fn::Split": ["+", "a,b,c"] }', '"Aliases": ["a,b,c"]'],
+            ['"Aliases": { "Fn::Split": ["+", "a+b+c"] }', '"Aliases": ["a", "b", "c"]'],
         ];
     }
 }

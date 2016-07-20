@@ -529,17 +529,29 @@ Usage Example:
     [...]
 ```
 
-### Functions `Fn:FileContentTrimLines` and `Fn:FileContentMinify`
+### Functions `Fn::FileContentTrimLines` and `Fn::FileContentMinify`
 
 These functions are similar to `Fn::FileContent` but additional they trim whitespace or minify the code.
 This comes in handy when deploying Lambda function where the content can't be larger than 2048kb if you 
 want to directly embed the source code via CloudFormation (instead of deploying a zip file).
 
-### Function `Fn:FileContentUnpretty` 
+### Function `Fn::FileContentUnpretty` 
 
 This function is the same as `Fn::FileContent` expect it will return the resulting JSON without formatting it, 
 which will reduce the file size significantly due to the missing whitespace in the JSON structure (not inside the file content!)
 This is useful if you're seeing the "...at 'templateBody' failed to satisfy constraint: Member must have length less than or equal to 51200" error message.
+
+### Function `Fn::Split`
+
+Sometime you have a dynamic number of array items. `Fn::Split` allows you to configure them as a single string and transforms them into an array:
+
+```
+"Aliases": { "Fn::Split": [",", "www.example.com,cdn.example.com"]}
+```
+results in:
+```
+"Aliases": ["www.example.com","cdn.example.com"]
+```
 
 ### Inject Parameters
 

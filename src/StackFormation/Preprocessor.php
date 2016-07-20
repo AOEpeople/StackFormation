@@ -12,10 +12,12 @@ class Preprocessor
         if (!is_string($json)) {
             throw new \InvalidArgumentException('Expected json string');
         }
+        // TODO: refactor to use a pipeline
         $json = $this->stripComments($json);
         $json = $this->parseRefInDoubleQuotedStrings($json);
         $json = $this->expandPort($json);
         $json = $this->injectFilecontent($json, $basePath);
+        $json = $this->split($json);
         $json = $this->replaceRef($json);
         $json = $this->replaceMarkers($json);
         return $json;
@@ -159,6 +161,24 @@ class Preprocessor
         );
 
         return $jsonString;
+    }
+
+    protected function split($jsonString)
+    {
+        return preg_replace_callback(
+            '/(\s*)(.*){\s*"Fn::Split"\s*:\s*\[\s*"(.*?)"\s*,\s*"(.*?)"\s*\]\s*}/',
+            function (array $matches) {
+                if (empty($matches[3])) {
+                    throw new \Exception('Delimiter cannot be empty');
+                }
+                if (empty($matches[4])) {
+                    throw new \Exception('String cannot be empty');
+                }
+                $pieces = explode($matches[3], $matches[4]);
+                return $matches[1] . $matches[2] . '["' . implode('", "', $pieces).'"]';
+            },
+            $jsonString
+        );
     }
 
     protected function injectInclude($string, $basePath)
