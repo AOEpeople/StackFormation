@@ -32,8 +32,12 @@ class Manager {
                 'region' => $region,
                 'retries' => 5,
                 'http' => [
-                    'connect_timeout' => 20,
-                    'verify' => false
+                    'connect_timeout' => 15,
+                    'timeout' => 15,
+                    'curl' => [
+                        /** @todo upgrade or remove as soon as AWS consistently uses at least TLS 1.1 */
+                        CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_0,
+                    ],
                 ]
             ];
 
