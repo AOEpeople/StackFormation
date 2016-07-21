@@ -34,12 +34,13 @@ class Manager {
                 'http' => [
                     'connect_timeout' => 15,
                     'timeout' => 15,
-                    'curl' => [
-                        /** @todo upgrade or remove as soon as AWS consistently uses at least TLS 1.1 */
-                        CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_0,
-                    ],
                 ]
             ];
+
+            /** @todo upgrade or remove these lines as soon as AWS consistently uses TLS 1.2 */
+            if (defined('CURLOPT_SSLVERSION') && defined('CURL_SSLVERSION_TLSv1_0')) {
+                $parameters['http']['curl'][CURLOPT_SSLVERSION] = CURL_SSLVERSION_TLSv1_0;
+            }
 
             $parameters['http_handler'] = $this->getHttpHandler();
 
