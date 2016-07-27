@@ -116,6 +116,9 @@ class Curl
      * @throws \Exception
      */
     public function doRequest() {
+        $this->responseHeaders = [];
+        $this->responseBody = [];
+
         $command = $this->getCurlCommand();
         $result = $this->connection->exec($command);
         if ($result['returnVar'] != 0) {
