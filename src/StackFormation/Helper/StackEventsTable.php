@@ -2,17 +2,24 @@
 
 namespace StackFormation\Helper;
 
-use StackFormation\Helper;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
 
     protected $printedEventIds = [];
+
     /**
      * @var OutputInterface
      */
-    protected $output;
+    protected $localOutput;
+
+    public function __construct(OutputInterface $output)
+    {
+        parent::__construct($output);
+        // the parent class's output is private, so we need a local one here...
+        $this->localOutput = $output;
+    }
 
     public function renderEvents(array $events) {
         $detailedLog = [];
@@ -26,7 +33,7 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
                     $event['LogicalResourceId'],
                     wordwrap($event['ResourceStatusReason'], 40, "\n"),
                 ];
-                $detailedLog = $this->getDetailedLogFromResourceStatusReason($event['ResourceStatusReason']);
+                $detailedLog = $this->getDetailedLogFromResourceStatusReason($event['ResourceStatusReason']) ?: $detailedLog;
             }
         }
         $this->setRows($rows);
@@ -44,12 +51,12 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
     protected function printLogMessages(array $logMessages)
     {
         if (count($logMessages)) {
-            $this->output->writeln('');
-            $this->output->writeln("====================");
-            $this->output->writeln("Detailed log output:");
-            $this->output->writeln("====================");
+            $this->localOutput->writeln('');
+            $this->localOutput->writeln("====================");
+            $this->localOutput->writeln("Detailed log output:");
+            $this->localOutput->writeln("====================");
             foreach ($logMessages as $line) {
-                $this->output->writeln(trim($line));
+                $this->localOutput->writeln(trim($line));
             }
         }
     }
@@ -63,9 +70,7 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
         $logMessages = [];
         if (preg_match('/See the details in CloudWatch Log Stream: (.*)/', $resourceStatusReason, $matches)) {
             $logStream = $matches[1];
-
             $logGroupName = Finder::findCloudWatchLogGroupByStream($logStream);
-
             $params = [
                 'limit' => 20,
                 'logGroupName' => $logGroupName,
