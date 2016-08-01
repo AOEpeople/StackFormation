@@ -83,10 +83,15 @@ class Blueprint {
             $additionalData['Resources'] = [ 'Force'.time() => [ 'Type' => 'AWS::CloudFormation::WaitConditionHandle' ] ];
         }
 
+        $description = null;
+        if (!empty($this->blueprintConfig['description'])) {
+            $description = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['description'], $this, 'description');
+        }
+
         $templateMerger = new TemplateMerger();
         return $templateMerger->merge(
             $templates,
-            !empty($this->blueprintConfig['description']) ? $this->blueprintConfig['description'] : null,
+            $description,
             $additionalData
         );
     }
