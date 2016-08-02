@@ -154,7 +154,7 @@ class TemplateMerger
     {
         // Update all { "DependsOn": ["...", "...", ...] }
         $template = preg_replace_callback(
-            '/\"DependsOn"\s*:\s*\[(.*)\]/s',
+            '/"DependsOn"\s*:\s*\[(.*)\]/s',
             function ($matches) use ($prefix) {
                 $dependencies = $matches[1];
                 $dependencies = preg_replace_callback(
@@ -181,7 +181,7 @@ class TemplateMerger
     {
         //  Update all "Fn::GetAtt": ["...", "..."] }
         $template = preg_replace_callback(
-            '/\"Fn::GetAtt"\s*:\s*\[s*"([a-zA-Z0-9:]+?)"/',
+            '/"Fn::GetAtt"\s*:\s*\[\s*"([a-zA-Z0-9:]+?)"/',
             function ($matches) use ($prefix) {
                 return '"Fn::GetAtt": ["' . $prefix . $matches[1] . '"';
             },
