@@ -6,6 +6,7 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class Preprocessor
 {
+    const MAX_JS_FILE_INCLUDE_SIZE = 4096;
 
     public function processJson($json, $basePath)
     {
@@ -113,9 +114,9 @@ class Preprocessor
                     }
 
                     $size = strlen($fileContent);
-                    if ($size > 2048) {
-                        // this is assuming your uploading an inline JS file to AWS Lambda
-                        throw new \Exception("JS file is larger than 2048 bytes (actual size: $size bytes)");
+                    if ($size > self::MAX_JS_FILE_INCLUDE_SIZE) {
+                        // this is assuming you are uploading an inline JS file to AWS Lambda
+                        throw new \Exception(sprintf("JS file is larger than %s bytes (actual size: %s bytes)", self::MAX_JS_FILE_INCLUDE_SIZE, $size));
                     }
                 }
 
