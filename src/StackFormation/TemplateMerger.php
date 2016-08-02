@@ -55,6 +55,7 @@ class TemplateMerger
                 $templateBody = $this->updateDependsOn($prefix, $templateBody);
                 $templateBody = $this->updateDependsOnMultiple($prefix, $templateBody);
                 $templateBody = $this->updateFnGetAtt($prefix, $templateBody);
+                $templateBody = $this->updateFnFindInMap($prefix, $templateBody);
             }
 
             $array = json_decode($templateBody, true);
@@ -154,7 +155,7 @@ class TemplateMerger
     {
         // Update all { "DependsOn": ["...", "...", ...] }
         $template = preg_replace_callback(
-            '/\"DependsOn"\s*:\s*\[(.*)\]/s',
+            '/"DependsOn"\s*:\s*\[(.*)\]/s',
             function ($matches) use ($prefix) {
                 $dependencies = $matches[1];
                 $dependencies = preg_replace_callback(
@@ -181,9 +182,27 @@ class TemplateMerger
     {
         //  Update all "Fn::GetAtt": ["...", "..."] }
         $template = preg_replace_callback(
-            '/\"Fn::GetAtt"\s*:\s*\[s*"([a-zA-Z0-9:]+?)"/',
+            '/"Fn::GetAtt"\s*:\s*\[\s*"([a-zA-Z0-9:]+?)"/',
             function ($matches) use ($prefix) {
                 return '"Fn::GetAtt": ["' . $prefix . $matches[1] . '"';
+            },
+            $template
+        );
+        return $template;
+    }
+
+    /**
+     * @param $prefix
+     * @param $template
+     * @return mixed
+     */
+    public function updateFnFindInMap($prefix, $template)
+    {
+        //  Update all "Fn::FindInMap": ["...", "..."] }
+        $template = preg_replace_callback(
+            '/"Fn::FindInMap"\s*:\s*\[\s*"([a-zA-Z0-9:]+?)"/',
+            function ($matches) use ($prefix) {
+                return '"Fn::FindInMap": ["' . $prefix . $matches[1] . '"';
             },
             $template
         );
