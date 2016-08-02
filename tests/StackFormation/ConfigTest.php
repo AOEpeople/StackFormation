@@ -16,15 +16,6 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function missingTemplateFile()
-    {
-        $this->setExpectedException('Exception', "Could not find template file doesnotexist.template referenced in stack a");
-        $config = new \StackFormation\Config([FIXTURE_ROOT . '/Config/blueprint.templatefile_missing.yml']);
-    }
-
-    /**
-     * @test
-     */
     public function duplicateStackName()
     {
         $this->setExpectedException('Exception', "Stackname 'a' was declared more than once.");
