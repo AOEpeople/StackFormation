@@ -45,18 +45,10 @@ class Config
 
                     // convert relative paths into absolute paths
                     foreach ($blueprintConfig['template'] as &$template) {
-                        $realPathFile = realpath($basePath . '/' . $template);
-                        if ($realPathFile === false) {
-                            throw new \Exception('Could not find template file ' . $template . ' referenced in stack ' . $stackname);
-                        }
-                        $template = $realPathFile;
+                        $template = $basePath . '/' . $template;
                     }
                     if (isset($blueprintConfig['stackPolicy'])) {
-                        $realPathFile = realpath($basePath . '/' . $blueprintConfig['stackPolicy']);
-                        if ($realPathFile === false) {
-                            throw new \Exception('Could not find stack policy '.$blueprintConfig['stackPolicy'].' referenced in stack ' . $stackname);
-                        }
-                        $blueprintConfig['stackPolicy'] = $realPathFile;
+                        $blueprintConfig['stackPolicy'] = $basePath . '/' . $blueprintConfig['stackPolicy'];
                     }
                 }
             }

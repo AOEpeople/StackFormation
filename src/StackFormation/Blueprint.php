@@ -69,9 +69,14 @@ class Blueprint {
 
         // convert templates paths to template objects
         $templates = $this->blueprintConfig['template'];
-        array_walk($templates, function(&$template) {
-            $template = new Template($template);
-        });
+        foreach($templates as &$template) {
+            $templateFile = $this->valueResolver->resolvePlaceholders($template, $this, 'template');
+            $realTemplateFile = realpath($templateFile);
+            if ($realTemplateFile === false || !is_file($realTemplateFile) || !is_readable($realTemplateFile)) {
+                throw new \Exception('Could not find template file ' . $templateFile . ' referenced in blueprint ' . $this->name);
+            }
+            $template = new Template($realTemplateFile);
+        };
 
         // Create blueprint reference
         if ($gatherDependencies) {
@@ -204,10 +209,12 @@ class Blueprint {
     public function getStackPolicy()
     {
         if (isset($this->blueprintConfig['stackPolicy'])) {
-            if (!is_file($this->blueprintConfig['stackPolicy'])) {
-                throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException('Stack policy "' . $this->blueprintConfig['stackPolicy'] . '" not found');
+            $stackPolicy = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['stackPolicy'], $this, 'stackPolicy');
+            $stackPolicyFile = realpath($stackPolicy);
+            if ($stackPolicyFile === false || !is_file($stackPolicyFile) || !is_readable($stackPolicyFile)) {
+                throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException('Stack policy "' . $stackPolicy . '" not found');
             }
-            return file_get_contents($this->blueprintConfig['stackPolicy']);
+            return file_get_contents($stackPolicyFile);
         }
         return false;
     }

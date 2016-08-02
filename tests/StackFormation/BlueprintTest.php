@@ -28,6 +28,16 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function missingTemplateFile()
+    {
+        $this->markTestIncomplete(
+            'This test has not been implemented yet.'
+        );
+    }
+
+    /**
+     * @test
+     */
     public function getVariable()
     {
         $config = new \StackFormation\Config([FIXTURE_ROOT . 'Config/blueprint.1.yml']);
