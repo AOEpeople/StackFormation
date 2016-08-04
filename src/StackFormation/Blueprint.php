@@ -66,15 +66,21 @@ class Blueprint
         return null;
     }
 
+    public function getTemplates()
+    {
+        return (array_key_exists('template', $this->blueprintConfig) ? (array)$this->blueprintConfig['template'] : array());
+    }
+
+    public function getOptionalTemplates()
+    {
+        return (array_key_exists('optionalTemplates', $this->blueprintConfig) ? (array)$this->blueprintConfig['optionalTemplates'] : array());
+    }
+
     public function getPreprocessedTemplate($gatherDependencies = true, $force = false)
     {
-        if (empty($this->blueprintConfig['template']) || !is_array($this->blueprintConfig['template'])) {
-            throw new \Exception('No template(s) found');
-        }
-
         // convert templates paths to template objects
         $templates = [];
-        foreach ($this->blueprintConfig['template'] as $key => $templateFile) {
+        foreach ($this->getTemplates() as $key => $templateFile) {
             $templateFile = $this->getBasePath() . '/' . $this->valueResolver->resolvePlaceholders($templateFile, $this, 'template');
             $realTemplateFile = realpath($templateFile);
             if ($realTemplateFile === false || !is_file($realTemplateFile) || !is_readable($realTemplateFile)) {
@@ -82,7 +88,7 @@ class Blueprint
             }
             $templates[] = (is_int($key) ? new Template($realTemplateFile) : new PrefixedTemplate($key, $realTemplateFile));
         };
-        foreach ($this->blueprintConfig['optionalTemplates'] as $key => $templateFile) {
+        foreach ($this->getOptionalTemplates() as $key => $templateFile) {
             $templateFile = $this->getBasePath() . '/' . $this->valueResolver->resolvePlaceholders($templateFile, $this, 'optionalTemplates');
             $realTemplateFiles = glob($templateFile);
             foreach ($realTemplateFiles as $realTemplateFile) {
@@ -91,6 +97,10 @@ class Blueprint
                 }
             }
         };
+
+        if (count($templates) === 0) {
+            throw new \Exception('No template(s) found');
+        }
 
         // Create blueprint reference
         if ($gatherDependencies) {
@@ -130,12 +140,12 @@ class Blueprint
         }
 
         $prefixes = [];
-        foreach (array_keys($this->blueprintConfig['template']) as $key) {
+        foreach (array_keys($this->getTemplates()) as $key) {
             if (!is_int($key)) {
                 $prefixes[] = $key;
             }
         }
-        foreach (array_keys($this->blueprintConfig['optionalTemplates']) as $key) {
+        foreach (array_keys($this->getOptionalTemplates()) as $key) {
             if (!is_int($key)) {
                 $prefixes[] = $key;
             }
