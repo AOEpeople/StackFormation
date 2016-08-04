@@ -24,7 +24,7 @@ class DependantsCommand extends \StackFormation\Command\Stack\AbstractStackComma
     {
         $this->dependencyTracker->reset();
         foreach ($this->blueprintFactory->getAllBlueprints() as $blueprint) {
-            $blueprint->gatherDependencies();
+            $blueprint->getPreprocessedTemplate();
         }
 
         $dependants = $this->dependencyTracker->findDependantsForStack($stack->getName());

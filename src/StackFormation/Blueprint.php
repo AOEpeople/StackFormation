@@ -277,14 +277,4 @@ class Blueprint
             Stack::METADATA_KEY_ENVVARS   => $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables(),
         ];
     }
-
-    /**
-     * Trigger traversing the whole configurating resolving all env vars
-     *
-     * @throws \Exception
-     */
-    public function gatherDependencies()
-    {
-        $this->getPreprocessedTemplate();
-    }
 }
