@@ -21,7 +21,7 @@ class DependenciesCommand extends \StackFormation\Command\Blueprint\AbstractBlue
     {
         // trigger resolving all placeholders
         $this->dependencyTracker->reset();
-        $blueprint->gatherDependencies();
+        $blueprint->getPreprocessedTemplate();
 
         $output->writeln("Blueprint '{$blueprint->getName()} depends on following stack's resources/parameters/outputs:");
 

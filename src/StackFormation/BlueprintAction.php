@@ -159,7 +159,7 @@ class BlueprintAction {
         if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("done."); }
 
         if ($this->output && !$this->output->isQuiet()) { $this->output->write("Preparing template... "); }
-        $template = $this->blueprint->getPreprocessedTemplate(true, $force);
+        $template = $this->blueprint->getPreprocessedTemplate($force);
         if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("done."); }
 
         $arguments = [

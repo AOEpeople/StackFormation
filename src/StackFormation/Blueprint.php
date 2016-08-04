@@ -76,8 +76,14 @@ class Blueprint
         return (array_key_exists('optionalTemplates', $this->blueprintConfig) ? (array)$this->blueprintConfig['optionalTemplates'] : array());
     }
 
-    public function getPreprocessedTemplate($gatherDependencies = true, $force = false)
+    public function getPreprocessedTemplate($force = false)
     {
+        // Gather dependencies and create blueprint references
+        $this->getStackName();
+        $this->getProfile();
+        $this->getParameters();
+        $this->getTags();
+
         // convert templates paths to template objects
         $templates = [];
         foreach ($this->getTemplates() as $key => $templateFile) {
@@ -102,10 +108,6 @@ class Blueprint
             throw new \Exception('No template(s) found');
         }
 
-        // Create blueprint reference
-        if ($gatherDependencies) {
-            $this->gatherDependencies();
-        }
         $additionalData = ['Metadata' => [Stack::METADATA_KEY => $this->getBlueprintReference()]];
 
         if ($force) {
@@ -275,19 +277,4 @@ class Blueprint
             Stack::METADATA_KEY_ENVVARS   => $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables(),
         ];
     }
-
-    /**
-     * Trigger traversing the whole configurating resolving all env vars
-     *
-     * @throws \Exception
-     */
-    public function gatherDependencies()
-    {
-        $this->getStackName();
-        $this->getProfile();
-        $this->getParameters();
-        $this->getTags();
-        $this->getPreprocessedTemplate(false);
-    }
-
 }

@@ -371,7 +371,7 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $valueResolver = new \StackFormation\ValueResolver\ValueResolver(null, $profileManagerMock, $config);
         $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
         $blueprint = $blueprintFactory->getBlueprint('reference-fixture-{env:FOO1}');
-        $blueprint->gatherDependencies();
+        $blueprint->getPreprocessedTemplate();
         $this->assertEquals('reference-fixture-BAR1', $blueprint->getStackName());
         $blueprintReference = $blueprint->getBlueprintReference();
 
