@@ -2,13 +2,14 @@
 
 namespace StackFormation;
 
-class Template {
+class Template
+{
 
     protected $filepath;
     protected $cache;
     protected $preProcessor;
 
-    public function __construct($filePath, Preprocessor $preprocessor=null)
+    public function __construct($filePath, Preprocessor $preprocessor = null)
     {
         if (!is_file($filePath)) {
             throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException("File '$filePath' not found");
@@ -25,28 +26,46 @@ class Template {
 
     public function getFileContent()
     {
-        return $this->cache->get(__METHOD__, function() {
-           return file_get_contents($this->filepath);
-        });
+        return $this->cache->get(
+            __METHOD__,
+            function () {
+                return file_get_contents($this->filepath);
+            }
+        );
     }
 
     public function getProcessedTemplate()
     {
-        return $this->cache->get(__METHOD__, function() {
-            return $this->preProcessor->processJson($this->getFileContent(), $this->getBasePath());
-        });
+        return $this->cache->get(
+            __METHOD__,
+            function () {
+                return $this->preProcessor->processJson($this->getFileContent(), $this->getBasePath());
+            }
+        );
     }
 
     public function getDecodedJson()
     {
-        return $this->cache->get(__METHOD__, function() {
-            return json_decode($this->getProcessedTemplate(), true);
-        });
+        if (!$this->cache->has(__METHOD__)) {
+            $templateBody = $this->getProcessedTemplate();
+            $array = json_decode($templateBody, true);
+            if (!is_array($array)) {
+                throw new TemplateDecodeException($this->getFilePath(), sprintf("Error decoding file '%s'", $this->getFilePath()));
+            }
+            if ($array['AWSTemplateFormatVersion'] != '2010-09-09') {
+                throw new TemplateInvalidException($this->getFilePath(), 'Invalid AWSTemplateFormatVersion');
+            }
+
+            $this->cache->set(__METHOD__, $array);
+        }
+
+        return $this->cache->get(__METHOD__);
     }
 
     public function getDescription()
     {
         $data = $this->getDecodedJson();
+
         return isset($data['Description']) ? $data['Description'] : '';
     }
 
@@ -54,6 +73,4 @@ class Template {
     {
         return dirname($this->getFilePath());
     }
-
-
 }

@@ -4,8 +4,9 @@ namespace StackFormation;
 
 use StackFormation\Helper\Validator;
 
-class Blueprint {
-    
+class Blueprint
+{
+
     /**
      * @var string
      */
@@ -28,7 +29,7 @@ class Blueprint {
         return $this->name;
     }
 
-    public function getTags($resolvePlaceholders=true)
+    public function getTags($resolvePlaceholders = true)
     {
         $tags = [];
         if (isset($this->blueprintConfig['tags'])) {
@@ -39,6 +40,7 @@ class Blueprint {
                 $tags[] = ['Key' => $key, 'Value' => $value];
             }
         }
+
         return $tags;
     }
 
@@ -46,46 +48,58 @@ class Blueprint {
     {
         $stackName = $this->valueResolver->resolvePlaceholders($this->name, $this, 'stackname');
         Validator::validateStackname($stackName);
+
         return $stackName;
     }
 
-    public function getProfile($resolvePlaceholders=true)
+    public function getProfile($resolvePlaceholders = true)
     {
         if (isset($this->blueprintConfig['profile'])) {
             $value = $this->blueprintConfig['profile'];
             if ($resolvePlaceholders) {
                 $value = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['profile'], $this, 'profile');
             }
+
             return $value;
         }
+
         return null;
     }
 
-    public function getPreprocessedTemplate($gatherDependencies=true, $force=false)
+    public function getPreprocessedTemplate($gatherDependencies = true, $force = false)
     {
         if (empty($this->blueprintConfig['template']) || !is_array($this->blueprintConfig['template'])) {
             throw new \Exception('No template(s) found');
         }
 
         // convert templates paths to template objects
-        $templates = $this->blueprintConfig['template'];
-        foreach($templates as &$template) {
-            $templateFile = $this->valueResolver->resolvePlaceholders($template, $this, 'template');
+        $templates = [];
+        foreach ($this->blueprintConfig['template'] as $key => $templateFile) {
+            $templateFile = $this->getBasePath() . '/' . $this->valueResolver->resolvePlaceholders($templateFile, $this, 'template');
             $realTemplateFile = realpath($templateFile);
             if ($realTemplateFile === false || !is_file($realTemplateFile) || !is_readable($realTemplateFile)) {
                 throw new \Exception('Could not find template file ' . $templateFile . ' referenced in blueprint ' . $this->name);
             }
-            $template = new Template($realTemplateFile);
+            $templates[] = (is_int($key) ? new Template($realTemplateFile) : new PrefixedTemplate($key, $realTemplateFile));
+        };
+        foreach ($this->blueprintConfig['optionalTemplates'] as $key => $templateFile) {
+            $templateFile = $this->getBasePath() . '/' . $this->valueResolver->resolvePlaceholders($templateFile, $this, 'optionalTemplates');
+            $realTemplateFiles = glob($templateFile);
+            foreach ($realTemplateFiles as $realTemplateFile) {
+                if ($realTemplateFile && is_file($realTemplateFile) && is_readable($realTemplateFile)) {
+                    $templates[] = (is_int($key) ? new Template($realTemplateFile) : new PrefixedTemplate($key, $realTemplateFile));
+                }
+            }
         };
 
         // Create blueprint reference
         if ($gatherDependencies) {
             $this->gatherDependencies();
         }
-        $additionalData = ['Metadata' => [ Stack::METADATA_KEY => $this->getBlueprintReference() ]];
+        $additionalData = ['Metadata' => [Stack::METADATA_KEY => $this->getBlueprintReference()]];
 
         if ($force) {
-            $additionalData['Resources'] = [ 'Force'.time() => [ 'Type' => 'AWS::CloudFormation::WaitConditionHandle' ] ];
+            $additionalData['Resources'] = ['Force' . time() => ['Type' => 'AWS::CloudFormation::WaitConditionHandle']];
         }
 
         $description = null;
@@ -94,6 +108,7 @@ class Blueprint {
         }
 
         $templateMerger = new TemplateMerger();
+
         return $templateMerger->merge(
             $templates,
             $description,
@@ -106,12 +121,24 @@ class Blueprint {
         return $this->blueprintConfig;
     }
 
-    public function getParameters($resolvePlaceholders=true)
+    public function getParameters($resolvePlaceholders = true)
     {
         $parameters = [];
 
         if (!isset($this->blueprintConfig['parameters'])) {
             return [];
+        }
+
+        $prefixes = [];
+        foreach (array_keys($this->blueprintConfig['template']) as $key) {
+            if (!is_int($key)) {
+                $prefixes[] = $key;
+            }
+        }
+        foreach (array_keys($this->blueprintConfig['optionalTemplates']) as $key) {
+            if (!is_int($key)) {
+                $prefixes[] = $key;
+            }
         }
 
         foreach ($this->blueprintConfig['parameters'] as $parameterKey => $parameterValue) {
@@ -131,31 +158,23 @@ class Blueprint {
                 throw new \Exception('Invalid type for value');
             }
 
-            $tmp = [
-                'ParameterKey' => $parameterKey,
-                'ParameterValue' => $parameterValue
-            ];
-
-            if (strpos($tmp['ParameterKey'], '*') !== false) {
+            if (strpos($parameterKey, '*') !== false) {
                 // resolve the '*' when using multiple templates with prefixes
-                if (!is_array($this->blueprintConfig['template'])) {
-                    throw new \Exception("Found placeholder ('*') in parameter key but only a single template is used.");
+                if (empty($prefixes)) {
+                    throw new \Exception("Found placeholder '*' in parameter key but the templates don't use prefixes");
                 }
 
-                $count = 0;
-                foreach (array_keys($this->blueprintConfig['template']) as $key) {
-                    if (!is_int($key)) {
-                        $count++;
-                        $newParameter = $tmp;
-                        $newParameter['ParameterKey'] = str_replace('*', $key, $tmp['ParameterKey']);
-                        $parameters[] = $newParameter;
-                    }
-                }
-                if ($count == 0) {
-                    throw new \Exception('Found placeholder \'*\' in parameter key but the templates don\'t use prefixes');
+                foreach ($prefixes as $prefix) {
+                    $parameters[] = [
+                        'ParameterKey'   => str_replace('*', $prefix, $parameterKey),
+                        'ParameterValue' => $parameterValue,
+                    ];
                 }
             } else {
-                $parameters[] = $tmp;
+                $parameters[] = [
+                    'ParameterKey'   => $parameterKey,
+                    'ParameterValue' => $parameterValue,
+                ];
             }
         }
 
@@ -164,6 +183,7 @@ class Blueprint {
 
     /**
      * @param string $key
+     *
      * @return string
      * @throws \Exception
      */
@@ -173,6 +193,7 @@ class Blueprint {
             return null;
         }
         $script = is_array($this->blueprintConfig[$key]) ? implode("\n", $this->blueprintConfig[$key]) : $this->blueprintConfig[$key];
+
         return $this->valueResolver->resolvePlaceholders($script, $this, 'script');
     }
 
@@ -198,6 +219,7 @@ class Blueprint {
         if (!is_dir($this->blueprintConfig['basepath'])) {
             throw new \Exception("Invalid basepath '{$this->blueprintConfig['basepath']}'");
         }
+
         return $this->blueprintConfig['basepath'];
     }
 
@@ -209,13 +231,15 @@ class Blueprint {
     public function getStackPolicy()
     {
         if (isset($this->blueprintConfig['stackPolicy'])) {
-            $stackPolicy = $this->valueResolver->resolvePlaceholders($this->blueprintConfig['stackPolicy'], $this, 'stackPolicy');
+            $stackPolicy = $this->getBasePath() . '/' . $this->valueResolver->resolvePlaceholders($this->blueprintConfig['stackPolicy'], $this, 'stackPolicy');
             $stackPolicyFile = realpath($stackPolicy);
             if ($stackPolicyFile === false || !is_file($stackPolicyFile) || !is_readable($stackPolicyFile)) {
                 throw new \Symfony\Component\Filesystem\Exception\FileNotFoundException('Stack policy "' . $stackPolicy . '" not found');
             }
+
             return file_get_contents($stackPolicyFile);
         }
+
         return false;
     }
 
@@ -225,6 +249,7 @@ class Blueprint {
         if (!in_array($onFailure, ['ROLLBACK', 'DO_NOTHING', 'DELETE'])) {
             throw new \InvalidArgumentException("Invalid value for onFailure parameter");
         }
+
         return $onFailure;
     }
 
@@ -237,7 +262,7 @@ class Blueprint {
     {
         return [
             Stack::METADATA_KEY_BLUEPRINT => $this->getName(),
-            Stack::METADATA_KEY_ENVVARS => $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables()
+            Stack::METADATA_KEY_ENVVARS   => $this->valueResolver->getDependencyTracker()->getUsedEnvironmentVariables(),
         ];
     }
 
