@@ -41,15 +41,6 @@ class Config
                     $stacknames[] = $stackname;
 
                     $blueprintConfig['basepath'] = $basePath;
-                    $blueprintConfig['template'] = (array)$blueprintConfig['template'];
-
-                    // convert relative paths into absolute paths
-                    foreach ($blueprintConfig['template'] as &$template) {
-                        $template = $basePath . '/' . $template;
-                    }
-                    if (isset($blueprintConfig['stackPolicy'])) {
-                        $blueprintConfig['stackPolicy'] = $basePath . '/' . $blueprintConfig['stackPolicy'];
-                    }
                 }
             }
             $config[] = $tmp;
