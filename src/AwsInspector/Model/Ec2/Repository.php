@@ -2,6 +2,8 @@
 
 namespace AwsInspector\Model\Ec2;
 
+use StackFormation\Helper\StaticCache;
+
 class Repository {
 
     /**
@@ -44,18 +46,21 @@ class Repository {
      * @throws \Exception
      */
     public function findEc2Instances(array $filters=[]) {
-        $ec2Client = \AwsInspector\SdkFactory::getClient('ec2'); /* @var $ec2Client \Aws\Ec2\Ec2Client */
-        $result = $ec2Client->describeInstances(['Filters' => $filters]);
-        $rows = $result->search('Reservations[].Instances[]');
+        $cacheKey = 'Ec2Repository->findEc2Instances:' . serialize($filters);
+        return StaticCache::get($cacheKey, function() use($filters) {
+            $ec2Client = \AwsInspector\SdkFactory::getClient('ec2'); /* @var $ec2Client \Aws\Ec2\Ec2Client */
+            $result = $ec2Client->describeInstances(['Filters' => $filters]);
+            $rows = $result->search('Reservations[].Instances[]');
 
-        $collection = new \AwsInspector\Model\Collection();
-        foreach ($rows as $row) {
-            $instance = Factory::create($row);
-            if ($instance !== false) {
-                $collection->attach($instance);
+            $collection = new \AwsInspector\Model\Collection();
+            foreach ($rows as $row) {
+                $instance = Factory::create($row);
+                if ($instance !== false) {
+                    $collection->attach($instance);
+                }
             }
-        }
-        return $collection;
+            return $collection;
+        });
     }
 
     /**
@@ -68,6 +73,27 @@ class Repository {
             $filters[] = ['Name' => 'tag:'.$tagName, "Values" => [$tagValue]];
         }
         return $this->findEc2Instances($filters);
+    }
+
+    public function findRouteTablesBySubnetId($subnetId) {
+        $cacheKey = 'Ec2Repository->findRouteTablesBySubnetId:' . $subnetId;
+        return StaticCache::get($cacheKey, function() use($subnetId) {
+            $ec2Client = \AwsInspector\SdkFactory::getClient('ec2');/* @var $ec2Client \Aws\Ec2\Ec2Client */
+            $results = $ec2Client->describeRouteTables(['Filters' => [['Name' => 'association.subnet-id', 'Values' => [$subnetId]]]]);
+            return $results->search('RouteTables');
+        });
+    }
+
+    public function getPublicIpForNatGateway($natGatewayId) {
+        $cacheKey = 'Ec2Repository->getPublicIpForNatGateway:' . $natGatewayId;
+        return StaticCache::get($cacheKey, function() use($natGatewayId) {
+            // Find the Elastic IP address attached to this NAT Gateway
+            $ec2Client = \AwsInspector\SdkFactory::getClient('ec2');
+            /* @var $ec2Client \Aws\Ec2\Ec2Client */
+            $results = $ec2Client->describeNatGateways(['NatGatewayIds' => [$natGatewayId]]);
+            $natGateway = $results->search('NatGateways');
+            return $natGateway[0]['NatGatewayAddresses'][0]['PublicIp'];
+        });
     }
 
 }
