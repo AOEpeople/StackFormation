@@ -37,7 +37,9 @@ class Cache
             } else {
                 throw new \Exception(sprintf("Cache key '%s' not found.", $key));
             }
-        }
+        } /* else {
+            echo "HIT!";
+        } */
         return $this->cache[$key];
     }
 
