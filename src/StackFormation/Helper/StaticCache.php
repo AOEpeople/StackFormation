@@ -11,7 +11,7 @@ class StaticCache
     /**
      * @return Cache
      */
-    public function getCache()
+    public static function getCache()
     {
         if (is_null(self::$cache)) {
             self::$cache = new Cache();
