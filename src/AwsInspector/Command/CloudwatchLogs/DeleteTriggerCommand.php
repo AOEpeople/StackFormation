@@ -48,6 +48,11 @@ class DeleteTriggerCommand extends Command
                 $name = $logGroup['logGroupName'];
                 if (preg_match('/'.$groupPattern.'/', $name)) {
                     try {
+                        $subscriptionFilters = $cloudwatchLogsClient->describeSubscriptionFilters(['logGroupName' => $logGroup['logGroupName']]);
+                        if (empty($subscriptionFilters->get('subscriptionFilters'))) {
+                            continue;
+                        }
+
                         $cloudwatchLogsClient->deleteSubscriptionFilter([
                             'filterName' => $filterName,
                             'logGroupName' => $logGroup['logGroupName']
