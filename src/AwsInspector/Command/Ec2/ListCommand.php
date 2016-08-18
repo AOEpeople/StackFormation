@@ -71,7 +71,9 @@ class ListCommand extends AbstractCommand
         }
 
         $this->sortColumn = $input->getOption('sort');
-        usort($rows, [$this, 'sortByColumn']);
+        if ($this->sortColumn !== null) {
+            usort($rows, [$this, 'sortByColumn']);
+        }
 
         if (count($rows)) {
             $table = new \Symfony\Component\Console\Helper\Table($output);
@@ -86,7 +88,7 @@ class ListCommand extends AbstractCommand
 
     private function sortByColumn($a, $b)
     {
-        if ($this->sortColumn === null || !isset($a[$this->sortColumn])) {
+        if (!isset($a[$this->sortColumn])) {
             return 0;
         }
         return strcmp($a[$this->sortColumn], $b[$this->sortColumn]);
