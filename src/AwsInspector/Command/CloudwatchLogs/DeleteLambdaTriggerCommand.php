@@ -12,7 +12,7 @@ class DeleteLambdaTriggerCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('cloudwatchlogs:delete-trigger')
+            ->setName('cloudwatchlogs:delete-lambda-trigger')
             ->setDescription('Deletes a subscription')
             ->addArgument(
                 'group',

@@ -12,7 +12,7 @@ class AddLambdaTriggerCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('cloudwatchlogs:add-trigger')
+            ->setName('cloudwatchlogs:add-lambda-trigger')
             ->setDescription('Creates or updates a subscription filter and associates it with the specified log group')
             ->addArgument(
                 'group',
