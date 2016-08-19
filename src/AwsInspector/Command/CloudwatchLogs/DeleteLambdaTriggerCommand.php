@@ -7,21 +7,21 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class AddTriggerCommand extends Command
+class DeleteLambdaTriggerCommand extends Command
 {
     protected function configure()
     {
         $this
-            ->setName('cloudwatchlogs:add-trigger')
-            ->setDescription('Creates or updates a subscription filter and associates it with the specified log group')
+            ->setName('cloudwatchlogs:delete-trigger')
+            ->setDescription('Deletes a subscription')
             ->addArgument(
                 'group',
                 InputArgument::REQUIRED,
                 'Log group name pattern'
             )->addArgument(
-                'destinationArn',
+                'lambdaArn',
                 InputArgument::REQUIRED,
-                'The ARN of the destination to deliver matching log events to (Lambda ARN for example)'
+                'The ARN of the Lambda destination to delete permissions'
             )->addArgument(
                 'filterName',
                 InputArgument::REQUIRED,
@@ -34,14 +34,14 @@ class AddTriggerCommand extends Command
         // TODO: refactor this to use \AwsInspector\Model\CloudWatchLogs\Repository
 
         $groupPattern = $input->getArgument('group');
-        $destinationArn = $input->getArgument('destinationArn');
+        $lambdaArn = $input->getArgument('lambdaArn');
         $filterName = $input->getArgument('filterName');
 
         /* @var $cloudwatchLogsClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
         $cloudwatchLogsClient = \AwsInspector\SdkFactory::getClient('cloudwatchlogs');
+        $lambdaClient = \AwsInspector\SdkFactory::getClient('lambda');
 
         $nextToken = null;
-        $logsWithLimitExceededException = [];
 
         do {
             $params = ['limit' => 50];
@@ -54,29 +54,30 @@ class AddTriggerCommand extends Command
                 $name = $logGroup['logGroupName'];
                 if (preg_match('/'.$groupPattern.'/', $name)) {
                     try {
-                        $cloudwatchLogsClient->putSubscriptionFilter([
-                            'destinationArn' => $destinationArn,
+                        $subscriptionFilters = $cloudwatchLogsClient->describeSubscriptionFilters(['logGroupName' => $logGroup['logGroupName']]);
+                        if (empty($subscriptionFilters->get('subscriptionFilters'))) {
+                            continue;
+                        }
+
+                        $cloudwatchLogsClient->deleteSubscriptionFilter([
                             'filterName' => $filterName,
-                            'filterPattern' => '',
                             'logGroupName' => $logGroup['logGroupName']
                         ]);
+
+                        $lambdaClient->removePermission([
+                            'FunctionName' => $lambdaArn,
+                            'StatementId' => (string) md5($logGroup['logGroupName']),
+                        ]);
+
+                        $output->writeln('Delete lambda trigger for ' . $logGroup['logGroupName']);
                     } catch (\Aws\CloudWatchLogs\Exception\CloudWatchLogsException $e) {
-                        if ($e->getAwsErrorCode() == 'LimitExceededException') {
-                            $logsWithLimitExceededException[] = $logGroup;
+                        if ($e->getAwsErrorCode() != 'ResourceNotFoundException') {
+                            throw $e;
                         }
                     }
-
-                    $output->writeln('Add trigger for ' . $logGroup['logGroupName']);
                 }
             }
             $nextToken = $result->get("nextToken");
         } while ($nextToken);
-
-        if (!empty($logsWithLimitExceededException)) {
-            $output->writeln('The following log groups has already a different subscription:');
-            foreach ($logsWithLimitExceededException as $logGroup) {
-                $output->writeln("\t" . $logGroup['logGroupName']);
-            }
-        }
     }
 }

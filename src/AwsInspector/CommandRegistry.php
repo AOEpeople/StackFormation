@@ -17,8 +17,8 @@ class CommandRegistry {
             new \AwsInspector\Command\CloudwatchLogs\DeleteLogGroupCommand(),
             new \AwsInspector\Command\CloudwatchLogs\ShowLogGroupsCommand(),
             new \AwsInspector\Command\CloudwatchLogs\TailCommand(),
-            new \AwsInspector\Command\CloudwatchLogs\AddTriggerCommand(),
-            new \AwsInspector\Command\CloudwatchLogs\DeleteTriggerCommand(),
+            new \AwsInspector\Command\CloudwatchLogs\AddLambdaTriggerCommand(),
+            new \AwsInspector\Command\CloudwatchLogs\DeleteLambdaTriggerCommand(),
             new \AwsInspector\Command\Clean\CleanSnapshotsCommand()
         ];
     }
