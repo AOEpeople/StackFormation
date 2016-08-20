@@ -34,6 +34,7 @@ class YamlCredentialProvider {
      * @throws \Exception
      */
     public function getEnvVarsForProfile($profile) {
+        $envVars = [];
         if (!$this->isValidProfile($profile)) {
             throw new \Exception("Invalid profile: $profile");
         }
@@ -41,11 +42,14 @@ class YamlCredentialProvider {
         $profileConfig = $config[$profile];
         if (empty($profileConfig['access_key'])) { throw new \Exception("Invalid access_key in profile $profile"); }
         if (empty($profileConfig['secret_key'])) { throw new \Exception("Invalid secret_key in profile $profile"); }
-        return [
+        if(false === empty($profileConfig['region'])){
+            $envVars['AWS_DEFAULT_REGION'] = $profileConfig['region'];
+        }
+        return array_merge($envVars,[
             'AWSINSPECTOR_PROFILE' => $profile, // this isn't really used except for debugging
             'AWS_ACCESS_KEY_ID' => $profileConfig['access_key'],
             'AWS_SECRET_ACCESS_KEY' => $profileConfig['secret_key'],
-        ];
+        ]);
     }
 
     public function listAllProfiles() {
