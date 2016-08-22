@@ -28,7 +28,8 @@ class RepositoryTest extends MockFacade
      */
     public function findAutoScalingGroupsReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeAutoScalingGroups']);
+        $methods = ['describeAutoScalingGroups'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeAutoScalingGroups')->willReturn(new \Aws\Result(
             [
                 'AutoScalingGroups' => [
@@ -63,7 +64,8 @@ class RepositoryTest extends MockFacade
      */
     public function findAutoScalingGroupsByTagsReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeAutoScalingGroups']);
+        $methods = ['describeAutoScalingGroups'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeAutoScalingGroups')->willReturn(new \Aws\Result(
             [
                 'AutoScalingGroups' => [
@@ -116,7 +118,8 @@ class RepositoryTest extends MockFacade
      */
     public function findByAutoScalingGroupNameReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeAutoScalingGroups']);
+        $methods = ['describeAutoScalingGroups'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeAutoScalingGroups')->willReturn(new \Aws\Result(
             [
                 'AutoScalingGroups' => [
@@ -152,7 +155,8 @@ class RepositoryTest extends MockFacade
      */
     public function findLaunchConfigurationsReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeLaunchConfigurations']);
+        $methods = ['describeLaunchConfigurations'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeLaunchConfigurations')->willReturn(new \Aws\Result(
             [
                 'LaunchConfigurations' => [
@@ -181,7 +185,8 @@ class RepositoryTest extends MockFacade
      */
     public function findLaunchConfigurationsGroupedByImageIdReturnsExpectedArray()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeLaunchConfigurations']);
+        $methods = ['describeLaunchConfigurations'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeLaunchConfigurations')->willReturn(new \Aws\Result(
             [
                 'LaunchConfigurations' => [
