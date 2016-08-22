@@ -13,11 +13,7 @@ class CommandTest extends MockFacade
      * @test
      */
     public function simpleCommand()
-    {   #$connectionMock = $this->getMockBuilder('\AwsInspector\Ssh\Connection');
-        #$connectionMock->setMethods([]);
-        #$connectionMock->setConstructorArgs([]);
-        #$connectionMock->setMockClassName('');
-        #$connectionMock->disableOriginalConstructor();
+    {
         $connectionMock = $this->getMock('\AwsInspector\Ssh\Connection', [], [], '', false);
         $connectionMock->method('__toString')->willReturn('connection');
         $command = new Command($connectionMock, 'command');

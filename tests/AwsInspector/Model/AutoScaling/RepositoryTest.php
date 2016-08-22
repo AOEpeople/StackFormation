@@ -11,10 +11,7 @@ class RepositoryTest extends MockFacade
      */
     public function getProfileManagerMock(array $methods)
     {
-        return $this->getMockBuilder('\StackFormation\Profile\Manager')
-            ->disableOriginalConstructor()
-            ->setMethods($methods)
-            ->getMock();
+        return $this->getMock('\StackFormation\Profile\Manager', $methods, [], '', false);
     }
 
     /**
@@ -23,10 +20,7 @@ class RepositoryTest extends MockFacade
      */
     public function getAutoScalingGroupClientMock(array $methods)
     {
-        return $this->getMockBuilder('\Aws\AutoScaling\AutoScaling')
-            ->disableOriginalConstructor()
-            ->setMethods($methods)
-            ->getMock();
+        return $this->getMock('\Aws\AutoScaling\AutoScaling', $methods, [], '', false);
     }
 
     /**

@@ -1,8 +1,9 @@
 <?php
 
 namespace AwsInspector\Tests\Helper;
+use AwsInspector\Tests\MockFacade;
 
-class CurlTest extends \PHPUnit_Framework_TestCase
+class CurlTest extends MockFacade
 {
     /**
      * @param array $output
@@ -27,7 +28,7 @@ class CurlTest extends \PHPUnit_Framework_TestCase
             ];
         }
 
-        $connectionMock = $this->getMockBuilder('\AwsInspector\Ssh\Connection')->disableOriginalConstructor()->getMock();
+        $connectionMock = $this->getMock('\AwsInspector\Ssh\Connection', [], [], '', false);
         $connectionMock->method('exec')->willReturn(['returnVar' => $returnVar, 'output' => $output]);
         $curl = new \AwsInspector\Helper\Curl('http://google.com', $header, $connectionMock);
         $curl->doRequest();
@@ -68,7 +69,7 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     public function doRequestThrowsExceptionIfOutputIsNotSet()
     {
         $this->setExpectedException('Exception', "No output found");
-        $connectionMock = $this->getMockBuilder('\AwsInspector\Ssh\Connection')->disableOriginalConstructor()->getMock();
+        $connectionMock = $this->getMock('\AwsInspector\Ssh\Connection', [], [], '', false);
         $connectionMock->method('exec')->willReturn(['returnVar' => 0]);
         $curl = new \AwsInspector\Helper\Curl('http://google.com', [], $connectionMock);
         $curl->doRequest();
