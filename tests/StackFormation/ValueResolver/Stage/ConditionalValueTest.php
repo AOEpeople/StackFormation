@@ -3,8 +3,9 @@
 namespace StackFormation\Tests\Stage\ValueResolver;
 
 use StackFormation\ValueResolver\Stage\ConditionalValue;
+use StackFormation\Tests\MockFacade;
 
-class ConditionalValueTest extends \PHPUnit_Framework_TestCase
+class ConditionalValueTest extends MockFacade
 {
 
     /**

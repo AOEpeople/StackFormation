@@ -5,8 +5,9 @@ namespace AwsInspector\Tests\Ssh;
 use AwsInspector\Model\Ec2\Instance;
 use AwsInspector\Ssh\Connection;
 use AwsInspector\Ssh\PrivateKey;
+use AwsInspector\Tests\MockFacade;
 
-class ConnectionTest extends \PHPUnit_Framework_TestCase
+class ConnectionTest extends MockFacade
 {
 
     /**

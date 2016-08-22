@@ -4,15 +4,20 @@ namespace AwsInspector\Tests\Ssh;
 
 use AwsInspector\Ssh\Command;
 use AwsInspector\Ssh\LocalConnection;
+use AwsInspector\Tests\MockFacade;
 
-class CommandTest extends \PHPUnit_Framework_TestCase
+class CommandTest extends MockFacade
 {
 
     /**
      * @test
      */
     public function simpleCommand()
-    {
+    {   #$connectionMock = $this->getMockBuilder('\AwsInspector\Ssh\Connection');
+        #$connectionMock->setMethods([]);
+        #$connectionMock->setConstructorArgs([]);
+        #$connectionMock->setMockClassName('');
+        #$connectionMock->disableOriginalConstructor();
         $connectionMock = $this->getMock('\AwsInspector\Ssh\Connection', [], [], '', false);
         $connectionMock->method('__toString')->willReturn('connection');
         $command = new Command($connectionMock, 'command');

@@ -1,8 +1,9 @@
 <?php
 
 namespace AwsInspector\Tests\Model\AutoScaling;
+use AwsInspector\Tests\MockFacade;
 
-class RepositoryTest extends \PHPUnit_Framework_TestCase
+class RepositoryTest extends MockFacade
 {
     /**
      * @param array $methods

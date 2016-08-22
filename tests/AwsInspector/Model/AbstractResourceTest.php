@@ -1,8 +1,9 @@
 <?php
 
 namespace AwsInspector\Tests\Model;
+use AwsInspector\Tests\MockFacade;
 
-class AbstractTest extends \PHPUnit_Framework_TestCase
+class AbstractTest extends MockFacade
 {
     /**
      * @test

@@ -2,7 +2,9 @@
 
 namespace AwsInspector\Tests\Model;
 
-class CollectionTest extends \PHPUnit_Framework_TestCase
+use AwsInspector\Tests\MockFacade;
+
+class CollectionTest extends MockFacade
 {
     /**
      * @test

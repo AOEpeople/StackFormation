@@ -4,7 +4,7 @@ namespace StackFormation\Tests;
 
 use StackFormation\Helper\Div;
 
-class BlueprintGetParameterTest extends \PHPUnit_Framework_TestCase
+class BlueprintGetParameterTest extends MockFacade
 {
 
     /**

@@ -2,7 +2,7 @@
 
 namespace StackFormation\Tests;
 
-class ProfileManagerTest extends \PHPUnit_Framework_TestCase
+class ProfileManagerTest extends MockFacade
 {
     CONST VAULT_MAC_KEY = 'ziBH2sJjat30mpnJtJwvlp7a4G6u20aKyJ6LonVbZKs=';
     CONST VAULT_ENCRYPTION_KEY = 'XXuso82dkjakWHNGtEqUF1eB1h4nKkmZ0Cxv7aQC8Jo=';

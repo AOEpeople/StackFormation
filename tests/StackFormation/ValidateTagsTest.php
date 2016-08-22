@@ -4,7 +4,7 @@ namespace StackFormation\Tests;
 
 use StackFormation\Helper\Validator;
 
-class ValidateTagsTest extends \PHPUnit_Framework_TestCase
+class ValidateTagsTest extends MockFacade
 {
     /**
      * @param array $tag
