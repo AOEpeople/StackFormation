@@ -4,7 +4,7 @@ namespace StackFormation\Tests;
 
 use StackFormation\Helper\Validator;
 
-class HelperTest extends \PHPUnit_Framework_TestCase
+class HelperTest extends MockFacade
 {
     /**
      * @param string $stackName

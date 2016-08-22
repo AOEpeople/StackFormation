@@ -1,8 +1,9 @@
 <?php
 
 namespace AwsInspector\Tests\Model\AutoScaling;
+use AwsInspector\Tests\MockFacade;
 
-class AutoScalingGroupTest extends \PHPUnit_Framework_TestCase
+class AutoScalingGroupTest extends MockFacade
 {
     /**
      * @param array $methods
@@ -10,10 +11,8 @@ class AutoScalingGroupTest extends \PHPUnit_Framework_TestCase
      */
     public function getProfileManagerMock(array $methods)
     {
-        return $this->getMockBuilder('\StackFormation\Profile\Manager')
-            ->disableOriginalConstructor()
-            ->setMethods($methods)
-            ->getMock();
+        return $this->getMock('\StackFormation\Profile\Manager', $methods, [], '', false);
+
     }
 
     /**
@@ -22,10 +21,7 @@ class AutoScalingGroupTest extends \PHPUnit_Framework_TestCase
      */
     public function getAutoScalingGroupClientMock(array $methods)
     {
-        return $this->getMockBuilder('\Aws\AutoScaling\AutoScalingClient')
-            ->disableOriginalConstructor()
-            ->setMethods($methods)
-            ->getMock();
+        return $this->getMock('\Aws\AutoScaling\AutoScalingClient', $methods, [], '', false);
     }
 
     /**
@@ -42,10 +38,7 @@ class AutoScalingGroupTest extends \PHPUnit_Framework_TestCase
         $data = ['AutoScalingGroupName' => 'MyASGName'];
         $autoScalingGroup = new \AwsInspector\Model\AutoScaling\AutoScalingGroup($data, $profileManager);
 
-        $loadBalancerObject = $this->getMockBuilder('\AwsInspector\Model\Elb\Elb')
-            ->disableOriginalConstructor()
-            ->setMethods(['getLoadBalancerName'])
-            ->getMock();
+        $loadBalancerObject = $this->getMock('\AwsInspector\Model\Elb\Elb', ['getLoadBalancerName'], [], '', false);
         $loadBalancerObject->method('getLoadBalancerName')->willReturn('LoadBalancer3');
 
         $loadBalancerNames = ['LoadBalancer1', 'LoadBalancer2', $loadBalancerObject];

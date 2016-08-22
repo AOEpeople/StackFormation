@@ -3,8 +3,9 @@
 namespace AwsInspector\Tests\Model\Ec2;
 
 use AwsInspector\Model\Ec2\Instance;
+use AwsInspector\Tests\MockFacade;
 
-class InstanceTest extends \PHPUnit_Framework_TestCase
+class InstanceTest extends MockFacade
 {
 
     /**

@@ -2,7 +2,7 @@
 
 namespace StackFormation\Tests;
 
-class ValueResolverTest extends \PHPUnit_Framework_TestCase
+class ValueResolverTest extends MockFacade
 {
     /**
      * @var \StackFormation\ValueResolver\ValueResolver

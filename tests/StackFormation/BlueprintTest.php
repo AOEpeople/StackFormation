@@ -4,7 +4,7 @@ namespace StackFormation\Tests;
 
 use StackFormation\Helper\Div;
 
-class BlueprintTest extends \PHPUnit_Framework_TestCase
+class BlueprintTest extends MockFacade
 {
     /**
      * @param \StackFormation\Config $config

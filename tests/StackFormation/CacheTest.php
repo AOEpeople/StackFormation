@@ -2,7 +2,7 @@
 
 namespace StackFormation\Tests;
 
-class CacheTest extends \PHPUnit_Framework_TestCase
+class CacheTest extends MockFacade
 {
     protected $cache;
 

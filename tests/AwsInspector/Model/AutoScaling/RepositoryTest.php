@@ -1,8 +1,9 @@
 <?php
 
 namespace AwsInspector\Tests\Model\AutoScaling;
+use AwsInspector\Tests\MockFacade;
 
-class RepositoryTest extends \PHPUnit_Framework_TestCase
+class RepositoryTest extends MockFacade
 {
     /**
      * @param array $methods
@@ -10,10 +11,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function getProfileManagerMock(array $methods)
     {
-        return $this->getMockBuilder('\StackFormation\Profile\Manager')
-            ->disableOriginalConstructor()
-            ->setMethods($methods)
-            ->getMock();
+        return $this->getMock('\StackFormation\Profile\Manager', $methods, [], '', false);
     }
 
     /**
@@ -22,10 +20,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function getAutoScalingGroupClientMock(array $methods)
     {
-        return $this->getMockBuilder('\Aws\AutoScaling\AutoScaling')
-            ->disableOriginalConstructor()
-            ->setMethods($methods)
-            ->getMock();
+        return $this->getMock('\Aws\AutoScaling\AutoScaling', $methods, [], '', false);
     }
 
     /**
@@ -33,7 +28,8 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function findAutoScalingGroupsReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeAutoScalingGroups']);
+        $methods = ['describeAutoScalingGroups'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeAutoScalingGroups')->willReturn(new \Aws\Result(
             [
                 'AutoScalingGroups' => [
@@ -68,7 +64,8 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function findAutoScalingGroupsByTagsReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeAutoScalingGroups']);
+        $methods = ['describeAutoScalingGroups'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeAutoScalingGroups')->willReturn(new \Aws\Result(
             [
                 'AutoScalingGroups' => [
@@ -121,7 +118,8 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function findByAutoScalingGroupNameReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeAutoScalingGroups']);
+        $methods = ['describeAutoScalingGroups'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeAutoScalingGroups')->willReturn(new \Aws\Result(
             [
                 'AutoScalingGroups' => [
@@ -157,7 +155,8 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function findLaunchConfigurationsReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeLaunchConfigurations']);
+        $methods = ['describeLaunchConfigurations'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeLaunchConfigurations')->willReturn(new \Aws\Result(
             [
                 'LaunchConfigurations' => [
@@ -186,7 +185,8 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function findLaunchConfigurationsGroupedByImageIdReturnsExpectedArray()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeLaunchConfigurations']);
+        $methods = ['describeLaunchConfigurations'];
+        $autoScalingClient = $this->getAutoScalingGroupClientMock($methods);
         $autoScalingClient->method('describeLaunchConfigurations')->willReturn(new \Aws\Result(
             [
                 'LaunchConfigurations' => [

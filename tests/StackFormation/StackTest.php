@@ -2,7 +2,7 @@
 
 namespace StackFormation\Tests;
 
-class StackTest extends \PHPUnit_Framework_TestCase
+class StackTest extends MockFacade
 {
     /**
      * @var \StackFormation\Stack

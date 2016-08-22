@@ -2,7 +2,7 @@
 
 namespace AwsInspector\Tests;
 
-class RegistryTest extends \PHPUnit_Framework_TestCase
+class RegistryTest extends MockFacade
 {
     /**
      * @test
