@@ -40,16 +40,34 @@ class YamlCredentialProvider {
         }
         $config = $this->getConfig();
         $profileConfig = $config[$profile];
-        if (empty($profileConfig['access_key'])) { throw new \Exception("Invalid access_key in profile $profile"); }
-        if (empty($profileConfig['secret_key'])) { throw new \Exception("Invalid secret_key in profile $profile"); }
+        if (false === empty($profileConfig['access_key'])){
+            $envVars['AWS_ACCESS_KEY_ID'] = $profileConfig['access_key'];
+            unset($profileConfig['access_key']);
+        } else {
+            throw new \Exception("Invalid access_key in profile $profile");
+        }
+        if (false === empty($profileConfig['secret_key'])) {
+            $envVars['AWS_SECRET_ACCESS_KEY'] = $profileConfig['secret_key'];
+            unset($profileConfig['secret_key']);
+        } else {
+            throw new \Exception("Invalid secret_key in profile $profile");
+        }
         if(false === empty($profileConfig['region'])){
             $envVars['AWS_DEFAULT_REGION'] = $profileConfig['region'];
+            unset($profileConfig['region']);
         }
-        return array_merge($envVars,[
-            'AWSINSPECTOR_PROFILE' => $profile, // this isn't really used except for debugging
-            'AWS_ACCESS_KEY_ID' => $profileConfig['access_key'],
-            'AWS_SECRET_ACCESS_KEY' => $profileConfig['secret_key'],
-        ]);
+        if(false === empty($profileConfig['filter'])){
+            $envVars['STACKFORMATION_NAME_FILTER'] = $profileConfig['filter'];
+            unset($profileConfig['filter']);
+        }
+        foreach ($profileConfig as $key => $value){
+            if(false === (bool)preg_match('/^[a-z0-9-_]+/', $key)){
+                throw new \Exception("Invalid environment variable in profile $profile");
+            }else{
+                $envVars[strtoupper($key)] = $value;
+            }
+        }
+        return $envVars;
     }
 
     public function listAllProfiles() {
