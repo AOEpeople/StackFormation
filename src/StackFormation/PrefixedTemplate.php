@@ -6,6 +6,19 @@ class PrefixedTemplate extends Template
     protected $prefix;
 
     /**
+     * presudo parameters which should not be prefixed
+     *
+     * @var array
+     */
+    protected $pseudoParameters = [
+            'AWS::AccountId',
+            'AWS::NotificationARNs',
+            'AWS::NoValue',
+            'AWS::Region',
+            'AWS::StackId',
+            'AWS::StackName'];
+
+    /**
      * PrefixedTemplate constructor.
      *
      * @param string            $prefix
@@ -74,7 +87,12 @@ class PrefixedTemplate extends Template
         $template = preg_replace_callback(
             '/\{\s*"Ref"\s*:\s*"([a-zA-Z0-9:]+?)"\s*\}/',
             function ($matches) use ($prefix) {
-                return '{"Ref":"' . $prefix . $matches[1] . '"}';
+                if(true === in_array($matches[1], $this->pseudoParameters)){
+                    return '{"Ref":"' . $matches[1] . '"}';
+                }{
+                    return '{"Ref":"' . $prefix . $matches[1] . '"}';
+                }
+
             },
             $template
         );
