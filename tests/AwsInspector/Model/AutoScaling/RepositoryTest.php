@@ -33,7 +33,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function findAutoScalingGroupsReturnsExpectedCollection()
     {
-        $autoScalingClient = $this->getAutoScalingGroupClientMock(['describeAutoScalingGroups']);
+        $autoScalingClient = $this->getAutoScalingGroupClientMock(array('describeAutoScalingGroups'));
         $autoScalingClient->method('describeAutoScalingGroups')->willReturn(new \Aws\Result(
             [
                 'AutoScalingGroups' => [
