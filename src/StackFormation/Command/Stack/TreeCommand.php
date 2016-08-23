@@ -16,7 +16,7 @@ class TreeCommand extends \StackFormation\Command\AbstractCommand
     {
         $this
             ->setName('stack:tree')
-            ->setDescription('List all as tree')
+            ->setDescription('List all stacks as tree')
             ->addOption(
                 'nameFilter',
                 null,
@@ -60,6 +60,13 @@ class TreeCommand extends \StackFormation\Command\AbstractCommand
         return $tree;
     }
 
+    /**
+     * render tree node
+     *
+     * @param string $tree
+     * @param int $depth
+     * @param int $cap
+     */
     protected function renderNode($tree, $depth = 0, $cap = 0) {
 
         $n = count($tree);
@@ -67,7 +74,7 @@ class TreeCommand extends \StackFormation\Command\AbstractCommand
             for ($pre = "", $i = $depth - 1; $i >= 0; $i--){
                 $pre.= $cap >> $i & 1 ? "│  " : "   ";
             }
-            echo $pre, --$n > 0 ? '├──' : '└──', $k, "\n";
+            echo $pre, --$n > 0 ? '├──' : '└──', $k, PHP_EOL;
             if (false === empty($next)){
                 $this->renderNode($next, $depth + 1, ($cap << 1) | ($n > 0));
             }
