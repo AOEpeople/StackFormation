@@ -9,6 +9,7 @@ class CommandRegistry
     {
         return [
             new Command\Stack\ListCommand(),
+            new Command\Stack\TreeCommand(),
             new Command\Stack\ObserveCommand(),
             new Command\Stack\DeleteCommand(),
             new Command\Stack\TimelineCommand(),
