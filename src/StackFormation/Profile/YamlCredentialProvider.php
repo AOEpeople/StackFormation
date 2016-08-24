@@ -64,7 +64,7 @@ class YamlCredentialProvider {
             if(false === (bool)preg_match('/^[a-z0-9-_]+/', $key)){
                 throw new \Exception("Invalid environment variable in profile $profile");
             }else{
-                $envVars[strtoupper(str_replace('-','_',$key))] = $value;
+                $envVars[strtoupper(str_replace('-','_',$key))] = sprintf('"%s"', $value);
             }
         }
         return $envVars;
