@@ -50,6 +50,7 @@ class Observer
         }, $pollInterval, 1000);
 
         $this->printStatus($lastStatus);
+        $this->printResources();
         $this->printOutputs();
         return $lastStatus;
     }
@@ -57,6 +58,26 @@ class Observer
     public function isSuccessfulStatus($status)
     {
         return in_array($status, ['CREATE_COMPLETE', 'UPDATE_COMPLETE', Stack::STATUS_STACK_GONE]);
+    }
+
+    protected function printResources()
+    {
+        $this->output->writeln("== RESOURCES ==");
+        try {
+            $rows = [];
+            foreach ($this->stack->getResources() as $key => $value) {
+                $value = strlen($value) > 100 ? substr($value, 0, 100) . "..." : $value;
+                $rows[] = [$key, $value];
+            }
+
+            $table = new Table($this->output);
+            $table
+                ->setHeaders(['Key', 'Value'])
+                ->setRows($rows);
+            $table->render();
+        } catch (\Exception $e) {
+            // never mind...
+        }
     }
 
     protected function printOutputs()
