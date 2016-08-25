@@ -102,13 +102,12 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
 
         try {
             try {
+                $output->writeln("\n\n== Parameters: ==");
+                $table = new Table($output);
+                $table->setHeaders(['Key', 'Value'])->setRows($blueprint->getParameters());
+                $table->render();
 
                 if ($input->getOption('review-parameters')) {
-                    $output->writeln("\n\n== Review parameters: ==");
-                    $table = new Table($output);
-                    $table->setHeaders(['Key', 'Value'])->setRows($blueprint->getParameters());
-                    $table->render();
-
                     $questionHelper = $this->getHelper('question');
                     $question = new ConfirmationQuestion("Do you want to proceed? [y/N] ", false);
                     if (!$questionHelper->ask($input, $output, $question)) {
@@ -116,7 +115,7 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
                     }
                 }
                 if ($input->getOption('review-changeset')) {
-                    $output->writeln("\n\n== Review change set: ==");
+                    $output->writeln("\n\n== Change set: ==");
                     try {
                         $changeSetResult = $blueprintAction->getChangeSet();
                         $table = new ChangeSetTable($output);
