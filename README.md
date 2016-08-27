@@ -14,6 +14,8 @@ Author:
 Contributors:
  - [Lee Saferite](https://github.com/LeeSaferite)
  - [Julian Kleinhans](https://github.com/kj187)
+ - [Daniel Niedergesäß](https://github.com/smart-devs)
+ 
 
 ### Installation
 
