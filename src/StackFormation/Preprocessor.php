@@ -19,6 +19,7 @@ class Preprocessor
         $json = $this->expandPort($json);
         $json = $this->injectFilecontent($json, $basePath);
         $json = $this->split($json);
+        $json = $this->replaceFnGetAttr($json);
         $json = $this->replaceRef($json);
         $json = $this->replaceMarkers($json);
         return $json;
@@ -204,5 +205,16 @@ class Preprocessor
     protected function replaceRef($jsonString)
     {
         return preg_replace('/\{\s*Ref\s*:\s*([a-zA-Z0-9:]+?)\s*\}/', '", {"Ref": "$1"}, "', $jsonString);
+    }
+
+    /**
+     * transforms {Fn::GetAtt:[resource,attribute]} to inline statement
+     *
+     * @param $jsonstring
+     * @return mixed
+     */
+    protected function replaceFnGetAttr($jsonstring){
+        return preg_replace('/\{\s*Fn::GetAtt:\[\s*([a-zA-Z0-9:]+?)\s*,\s*([a-zA-Z0-9:]+?)\s*\]\}/',
+            '", {"Fn::GetAtt": ["$1", "$2"]} ,"', $jsonstring);
     }
 }
