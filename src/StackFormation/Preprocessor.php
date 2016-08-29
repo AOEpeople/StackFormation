@@ -18,6 +18,7 @@ class Preprocessor
         $json = $this->parseRefInDoubleQuotedStrings($json);
         $json = $this->expandPort($json);
         $json = $this->injectFilecontent($json, $basePath);
+        $json = $this->base64encodedJson($json);
         $json = $this->split($json);
         $json = $this->replaceRef($json);
         $json = $this->replaceMarkers($json);
@@ -99,14 +100,13 @@ class Preprocessor
                 if (!is_file($file)) {
                     throw new FileNotFoundException("File '$file' not found");
                 }
-
-                $fileContent = file_get_contents($file);
-                $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
                 $ext = pathinfo($file, PATHINFO_EXTENSION);
-
                 if ($matches[3] == 'Minify' && $ext != 'js') {
                     throw new \Exception('Fn::FileContentMinify is only supported for *.js files. (File: ' . $file . ')');
                 }
+
+                $fileContent = file_get_contents($file);
+                $fileContent = $this->injectInclude($fileContent, dirname(realpath($file)));
 
                 if ($ext === 'js') {
                     if ($matches[3] == 'Minify') {
@@ -120,13 +120,8 @@ class Preprocessor
                     }
                 }
 
-                $fileContent = preg_replace_callback(
-                    '/###JSON###(.+?)######/',
-                    function (array $m) {
-                        return "###JSON###" . base64_encode($m[1]) . "######";
-                    },
-                    $fileContent
-                );
+                // TODO: this isn't optimal. Why are we processing this here in between?
+                $fileContent = $this->base64encodedJson($fileContent);
 
                 $lines = explode("\n", $fileContent);
                 foreach ($lines as $key => &$line) {
@@ -149,14 +144,6 @@ class Preprocessor
                 $result = str_replace("\n", "\n" . $whitespace, $result);
 
                 return $matches[1] . $matches[2] . $result;
-            },
-            $jsonString
-        );
-
-        $jsonString = preg_replace_callback(
-            '/###JSON###(.+?)######/',
-            function (array $m) {
-                return '", ' . base64_decode($m[1]) . ', "';
             },
             $jsonString
         );
@@ -204,5 +191,21 @@ class Preprocessor
     protected function replaceRef($jsonString)
     {
         return preg_replace('/\{\s*Ref\s*:\s*([a-zA-Z0-9:]+?)\s*\}/', '", {"Ref": "$1"}, "', $jsonString);
+    }
+
+    /**
+     * @param $jsonString
+     * @return mixed
+     */
+    protected function base64encodedJson($jsonString)
+    {
+        $jsonString = preg_replace_callback(
+            '/###JSON###(.+?)######/',
+            function (array $m) {
+                return '", ' . base64_decode($m[1]) . ', "';
+            },
+            $jsonString
+        );
+        return $jsonString;
     }
 }
