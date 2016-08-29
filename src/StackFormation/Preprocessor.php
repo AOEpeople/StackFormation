@@ -214,7 +214,7 @@ class Preprocessor
      * @return mixed
      */
     protected function replaceFnGetAttr($jsonstring){
-        return preg_replace('/\{\s*Fn::GetAtt:\[\s*([a-zA-Z0-9:]+?)\s*,\s*([a-zA-Z0-9:]+?)\s*\]\}/',
+        return preg_replace('/\{\s*Fn\s*::\s*GetAtt\s*:\s*\[\s*([a-zA-Z0-9:]+?)\s*,\s*([a-zA-Z0-9:]+?)\s*\]\s*\}/',
             '", {"Fn::GetAtt": ["$1", "$2"]} ,"', $jsonstring);
     }
 }
