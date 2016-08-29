@@ -175,6 +175,10 @@ class Preprocessor
             '/###INCLUDE:(.+)/',
             function (array $matches) use ($basePath) {
                 $file = $basePath . '/' . $matches[1];
+
+                # Parse ENV vars in file names...
+                $file = $this->replaceMarkers($file);
+
                 if (!is_file($file)) {
                     throw new FileNotFoundException("File $file not found");
                 }
