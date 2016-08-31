@@ -84,11 +84,15 @@ class StackFactory {
     public function getStacksFromApi($fresh=false, $nameFilter=null, $statusFilter=null)
     {
         if ($fresh || is_null($this->stacksCache)) {
-            $res = $this->cfnClient->describeStacks();
             $this->stacksCache = [];
-            foreach ($res->get('Stacks') as $stack) {
-                $this->stacksCache[$stack['StackName']] = new Stack($stack, $this->cfnClient);
-            }
+            $nextToken = '';
+            do {
+                $res = $this->cfnClient->describeStacks($nextToken ? ['NextToken' => $nextToken] : null);
+                foreach ($res->get('Stacks') as $stack) {
+                    $this->stacksCache[$stack['StackName']] = new Stack($stack, $this->cfnClient);
+                }
+                $nextToken = $res->get('NextToken');
+            } while ($nextToken);
         }
 
         $stacks = $this->stacksCache;
