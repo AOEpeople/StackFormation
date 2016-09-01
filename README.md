@@ -277,13 +277,15 @@ blueprints:
       KeyPair: 
         '{env:Environment}==prod': MyProdKey
         '{env:Environment}==stage': MyStageKey
+        '{env:Environment}~=/^dev[0-9]+$/': MyDevKey
         'default': MyDevKey
 ```
 
 StackFormation will evaluate all keys from top to bottom and the first key that evaluates to true will be returned. 
 Allowed conditions:
-- 'A==B'
-- 'A!=B'
+- `A==B`
+- `A!=B`
+- `A~=/^regex$/`
 - 'default' (will always evaluate to true. Make sure you put this at the very end since everything after this will be ignored).
 Placeholders will be resolved before the conditions are evaluated.
 
