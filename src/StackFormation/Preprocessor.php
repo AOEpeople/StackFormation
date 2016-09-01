@@ -20,6 +20,7 @@ class Preprocessor
         $json = $this->injectFilecontent($json, $basePath);
         $json = $this->base64encodedJson($json);
         $json = $this->split($json);
+        $json = $this->replaceFnGetAttr($json);
         $json = $this->replaceRef($json);
         $json = $this->replaceMarkers($json);
         return $json;
@@ -211,5 +212,17 @@ class Preprocessor
             $jsonString
         );
         return $jsonString;
+    }
+
+    /**
+     * transforms {Fn::GetAtt:[resource,attribute]} to inline statement
+     *
+     * @param $jsonstring
+     * @return mixed
+     */
+    protected function replaceFnGetAttr($jsonstring)
+    {
+        return preg_replace('/\{\s*Fn\s*::\s*GetAtt\s*:\s*\[\s*([a-zA-Z0-9:]+?)\s*,\s*([a-zA-Z0-9:]+?)\s*\]\s*\}/',
+            '", {"Fn::GetAtt": ["$1", "$2"]} ,"', $jsonstring);
     }
 }

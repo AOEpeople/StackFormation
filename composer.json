@@ -12,6 +12,11 @@
         "email": "lee.saferite@aoe.com",
         "homepage": "https://github.com/LeeSaferite",
         "role": "Contributor"
+    }, {
+        "name": "Daniel Niedergesäß",
+        "email": "dn@smart-devs.rocks",
+        "homepage": "https://github.com/smart-devs",
+        "role": "Contributor"
     }],
     "require": {
         "symfony/console": "^3.0.0",

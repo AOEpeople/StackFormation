@@ -38,6 +38,7 @@ class TreeCommand extends \StackFormation\Command\AbstractCommand
 
         $stacks = $this->getStackFactory()->getStacksFromApi(false, $nameFilter, $statusFilter);
         $dataTree = $this->prepareTree($stacks);
+        $dataTree = $this->flatternTree($dataTree);
         $this->renderNode($dataTree);
     }
 
@@ -58,6 +59,33 @@ class TreeCommand extends \StackFormation\Command\AbstractCommand
             }
         }
         return $tree;
+    }
+
+    /**
+     * flattern tree to gain a better overview
+     *
+     * @param array $treeIn
+     * @return array
+     */
+    protected function flatternTree(array $treeIn)
+    {
+        $treeOut = [];
+        foreach ($treeIn as $name => $children) {
+            if (count($children) === 0) {
+                $treeOut[$name] = [];
+            } elseif (count($children) === 1) {
+                $name = sprintf('%s-%s', $name, key($children));
+                if (count($children[key($children)]) > 0) {
+                    $treeOut[$name] = $this->flatternTree($children[key($children)]);
+                }else{
+                    $treeOut[$name] = [];
+                }
+            } else {
+                $treeOut[$name] = $this->flatternTree($children);
+            }
+
+        }
+        return $treeOut;
     }
 
     /**
