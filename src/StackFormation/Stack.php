@@ -263,6 +263,12 @@ class Stack {
         return $this;
     }
 
+    public function continueUpdateRollback()
+    {
+        $this->cfnClient->continueUpdateRollback(['StackName' => $this->getName()]);
+        return $this;
+    }
+
     public function delete()
     {
         $this->cfnClient->deleteStack(['StackName' => $this->getName()]);

@@ -181,7 +181,18 @@ class DeployCommand extends \StackFormation\Command\Blueprint\AbstractBlueprintC
                         $output->writeln('Cancellation completed. Now deploying stack: ' . $stackName);
                         $blueprintAction->deploy($dryRun);
                     }
-                break;
+                    break;
+                case 'UPDATE_ROLLBACK_FAILED':
+                    if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Stack is in UPDATE_ROLLBACK_FAILED state. Do you want to continue the update rollback and deploy then? [Y/n]'))) {
+                        $output->writeln('Continuing update rollback for ' . $stackName);
+                        $stack->continueUpdateRollback();
+                        $observer = new Observer($stack, $stackFactory, $output);
+                        if ($deleteOnTerminate) { $observer->deleteOnSignal(); }
+                        $observer->observeStackActivity();
+                        $output->writeln('Update rollback completed. Now deploying stack: ' . $stackName);
+                        $blueprintAction->deploy($dryRun);
+                    }
+                    break;
                 default: throw $e;
             }
         }
