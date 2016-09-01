@@ -199,4 +199,12 @@ class Instance extends \AwsInspector\Model\AbstractResource
         return true;
     }
 
+    public function terminate()
+    {
+        $ec2Client = \AwsInspector\SdkFactory::getClient('ec2');/* @var $ec2Client \Aws\Ec2\Ec2Client */
+        $ec2Client->terminateInstances([
+            'InstanceIds' => [ $this->getInstanceId() ]
+        ]);
+    }
+
 }
