@@ -34,6 +34,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $nameFilter = $input->getOption('nameFilter');
         $stacks = $this->getStackFactory()->getStacksFromApi(false, $nameFilter);
 
+
         $data = [];
         foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */
 
@@ -60,10 +61,13 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                 $tmp = array_merge($tmp, $diff->compare());
             } catch (BlueprintReferenceNotFoundException $e) {
                 $tmp['blueprintName'] = '-';
+                $tmp['error'] = true;
             } catch (BlueprintNotFoundException $e) {
                 $tmp['blueprintName'] = '<fg=red>Not found: '.$e->getBlueprintName().'</>';
+                $tmp['error'] = true;
             } catch (\Exception $e) {
                 $tmp['blueprintName'] = '<fg=red>Exception: '.$e->getMessage().'</>';
+                $tmp['error'] = true;
             }
             $data[] = $tmp;
         }
@@ -82,6 +86,10 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $output->writeln("-> Run this to update a live stack:");
         $output->writeln("{$GLOBALS['argv'][0]} blueprint:deploy -o <blueprintName>");
         $output->writeln('');
+
+        if (isset($tmp['error']) && $tmp['error'] === true) {
+            exit(1);
+        }
     }
 
 }

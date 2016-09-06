@@ -85,6 +85,8 @@ class Diff
             throw new \InvalidArgumentException('Blueprint not set');
         }
 
+        $tmp = [];
+
         try {
 
             // parameters
@@ -93,7 +95,12 @@ class Diff
             $parametersBlueprint = $this->blueprint->getParameters(true);
             $parametersBlueprint = Div::flatten($parametersBlueprint, 'ParameterKey', 'ParameterValue');
 
-            $tmp['parameters'] = $this->parametersAreEqual($parametersStack, $parametersBlueprint) ? "<fg=green>equal</>" : "<fg=red>different</>";
+            if ($this->parametersAreEqual($parametersStack, $parametersBlueprint)) {
+                $tmp['parameters'] = "<fg=green>equal</>";
+            } else {
+                $tmp['parameters'] = "<fg=red>different</>";
+                $tmp['error'] = true;
+            }
 
             // template
             if ($this->output->isVerbose()) { $this->output->writeln($this->stack->getName(). ': Comparing template'); }
@@ -102,13 +109,21 @@ class Diff
 
             $templateStack = $this->normalizeJson($templateStack);
             $templateBlueprint = $this->normalizeJson($templateBlueprint);
-            $tmp['template'] = ($templateStack === $templateBlueprint) ? "<fg=green>equal</>" : "<fg=red>different</>";
+
+            if ($templateStack === $templateBlueprint) {
+                $tmp['template'] = "<fg=green>equal</>";
+            } else {
+                $tmp['template'] = "<fg=red>different</>";
+                $tmp['error'] = true;
+            }
         } catch (CloudFormationException $e) {
             $tmp['parameters'] = 'Stack not found';
             $tmp['template'] = 'Stack not found';
+            $tmp['error'] = true;
         } catch (\Exception $e) {
             $tmp['parameters'] = '<fg=red>EXCEPTION: ' . $e->getMessage(). '</>';
             $tmp['template'] = 'EXCEPTION';
+            $tmp['error'] = true;
         }
         return $tmp;
     }
