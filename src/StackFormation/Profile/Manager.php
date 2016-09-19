@@ -101,6 +101,9 @@ class Manager {
         if (!is_string($client)) {
             throw new \InvalidArgumentException('Client parameter must be a string');
         }
+        if (getenv('AWS_UNSET_PROFILE')) {
+            $profile = '';
+        }
         if (!is_null($profile) && !is_string($profile)) {
             throw new \InvalidArgumentException('Profile parameter must be a string');
         }
