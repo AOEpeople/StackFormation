@@ -34,7 +34,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $nameFilter = $input->getOption('nameFilter');
         $stacks = $this->getStackFactory()->getStacksFromApi(false, $nameFilter);
 
-
+        $error = false;
         $data = [];
         foreach ($stacks as $stackName => $stack) { /* @var $stack Stack */
 
@@ -59,15 +59,19 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                     $tmp['blueprintName'] .= "\n". wordwrap(Div::assocArrayToString($stack->getUsedEnvVars()), 80, "\n");
                 }
                 $tmp = array_merge($tmp, $diff->compare());
+
+                if (isset($tmp['error']) && $tmp['error'] === true) {
+                    $error = true;
+                }
             } catch (BlueprintReferenceNotFoundException $e) {
                 $tmp['blueprintName'] = '-';
-                $tmp['error'] = true;
+                $error = true;
             } catch (BlueprintNotFoundException $e) {
                 $tmp['blueprintName'] = '<fg=red>Not found: '.$e->getBlueprintName().'</>';
-                $tmp['error'] = true;
+                $error = true;
             } catch (\Exception $e) {
                 $tmp['blueprintName'] = '<fg=red>Exception: '.$e->getMessage().'</>';
-                $tmp['error'] = true;
+                $error = true;
             }
             $data[] = $tmp;
         }
@@ -87,7 +91,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $output->writeln("{$GLOBALS['argv'][0]} blueprint:deploy -o <blueprintName>");
         $output->writeln('');
 
-        if (isset($tmp['error']) && $tmp['error'] === true) {
+        if ($error === true) {
             exit(1);
         }
     }
