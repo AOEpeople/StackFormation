@@ -153,6 +153,14 @@ class Manager {
         return $tmp;
     }
 
+    public function loadProfileToEnv($profile) {
+        $tmp = [];
+        foreach ($this->credentialProvider->getEnvVarsForProfile($profile) as $var => $value) {
+            putenv("$var=$value");
+        }
+        return $tmp;
+    }
+
     public function writeProfileToDotEnv($profile, $file='.env') {
         $tmp = $this->getEnvVarsFromProfile($profile);
         $res = file_put_contents($file, implode("\n", $tmp));
