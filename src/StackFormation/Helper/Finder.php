@@ -38,22 +38,38 @@ class Finder
 
         $cloudWatchLogClient = \AwsInspector\SdkFactory::getClient('CloudWatchLogs');
         /* @var $cloudWatchLogClient \Aws\CloudWatchLogs\CloudWatchLogsClient */
-        $params = [];
-        if ($logGroupNamePrefix) {
-            $params['logGroupNamePrefix'] = $logGroupNamePrefix;
-        }
-        $resGroups = $cloudWatchLogClient->describeLogGroups($params);
-        foreach ($resGroups->search('logGroups[].logGroupName') as $logGroupName) {
-            $resStreams = $cloudWatchLogClient->describeLogStreams([
-                'logGroupName' => $logGroupName,
-                'orderBy' => 'LastEventTime'
-            ]);
-            foreach ($resStreams->search('logStreams[].logStreamName') as $logStreamName) {
-                if ($stream == $logStreamName) {
-                    return $logGroupName;
-                }
+
+        $groupsNextToken = null;
+        do {
+            $params = [];
+            if ($logGroupNamePrefix) {
+                $params['logGroupNamePrefix'] = $logGroupNamePrefix;
             }
-        }
+            if ($groupsNextToken) {
+                $params['nextToken'] = $groupsNextToken;
+            }
+            $resGroups = $cloudWatchLogClient->describeLogGroups($params);
+            foreach ($resGroups->search('logGroups[].logGroupName') as $logGroupName) {
+                $streamsNextToken = null;
+                do {
+                    $streamsParams = [
+                        'logGroupName' => $logGroupName,
+                        'orderBy' => 'LastEventTime'
+                    ];
+                    if ($streamsNextToken) {
+                        $streamsParams['nextToken'] = $streamsNextToken;
+                    }
+                    $resStreams = $cloudWatchLogClient->describeLogStreams($streamsParams);
+                    foreach ($resStreams->search('logStreams[].logStreamName') as $logStreamName) {
+                        if ($stream == $logStreamName) {
+                            return $logGroupName;
+                        }
+                    }
+                    $streamsNextToken = $resGroups->get("nextToken");
+                } while ($streamsNextToken);
+            }
+            $groupsNextToken = $resGroups->get("nextToken");
+        } while ($groupsNextToken);
         return null;
     }
 }
