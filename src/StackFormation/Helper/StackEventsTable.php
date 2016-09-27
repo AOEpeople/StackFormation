@@ -64,6 +64,7 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
     /**
      * @param $resourceStatusReason
      * @return array
+     * @throws \Exception
      */
     public function getDetailedLogFromResourceStatusReason($resourceStatusReason)
     {
@@ -71,6 +72,9 @@ class StackEventsTable extends \Symfony\Component\Console\Helper\Table {
         if (preg_match('/See the details in CloudWatch Log Stream: (.*)/', $resourceStatusReason, $matches)) {
             $logStream = $matches[1];
             $logGroupName = Finder::findCloudWatchLogGroupByStream($logStream);
+            if (empty($logGroupName)) {
+                throw new \Exception('Could not find logGroupName for logStream: '.$logStream);
+            }
             $params = [
                 'limit' => 20,
                 'logGroupName' => $logGroupName,
