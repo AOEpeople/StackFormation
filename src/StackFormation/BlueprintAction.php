@@ -152,6 +152,14 @@ class BlueprintAction {
         }
     }
 
+    public function updateStackPolicy()
+    {
+        $result = $this->getCfnClient()->setStackPolicy([
+            'StackName' => $this->blueprint->getStackName(),
+            'StackPolicyBody' => $this->blueprint->getStackPolicy()
+        ]);
+    }
+
     protected function prepareArguments($force=false)
     {
         if ($this->output && !$this->output->isQuiet()) { $this->output->write("Preparing parameters... "); }

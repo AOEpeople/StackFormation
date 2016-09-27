@@ -21,6 +21,7 @@ class CommandRegistry
             new Command\Stack\Show\DependantsCommand(),
 
             new Command\Blueprint\DeployCommand(),
+            new Command\Blueprint\DeployPolicyCommand(),
             new Command\Blueprint\ValidateCommand(),
             new Command\Blueprint\Show\TemplateCommand(),
             new Command\Blueprint\Show\ParametersCommand(),
