@@ -663,6 +663,31 @@ Example:
 "Key": "Name", "Value": {"Fn::Join": ["", ["magento-", {"Ref":"Environment"}, "-", {"Ref":"Build"}, "-instance"]]}
 ```
 
+### Reverse blueprint match
+
+Let's say you have a blueprint `ecom-{env:ACCOUNT}-{env:ENVIRONMENT}-static-stack` and you want to deploy it with ACCOUNT=t and ENVIRONMENT=dpl.
+You would do this by setting the env vars ACCOUNT and ENVIRONMENT and then run the deploy command:
+
+```
+export ACCOUNT=t
+export ENVIRONMENT=dpl
+bin/stackformation.php deploy 'ecom-{env:ACCOUNT}-{env:ENVIRONMENT}-static-stack'
+```
+
+But instead you can also simply run the deploy command with the resulting stack name `ecom-t-tst-static-stack`
+StackFormation will then attempt to find a matching tag, determine which environments need to be set and
+run the original blueprint for you:
+
+```
+bin/stackformation.php deploy 'ecom-t-tst-static-stack'
+Blueprint reverse match found: ecom-{env:ACCOUNT}-{env:ENVIRONMENT}-static-stack
+With ENV vars: ACCOUNT=t; ENVIRONMENT=tst
+Use this blueprint and set env vars? [y/N] y
+Setting env var: ACCOUNT=t
+Setting env var: ENVIRONMENT=tst
+...
+```
+
 ### Misc
 
 Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the blueprints.yml

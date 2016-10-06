@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 abstract class AbstractCommand extends Command
 {
@@ -75,11 +76,24 @@ abstract class AbstractCommand extends Command
                 $blueprint = $helper->ask($input, $output, $question);
             }
             $output->writeln('Selected blueprint: ' . $blueprint);
-
-            list($stackName) = explode(' ', $blueprint);
-            $input->setArgument('blueprint', $stackName);
+            list($blueprint) = explode(' ', $blueprint);
+        } elseif (!empty($blueprint) && !$this->blueprintFactory->blueprintExists($blueprint)) {
+            if ($result = $this->blueprintFactory->findByStackname($blueprint)) {
+                $output->writeln('Blueprint reverse match found: <fg=green>'. $result['blueprint'] . '</>');
+                $output->writeln('With ENV vars: <fg=green>' . Helper\Div::assocArrayToString($result['envvars']) .'</>');
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion("Use this blueprint and set env vars? [y/N] ", false);
+                if (!$helper->ask($input, $output, $question)) {
+                    throw new \Exception('Operation aborted');
+                }
+                $blueprint = $result['blueprint'];
+                foreach ($result['envvars'] as $var => $value) {
+                    $output->writeln("Setting env var: $var=$value");
+                    putenv("$var=$value");
+                }
+            }
         }
-
+        $input->setArgument('blueprint', $blueprint);
         return $blueprint;
     }
 

@@ -42,6 +42,28 @@ class BlueprintFactory {
         return $this->config->blueprintExists($blueprint);
     }
 
+    public function findByStackname($stackname)
+    {
+        foreach ($this->config->getBlueprintNames() as $blueprintName) {
+            if (strpos($blueprintName, '{env:') !== false) {
+                $regex = preg_replace('/\{env:([^:\}\{]+?)\}/', '(?P<$1>\w+)', $blueprintName);
+                $matches = [];
+                if (preg_match('/' . $regex . '/', $stackname, $matches)) {
+                    foreach ($matches as $key => $value) {
+                        if (is_int($key)) {
+                            unset($matches[$key]);
+                        }
+                    }
+                    return [
+                        'blueprint' => $blueprintName,
+                        'envvars' => $matches
+                    ];
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * @return Blueprint[]
      * @throws \Exception
