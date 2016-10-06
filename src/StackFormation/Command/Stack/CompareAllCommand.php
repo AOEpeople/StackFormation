@@ -73,6 +73,10 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                 $tmp['blueprintName'] = '<fg=red>Exception: '.$e->getMessage().'</>';
                 $error = true;
             }
+            if (isset($tmp['error'])) {
+                // so the column doesn't show on in the output table
+                unset($tmp['error']);
+            }
             $data[] = $tmp;
         }
 
