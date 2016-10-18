@@ -65,12 +65,18 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
                 }
             } catch (BlueprintReferenceNotFoundException $e) {
                 $tmp['blueprintName'] = '-';
+                $tmp['parameters'] = '<fg=red>not found</>';
+                $tmp['template'] = '<fg=red>not found</>';
                 $error = true;
             } catch (BlueprintNotFoundException $e) {
                 $tmp['blueprintName'] = '<fg=red>Not found: '.$e->getBlueprintName().'</>';
+                $tmp['parameters'] = '<fg=red>not found</>';
+                $tmp['template'] = '<fg=red>not found</>';
                 $error = true;
             } catch (\Exception $e) {
                 $tmp['blueprintName'] = '<fg=red>Exception: '.$e->getMessage().'</>';
+                $tmp['parameters'] = '<fg=red>exception</>';
+                $tmp['template'] = '<fg=red>exception</>';
                 $error = true;
             }
             if (isset($tmp['error'])) {
@@ -95,9 +101,7 @@ class CompareAllCommand extends \StackFormation\Command\AbstractCommand
         $output->writeln("{$GLOBALS['argv'][0]} blueprint:deploy -o <blueprintName>");
         $output->writeln('');
 
-        if ($error === true) {
-            exit(1);
-        }
+        return ($error === true) ? 1 : 0;
     }
 
 }
