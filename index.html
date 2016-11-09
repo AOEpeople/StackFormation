@@ -1,0 +1,787 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>AWS StackFormation by AOEpeople</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>AWS StackFormation</h1>
+        <p>Lightweight AWS CloudFormation Stack Manager</p>
+        <p class="view"><a href="https://github.com/AOEpeople/StackFormation">View the Project on GitHub <small>AOEpeople/StackFormation</small></a></p>
+        <ul>
+          <li><a href="https://github.com/AOEpeople/StackFormation/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/AOEpeople/StackFormation/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/AOEpeople/StackFormation">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="stackformation" class="anchor" href="#stackformation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>StackFormation</h1>
+
+<p><strong>Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor</strong></p>
+
+<p><img align="right" src="https://raw.githubusercontent.com/AOEpeople/StackFormation/master/doc/img/stackformation_200px.png"></p>
+
+<p><a href="https://travis-ci.org/AOEpeople/StackFormation"><img src="https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master" alt="Build Status"></a>
+<a href="https://codeclimate.com/github/AOEpeople/StackFormation"><img src="https://codeclimate.com/github/AOEpeople/StackFormation/badges/gpa.svg" alt="Code Climate"></a>
+<a href="https://codeclimate.com/github/AOEpeople/StackFormation/coverage"><img src="https://codeclimate.com/github/AOEpeople/StackFormation/badges/coverage.svg" alt="Test Coverage"></a></p>
+
+<p>Author: </p>
+
+<ul>
+<li><a href="https://twitter.com/fbrnc">Fabrizio Branca</a></li>
+</ul>
+
+<p>Contributors:</p>
+
+<ul>
+<li><a href="https://github.com/LeeSaferite">Lee Saferite</a></li>
+<li><a href="https://github.com/kj187">Julian Kleinhans</a></li>
+<li><a href="https://github.com/smart-devs">Daniel Niedergesäß</a></li>
+</ul>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h3>
+
+<h4>
+<a id="via-composer" class="anchor" href="#via-composer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Via composer</h4>
+
+<p><a href="https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx">Install composer</a> first, then:</p>
+
+<pre><code>composer require aoepeople/stackformation
+</code></pre>
+
+<h4>
+<a id="using-the-phar" class="anchor" href="#using-the-phar" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using the phar</h4>
+
+<p>Grab the latest release from <a href="https://github.com/AOEpeople/StackFormation/releases/latest">https://github.com/AOEpeople/StackFormation/releases/latest</a>
+or use this shortcut (requires <code>jq</code> to be installed)</p>
+
+<pre><code>wget $(curl -s https://api.github.com/repos/AOEpeople/StackFormation/releases/latest | jq -r '.assets[0].browser_download_url')
+</code></pre>
+
+<p>If you want to use stackformation globally:</p>
+
+<pre><code>mv stackformation.phar /usr/local/bin/stackformation
+chmod +x /usr/local/bin/stackformation
+</code></pre>
+
+<h3>
+<a id="quickstart" class="anchor" href="#quickstart" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quickstart</h3>
+
+<h4>
+<a id="setup" class="anchor" href="#setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup</h4>
+
+<p>Create a <code>.env.default</code> file (and add it yo your gitignore: <code>echo .env.default &gt;&gt; .gitignore</code>)</p>
+
+<pre><code>AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY_HERE
+AWS_SECRET_ACCESS_KEY=INSERT_YOUR_SECRET_KEY_HERE
+AWS_DEFAULT_REGION=INSERT_YOUR_DEFAULT_REGION_HERE
+</code></pre>
+
+<h4>
+<a id="your-first-blueprint" class="anchor" href="#your-first-blueprint" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Your first blueprint</h4>
+
+<p>Create a <code>blueprints.yml</code> in your current directory:</p>
+
+<pre><code>blueprints:
+  - stackname: my-stack
+    template: my-stack.template
+</code></pre>
+
+<p>Create you CloudFormation template <code>my-stack.template</code>:</p>
+
+<pre><code>{
+  "Resources": { 
+    "MyResource1": { "Type": "AWS::CloudFormation::WaitConditionHandle" }
+  }
+}
+</code></pre>
+
+<p>Deploy your stack:</p>
+
+<pre><code>bin/stackformation.php deploy my-stack
+</code></pre>
+
+<h4>
+<a id="adding-parameters" class="anchor" href="#adding-parameters" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Adding parameters</h4>
+
+<p>Add parameters in your <code>my-stack.template</code>:</p>
+
+<pre><code>{
+  "Parameters: {
+    "MyParameter1": { "Type": "String" }
+  },
+  "Resources": { 
+    "MyResource1": { "Type": "AWS::CloudFormation::WaitConditionHandle" }
+  }
+}
+</code></pre>
+
+<p>...and configure that parameter in the <code>blueprint.yml</code> file:</p>
+
+<pre><code>blueprints:
+  - stackname: my-stack
+    template: my-stack.template
+    parameters:
+      MyParameter1: 'Hello World'
+</code></pre>
+
+<h4>
+<a id="referencing-outputsresourcesparameters-from-other-stacks" class="anchor" href="#referencing-outputsresourcesparameters-from-other-stacks" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Referencing outputs/resources/parameters from other stacks</h4>
+
+<p>TODO</p>
+
+<h4>
+<a id="inject-user-data" class="anchor" href="#inject-user-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Inject user data</h4>
+
+<p>TODO</p>
+
+<h3>
+<a id="structuring-your-blueprints" class="anchor" href="#structuring-your-blueprints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Structuring your blueprints</h3>
+
+<p>Structure your blueprints including all templates and other files (e.g. userdata) in "modules".
+StackFormation will load all stack.yml files from following locations:</p>
+
+<ul>
+<li><code>blueprints/*/*/*/blueprints.yml</code></li>
+<li><code>blueprints/*/*/blueprints.yml</code></li>
+<li><code>blueprints/*/blueprints.yml</code></li>
+<li><code>blueprints/blueprints.yml</code></li>
+<li><code>blueprints.yml</code></li>
+</ul>
+
+<p>So it's suggested to create a directory structure like this one:</p>
+
+<pre><code>blueprints/
+  stack1/
+    userdata/
+      provisioning.sh
+    blueprints.yml
+    my.template
+  stack2/
+    blueprints.yml
+  ...
+</code></pre>
+
+<p>All <code>blueprints.yml</code> files will be merged together.</p>
+
+<h3>
+<a id="using-stack-policies" class="anchor" href="#using-stack-policies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using stack policies</h3>
+
+<p>To prevent stack resources from being unintentionally updated or deleted during a stack update you can use <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html">stack policies</a>.
+Stack policies apply only during stack updates and should be used only as a fail-safe mechanism to prevent accidental 
+updates to certain stack resources.</p>
+
+<p>It's suggested to create a stack_policies directory below the corresponding stack directory:</p>
+
+<pre><code>blueprints/
+  stack1/
+    stack_policies/
+    blueprints.yml
+    ...
+  stack2/
+    stack_policies/
+    blueprints.yml
+    ...
+  ...
+</code></pre>
+
+<p>You have to tell StackFormation where it could find the stack policy. </p>
+
+<p>Example:</p>
+
+<pre><code>blueprints:
+  - stackname: 'my-stack'
+    template: 'templates/my-stack.template'
+    stackPolicy: 'stack_policies/my-stack.json'
+</code></pre>
+
+<h3>
+<a id="using-composer" class="anchor" href="#using-composer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using composer</h3>
+
+<p>You can pull in StackFormation modules via composer. Look at the <a href="https://github.com/AOEpeople/cfn-lambdahelper">cfn-lambdahelper</a> 
+for an example. A custom composer installer (configured as <code>require</code> dependency) will take care of putting all the
+module files in your <code>blueprints/</code> directory. This way you can have project specific and generic modules next to each other.</p>
+
+<p>Please note that a "StackFormation module" will probably not come with a <code>blueprints.yml</code> file since this (and especially the 
+stack parameter configuration) is project specific. </p>
+
+<p>You will need to create the stack configuration for the parts you want to use. A good place would be <code>blueprints/blueprints.yml</code> 
+where you reference the imported module.</p>
+
+<p>Example:</p>
+
+<pre><code>blueprints:
+  - stackname: 'lambdacfnhelpers-stack'
+    template: 'cfn-lambdahelper/lambda_cfn_helpers.template'
+    Capabilities: CAPABILITY_IAM
+</code></pre>
+
+<h3>
+<a id="parameter-values" class="anchor" href="#parameter-values" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Parameter Values</h3>
+
+<ul>
+<li>Output lookup: <code>{output:&lt;stack&gt;:&lt;output&gt;}</code> -&gt; output value</li>
+<li>Resource lookup: <code>{resource:&lt;stack&gt;:&lt;logicalResource&gt;}</code> -&gt; physical Id of that resource</li>
+<li>Parameter lookup: <code>{parameter:&lt;stack&gt;:&lt;logicalResource&gt;}</code> -&gt; parameter value (note that some parameters will not be shown if they're 'no_echo')</li>
+<li>Environment variable lookup: <code>{env:&lt;var&gt;}</code> -&gt; value of environment variable 'var'</li>
+<li>Environment variable lookup with default value fallback: <code>{env:&lt;var&gt;:&lt;defaultValue&gt;}</code> -&gt; value of environment variable 'var' falling back to 'defaultValue' if env var is not set</li>
+<li>Stack/global variable lookup: <code>{var:&lt;var&gt;}</code> -&gt; value variable 'var'</li>
+<li>Current timestamp: <code>{tstamp}</code> -&gt; e.g. '1453151115'</li>
+<li>MD5 sum: <code>{md5:&lt;filename&gt;}</code> -&gt; e.g. 'fdd747e9989440289dcfb476c75b4268'</li>
+<li>Clean: <code>{clean:2.1.7}</code> -&gt; '217' (removes all characters that aren't allowed in stack names</li>
+<li>Switch profile: <code>[profile:&lt;profileName&gt;:...]</code> will switch to a different profile and evaluate the second parameter there. This is useful in cross account setups.</li>
+</ul>
+
+<p>Output and resource lookup allow you to "connect" stacks to each other by wiring the output or resources created in
+one stack to the input parameters needed in another stack that sits on top of the first one without manually 
+managing the input values.</p>
+
+<p>Example</p>
+
+<pre><code>blueprints:
+  - stackname: stack1-db
+    template: templates/stack1.template
+    [...]
+  - stackname: stack2-app
+    template: templates/stack2.template
+    parameters:
+      build: 's3://{output:stack1:bucketName}/{env:BUILD}/build.tar.gz'
+      db: '{output:stack1-db:DatabaseRds}'
+</code></pre>
+
+<p>Variables (global/local, nested into other placeholders)</p>
+
+<pre><code>vars:
+  KeyPair: 'mykeypair'
+
+blueprints:
+  - stackname: mystack
+    vars:
+      ParentStack: 'MyParentStack'
+    parameters:
+      KeyPair: '{var:mykeypair}'
+      Database: '{output:{var:ParentStack}:DatabaseRds}'
+    [...]
+</code></pre>
+
+<p>Switch Profile Example (in this example an AMI is baked in a different account and shared with this account)</p>
+
+<pre><code>blueprints:
+  - stackname: mystack
+    parameters:
+      BaseAmi: '[profile:myDevAccountProfile:{output:bakestack:BaseAmi}]'
+</code></pre>
+
+<h3>
+<a id="conditional-parameter-values" class="anchor" href="#conditional-parameter-values" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Conditional parameter values</h3>
+
+<p>You might end up deploying the same stacks to multiple environments or accounts. Instead of duplicating the blueprints (or using YAML reference) you'll probably
+want to parameterize your blueprints like this </p>
+
+<pre><code>blueprints:
+  - stackname: 'app-{env:Environment}-build'
+    template: 'build.template'
+    parameters:
+      KeyPair: 'MyKeyPair'
+    [...]
+</code></pre>
+
+<p>... and then before deploying (locally or from your CI server) you'd set the env var first and then deploy:</p>
+
+<pre><code>export Environment=prod
+bin/stackformation.php blueprint:deploy 'app-{env:Environment}-build'
+</code></pre>
+
+<p>But in many cases those stacks do have some minor differences in some of the parameters (e.g. different VPCs or KeyNames,...)
+You could solve it like this with nested placeholders:</p>
+
+<pre><code>blueprints:
+  - stackname: 'app-{env:Environment}-build'
+    template: 'build.template'
+    vars:
+      prod-KeyName: MyProdKey
+      stage-KeyName: MyStageKey
+    parameters:
+      KeyPair: '{var:{env:Environment}-KeyName}'
+</code></pre>
+
+<p>While this is perfectly possible this gets very confusing soon. Plus you'll have to mention every variation of the variable explicitely.</p>
+
+<p>Instead you can use a conditional value:</p>
+
+<pre><code>blueprints:
+  - stackname: 'app-{env:Environment}-build'
+    template: 'build.template'
+    parameters:
+      KeyPair: 
+        '{env:Environment}==prod': MyProdKey
+        '{env:Environment}==stage': MyStageKey
+        '{env:Environment}~=/^dev[0-9]+$/': MyDevKey
+        'default': MyDevKey
+</code></pre>
+
+<p>StackFormation will evaluate all keys from top to bottom and the first key that evaluates to true will be returned. 
+Allowed conditions:</p>
+
+<ul>
+<li><code>A==B</code></li>
+<li><code>A!=B</code></li>
+<li><code>A~=/^regex$/</code></li>
+<li>'default' (will always evaluate to true. Make sure you put this at the very end since everything after this will be ignored).
+Placeholders will be resolved before the conditions are evaluated.</li>
+</ul>
+
+<h3>
+<a id="wildcards" class="anchor" href="#wildcards" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Wildcards</h3>
+
+<p>When referencing a stack in <code>{output:&lt;stack&gt;:&lt;output&gt;}</code>, <code>{resource:&lt;stack&gt;:&lt;logicalResource&gt;}</code>, or <code>{parameter:&lt;stack&gt;:&lt;logicalResource&gt;}</code> you can use a wildcard
+to specify a stack. In this case StackFormation looks up all live stacks and finds a stack matching the pattern. If there's no stack or more than a single stack 
+matching the pattern StackFormation will throw an exception.
+This feature is helpful when you know there's always only a single stack of one type that has a placeholder in it's stackname:</p>
+
+<p>Example: 
+Stackname: <code>deployment-{env:BUILD_NUMBER}</code>
+In blueprints.yml: </p>
+
+<pre><code>blueprints:
+  - stackname: mystack
+    parameters:
+      Elb: '{output:deployment-*:Elb}'
+</code></pre>
+
+<h3>
+<a id="effective-stackname" class="anchor" href="#effective-stackname" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Effective stackname</h3>
+
+<p>You can include environment variable in your stackname (which is very handy for automation via Jenkins).
+In this case your effective stackname (e.g. <code>build-5</code>) will be different from the configured stackname (e.g. <code>build-{env:BUILD_NUMBER}</code>)</p>
+
+<p>Example</p>
+
+<pre><code>blueprints:
+  - stackname: 'build-{env:BUILD_NUMBER}'
+    template: templates/deploy_build.template
+</code></pre>
+
+<h3>
+<a id="relative-file-paths" class="anchor" href="#relative-file-paths" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Relative file paths</h3>
+
+<p>Please note that all files paths in the <code>template</code> section of a <code>blueprints.yml</code> are relative to the current <code>blueprints.yml</code> file
+and all files included via <code>Fn::FileContent</code>/ <code>Fn:FileContentTrimLines</code> or <code>Fn:FileContentMinify</code> are relative to the 
+CloudFormation template file.</p>
+
+<p>Example:</p>
+
+<pre><code>blueprints/
+  stack1/
+    userdata/
+      provisioning.sh
+    blueprints.yml
+    my.template
+</code></pre>
+
+<p>blueprints.yml:</p>
+
+<pre><code>blueprints:
+  - stackname: test
+    template: my.template
+</code></pre>
+
+<p>my.template</p>
+
+<pre><code>{ [...]
+  "Ec2Instance": {
+    "Type": "AWS::AutoScaling::LaunchConfiguration",
+    "Properties": {
+      "UserData": {"Fn::Base64": {"Fn::FileContent": "userdata/provisioning.sh"}}
+    }
+  }
+}
+</code></pre>
+
+<h3>
+<a id="template-merging" class="anchor" href="#template-merging" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Template merging</h3>
+
+<p>StackFormation allows you to configure more than one template:</p>
+
+<pre><code>blueprints:
+  - stackname: iam
+    template:
+      - iam_role_jenkins.template
+      - iam_user_inspector.template
+    description: 'IAM users and roles'
+</code></pre>
+
+<p>The template files cannot have duplicate keys in any of the top level attributes. StackFormation will then merge them into 
+a single CloudFormation template and deploy this one instead. This feature helps you to structure your template logically
+without having to deploy and manage them separatly. Also with this you can choose which template to include in case you're
+pulling in a StackFormation module like <a href="https://github.com/AOEpeople/cfn-lambdahelper">https://github.com/AOEpeople/cfn-lambdahelper</a>.</p>
+
+<p>You can always inspect the final merged and preprocessed template:</p>
+
+<pre><code>bin/stackformation.php stack:template iam
+</code></pre>
+
+<h3>
+<a id="prefixed-template-merging" class="anchor" href="#prefixed-template-merging" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prefixed template merging</h3>
+
+<p>If you list your templates with attributes instead of a plain list, the attribute keys will be used to prefix every element of that template.
+This way you can you the same template with different input parameters instead of duplicating resources. This comes in handy for VPC setups.</p>
+
+<pre><code>blueprints:
+  - stackname: vpc-subnets
+    template:
+      ZoneA: az.template
+      ZoneB: az.template
+    parameters:
+      ZoneAVpc: MyVPC
+      ZoneAPublicSubnetCidrBlock: '10.0.0.0/24'
+      ZoneAPrivateSubnetCidrBlock: '10.0.10.0/24'
+      ZoneAAZ: 'eu-west-1a'
+      ZoneBVpc: MyVPC
+      ZoneBAPublicSubnetCidrBlock: '10.0.1.0/24'
+      ZoneBPrivateSubnetCidrBlock: '10.0.11.0/24'
+      ZoneBAZ: 'eu-west-1b'
+      [...]
+</code></pre>
+
+<p>If you have a parameter that needs to be passed to all templates you can prefix it with '<em>' (make sure you add quotes around that key 
+since JSON will consider this a reference instead) and StackFormation will replace '</em>' with each prefix used in the <code>template:</code> section.</p>
+
+<pre><code>blueprints:
+  - stackname: vpc-subnets
+    template:
+      ZoneA: az.template
+      ZoneB: az.template
+    parameters:
+      '*Vpc': MyVPC # Will automatically be expanded to 'ZoneAVpc: MyVPC' and 'ZoneBVpc: MyVPC'
+      '*Igw': MyInternetGateway
+      ZoneAPublicSubnetCidrBlock: '10.0.0.0/24'
+      ZoneAPrivateSubnetCidrBlock: '10.0.10.0/24'
+      ZoneAAZ: 'eu-west-1a'
+      ZoneBVpc: MyVPC
+      ZoneBAPublicSubnetCidrBlock: '10.0.1.0/24'
+      ZoneBPrivateSubnetCidrBlock: '10.0.11.0/24'
+      ZoneBAZ: 'eu-west-1b'
+      [...]
+</code></pre>
+
+<h3>
+<a id="before" class="anchor" href="#before" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>before</code>
+</h3>
+
+<p>You can run shell commands before the CloudFormation is being deployed.
+The commands will be executed in the directory where the blueprints.yml file lives. </p>
+
+<p>Example:</p>
+
+<pre><code>blueprints:
+  - stackname: 'my-lambda-function'
+    template: lambda.template
+    Capabilities: CAPABILITY_IAM
+    before:
+    - cd function 
+    - npm install aws-sdk
+    - zip -r nat_gateway.zip nat_gateway.js node_modules/
+    - aws s3 cp nat_gateway.zip s3://mybucket/lambda/nat_gateway.zip
+</code></pre>
+
+<p>and you can even use placeholders:</p>
+
+<pre><code>blueprints:
+  - stackname: 'my-lambda-function'
+    template: lambda.template
+    Capabilities: CAPABILITY_IAM
+    vars:
+      bucket: mybucket
+      key: 'lambda/nat_gateway.zip'
+    parameters:
+      # these are the input parameters passed to the cfn template that match the upload location in the custom script below
+      S3Bucket: '{var:bucket}'
+      S3Key: '{var:key}'
+    before:
+    - cd function
+    - npm install aws-sdk
+    - zip -r nat_gateway.zip nat_gateway.js node_modules/
+    - aws s3 cp nat_gateway.zip s3://{var:bucket}/{var:key}
+
+</code></pre>
+
+<h3>
+<a id="after" class="anchor" href="#after" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>after</code>
+</h3>
+
+<p>Similar to <code>before</code> scripts you can define scripts that are being executed after the stack has been deployed.
+Please note this only work if you're 'observing' the deploying (no if you deployed with '--no-observe' or if you're 
+stopping the process (e.g. CTRL+C) during the deployment.</p>
+
+<p>The <code>after</code> configuration equals the <code>before</code> configuration with the addition that you have access to the status in the <code>${STATUS}</code> variable/
+(Special status values in addition to the default ones like 'CREATE_COMPLETE',...
+are 'NO_UPDATES_PERFORMED' and 'STACK_GONE')</p>
+
+<p>Example</p>
+
+<pre><code>blueprints:
+  - stackname: 'my-static-website'
+    description: 'Static website hosted in S3'
+    template: 'website.template'
+    after:
+      - 'if [[ $STATUS =~ ^(UPDATE|CREATE)_COMPLETE|NO_UPDATES_PERFORMED$ ]] ; then aws s3 sync --delete content/ s3://www-tst.aoeplay.net/; fi'
+</code></pre>
+
+<h3>
+<a id="before-and-after" class="anchor" href="#before-and-after" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>before</code> and <code>after</code>
+</h3>
+
+<p><code>before</code> or <code>after</code> are being executed in the base directory of the current blueprint (that's the directory the blueprint's blueprint.yml file is located at).
+But you can switch directories in your script. The <code>${CWD}</code> variable holds the current working directory (the project root) in case you want to switch to that.</p>
+
+<p>When a profile is being used (even if the profile is loaded via the <code>profiles.yml</code> file) the <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> variables will be 
+set in the script context, so you can safely call the aws cli tool in the same context the blueprint is being deployed.</p>
+
+<p>In addition to that <code>${BLUEPRINT}</code> will hold the current blueprint's name and <code>${STACKNAME}</code> the current resulting stack name 
+Also <code>${STATUS}</code> will hold the last status of the stack that has just been deployed (<code>after</code> scripts only).</p>
+
+<p>You can separate the script lines in an array (that will then be concatenated with <code>\n</code> before executing:</p>
+
+<pre><code>blueprints:
+  - stackname: 'my-static-website'
+    [...]
+    after:
+      - 'echo "Line 1"'
+      - 'echo "Line 2"'
+</code></pre>
+
+<p>or you can use the YAML multiline notation:</p>
+
+<pre><code>blueprints:
+  - stackname: 'my-static-website'
+    [...]
+    after: |
+      echo "Line 1"
+      echo "Line 2"
+</code></pre>
+
+<h3>
+<a id="aws-sdk" class="anchor" href="#aws-sdk" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>AWS SDK</h3>
+
+<p>StackFormation uses the AWS SDK for PHP. You should configure your keys in env vars:</p>
+
+<pre><code>export AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY
+export AWS_SECRET_ACCESS_KEY=INSERT_YOUR_PRIVATE_KEY
+export AWS_DEFAULT_REGION=eu-west-1
+</code></pre>
+
+<h3>
+<a id="function-fnfilecontent" class="anchor" href="#function-fnfilecontent" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Function <code>Fn::FileContent</code>
+</h3>
+
+<p>Before uploading CloudFormation template to the API there's some pre-processing going on:
+I've introduced a new function "FileContent" that accepts a path to a file. This file will be read, converted into JSON (using <code>Fn::Join</code>).
+The path is relative to the path of the current CloudFormation template file.</p>
+
+<p>Usage Example:</p>
+
+<pre><code>    [...]
+    "UserData": {"Fn::Base64": {"Fn::FileContent":"../scripts/setup.sh"}},
+    [...]
+</code></pre>
+
+<h3>
+<a id="functions-fnfilecontenttrimlines-and-fnfilecontentminify" class="anchor" href="#functions-fnfilecontenttrimlines-and-fnfilecontentminify" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Functions <code>Fn::FileContentTrimLines</code> and <code>Fn::FileContentMinify</code>
+</h3>
+
+<p>These functions are similar to <code>Fn::FileContent</code> but additional they trim whitespace or minify the code.
+This comes in handy when deploying Lambda function where the content can't be larger than 2048kb if you 
+want to directly embed the source code via CloudFormation (instead of deploying a zip file).</p>
+
+<h3>
+<a id="function-fnfilecontentunpretty" class="anchor" href="#function-fnfilecontentunpretty" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Function <code>Fn::FileContentUnpretty</code>
+</h3>
+
+<p>This function is the same as <code>Fn::FileContent</code> expect it will return the resulting JSON without formatting it, 
+which will reduce the file size significantly due to the missing whitespace in the JSON structure (not inside the file content!)
+This is useful if you're seeing the "...at 'templateBody' failed to satisfy constraint: Member must have length less than or equal to 51200" error message.</p>
+
+<h3>
+<a id="function-fnsplit" class="anchor" href="#function-fnsplit" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Function <code>Fn::Split</code>
+</h3>
+
+<p>Sometime you have a dynamic number of array items. <code>Fn::Split</code> allows you to configure them as a single string and transforms them into an array:</p>
+
+<pre><code>"Aliases": { "Fn::Split": [",", "www.example.com,cdn.example.com"]}
+</code></pre>
+
+<p>results in:</p>
+
+<pre><code>"Aliases": ["www.example.com","cdn.example.com"]
+</code></pre>
+
+<h3>
+<a id="inject-parameters" class="anchor" href="#inject-parameters" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Inject Parameters</h3>
+
+<p>The scripts (included via <code>Fn::FileContent</code>) may contain references to other CloudFormation resources or parameters. 
+Part of the pre-processing is to convert snippets like <code>{Ref:MagentoWaitConditionHandle}</code> or <code>{Ref:AWS::Region}</code> or <code>{Fn::GetAtt:[resource,attribute]}</code> (note the missing quotes!)
+into correct JSON snippets and embed them into the <code>Fn::Join</code> array.</p>
+
+<p>Usage Example:</p>
+
+<pre><code>#!/usr/bin/env bash
+/usr/local/bin/cfn-signal --exit-code $? '{Ref:WaitConditionHandle}'
+</code></pre>
+
+<p>will be converted to:</p>
+
+<pre><code>{"Fn::Join": ["", [
+"#!\/usr\/bin\/env bash\n",
+"\/usr\/local\/bin\/cfn-signal --exit-code $? '", {"Ref": "WaitConditionHandle"}, "'"
+]]}
+</code></pre>
+
+<p>Usage Example:</p>
+
+<pre><code>#!/usr/bin/env bash
+EIP="{Fn::GetAtt:[NatIp,AllocationId]}"
+</code></pre>
+
+<p>will be converted to:</p>
+
+<pre><code>{"Fn::Join": ["", [
+"#!\/usr\/bin\/env bash\n",
+"EIP=\"",
+{
+    "Fn::GetAtt": [
+        "NatIp",
+        "AllocationId"
+    ]
+},
+"\"\n",
+]]}
+</code></pre>
+
+<h3>
+<a id="include-file-content" class="anchor" href="#include-file-content" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Include file content</h3>
+
+<p>You can include content from a different file into a script. Use this is you have duplicate code that you need to embed into multiple 
+resource's UserData:</p>
+
+<p>Example:</p>
+
+<pre><code>#!/usr/bin/env bash
+
+###INCLUDE:../generic/includes/base.sh
+
+[...]
+</code></pre>
+
+<h3>
+<a id="inject-raw-json" class="anchor" href="#inject-raw-json" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Inject raw JSON</h3>
+
+<pre><code>###JSON###
+{ "hello": "world" }
+######
+</code></pre>
+
+<h3>
+<a id="stackname-filter" class="anchor" href="#stackname-filter" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Stackname filter</h3>
+
+<p>You can configure a regular expression in the <code>STACKFORMATION_NAME_FILTER</code> environment variable (e.g. via <code>.env.default</code>) which
+will filter all your stack lists to the stacks matching this pattern. This is useful if you have a naming convention in place and
+you don't want to see other team's stacks in your list.</p>
+
+<p>Example:</p>
+
+<pre><code>STACKFORMATION_NAME_FILTER=/^myproject-(a|b)-/
+</code></pre>
+
+<h3>
+<a id="comments" class="anchor" href="#comments" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Comments</h3>
+
+<p>You can add comments to your JSON file. Due to a current bug you can't have double quotes in your comment block.</p>
+
+<p>Example:</p>
+
+<pre><code>{"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"}, /* AOE WI Office */
+{"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "5.6.7.8/32"}, /* Fabrizio Home Office */
+</code></pre>
+
+<h3>
+<a id="port" class="anchor" href="#port" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Port</h3>
+
+<p><code>"Port":"..."</code> will automatically expanded to <code>"FromPort": "...", "ToPort": "..."</code>. So if you're specifying a single
+port instead of a range of ports you can reduce the redundancy:</p>
+
+<p>Example:</p>
+
+<pre><code>{"IpProtocol": "tcp", "Port": "80", "CidrIp": "1.2.3.4/32"}, 
+/* expands to: */
+{"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"},
+</code></pre>
+
+<h3>
+<a id="expand-strings-with-ref" class="anchor" href="#expand-strings-with-ref" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Expand strings with {Ref:...}</h3>
+
+<p>Tired of concatenating strings with <code>{"Fn::Join": ["", [</code> manually? Just add the references in a string and StackFormation will
+expand this for you:</p>
+
+<p>Example:</p>
+
+<pre><code>"Key": "Name", "Value": "magento-{Ref:Environment}-{Ref:Build}-instance"
+/* will be replaced with: */
+"Key": "Name", "Value": {"Fn::Join": ["", ["magento-", {"Ref":"Environment"}, "-", {"Ref":"Build"}, "-instance"]]}
+</code></pre>
+
+<h3>
+<a id="reverse-blueprint-match" class="anchor" href="#reverse-blueprint-match" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reverse blueprint match</h3>
+
+<p>Let's say you have a blueprint <code>ecom-{env:ACCOUNT}-{env:ENVIRONMENT}-static-stack</code> and you want to deploy it with ACCOUNT=t and ENVIRONMENT=dpl.
+You would do this by setting the env vars ACCOUNT and ENVIRONMENT and then run the deploy command:</p>
+
+<pre><code>export ACCOUNT=t
+export ENVIRONMENT=dpl
+bin/stackformation.php deploy 'ecom-{env:ACCOUNT}-{env:ENVIRONMENT}-static-stack'
+</code></pre>
+
+<p>But instead you can also simply run the deploy command with the resulting stack name <code>ecom-t-tst-static-stack</code>
+StackFormation will then attempt to find a matching tag, determine which environments need to be set and
+run the original blueprint for you:</p>
+
+<pre><code>bin/stackformation.php deploy 'ecom-t-tst-static-stack'
+Blueprint reverse match found: ecom-{env:ACCOUNT}-{env:ENVIRONMENT}-static-stack
+With ENV vars: ACCOUNT=t; ENVIRONMENT=tst
+Use this blueprint and set env vars? [y/N] y
+Setting env var: ACCOUNT=t
+Setting env var: ENVIRONMENT=tst
+...
+</code></pre>
+
+<h3>
+<a id="misc" class="anchor" href="#misc" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Misc</h3>
+
+<p>Use the <code>jq</code> tool to create a simple list of all parameters (almost) ready to paste it in the blueprints.yml</p>
+
+<pre><code>cat my.template | jq '.Parameters | keys' | sed 's/",/: \'\'/g' | sed 's/"//g'
+</code></pre>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/AOEpeople">AOEpeople</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
