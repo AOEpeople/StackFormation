@@ -146,16 +146,16 @@ class Connection
      */
     public function tunnel($configuration)
     {
-        $configurationArray = explode(':', $configuration);
+        $configurationData = explode(':', $configuration);
 
-        if (count($configurationArray) == 4) {
-            list($localIp, $localPort, $remoteHost, $remotePort) = $configurationArray;
+        if (count($configurationData) == 4) {
+            list($localIp, $localPort, $remoteHost, $remotePort) = $configurationData;
 
             if (empty($localIp)) {
                 throw new \InvalidArgumentException('Invalid local host');
             }
         } else {
-            list($localPort, $remoteHost, $remotePort) = $configurationArray;
+            list($localPort, $remoteHost, $remotePort) = $configurationData;
         }
 
         if (!ctype_digit($localPort)) {
