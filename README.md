@@ -81,6 +81,9 @@ If your access and secret key are correct and the user behind that have enough p
 ```
 bin/stackformation.php ec2:list
 ```
+
+<img src="doc/img/kickstart_demo_ec2list.png">
+
 ### Your first blueprint
 
 Create a `blueprints.yml` in your current directory:
