@@ -58,7 +58,7 @@ To check if StackFormation is working properly execute the following command
 vendor/aoepeople/stackformation/src/stackformation.php
 ```
 You should see all available StackFormation commands and options now.
-##### Tipps
+##### Tipp
 If you have installed StackFormation via composer, it may be a little bit annoying to write the whole path to the `stackformation.php` file.
 Just add the following configuration to your composer.json file and update composer
 
@@ -110,6 +110,13 @@ bin/stackformation.php deploy my-stack
 The output should be the following
 
 <img src="doc/img/kickstart_demo_deploy.png">
+
+
+```
+bin/stackformation.php stack:list
+```
+
+<img src="doc/img/kickstart_demo_stacklist.png">
 
 ### Adding parameters
 
