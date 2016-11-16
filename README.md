@@ -1,4 +1,4 @@
-<img align="right" style="float: right; height: 200px;" src="https://raw.githubusercontent.com/AOEpeople/StackFormation/master/doc/img/stackformation_200px.png">
+<img align="right" style="float: right; height: 200px;" src="doc/img/stackformation_200px.png">
 
 # StackFormation
 
@@ -106,7 +106,7 @@ bin/stackformation.php deploy my-stack
 ```
 The output should be the following
 
-<img src="https://raw.githubusercontent.com/AOEpeople/StackFormation/master/doc/img/kickstart_demo_deploy.png">
+<img src="doc/img/kickstart_demo_deploy.png">
 
 ### Adding parameters
 
