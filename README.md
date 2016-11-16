@@ -1,4 +1,4 @@
-<img align="right" style="float: right; height: 200px;" src="doc/img/stackformation_200px.png">
+<img align="right" style="float: right; height: 200px;" src="https://raw.githubusercontent.com/AOEpeople/StackFormation/master/doc/img/stackformation_200px.png">
 
 # StackFormation
 
@@ -16,16 +16,13 @@ Contributors:
  - [Julian Kleinhans](https://github.com/kj187)
  - [Daniel Niedergesäß](https://github.com/smart-devs)
  
-
+## Getting started
 ### Installation
-
 #### Via composer
-
 [Install composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx) first, then:
 ```
 composer require aoepeople/stackformation
 ```
-
 #### Using the phar
 
 Grab the latest release from https://github.com/AOEpeople/StackFormation/releases/latest
@@ -39,19 +36,52 @@ If you want to use stackformation globally:
 mv stackformation.phar /usr/local/bin/stackformation
 chmod +x /usr/local/bin/stackformation
 ```
+### Kickstart a demo project
+Imagine we are starting from scratch and we don`t have StackFormation globally available. First of all we have to create a new project directory and move into that new empty directory
+```
+mkdir Demo
+cd Demo
+```
+#### Installation
+Now we have to install StackFormation, for this demo we will install it via composer
+```
+composer require aoepeople/stackformation
+```
+Your first level project structure should be looking like that now
+```
+├── composer.json
+├── composer.lock
+└── vendor
+```
+To check if StackFormation is working properly execute the following command
+```
+vendor/aoepeople/stackformation/src/stackformation.php
+```
+You should see all available StackFormation commands and options now.
+##### Tipps
+If you have installed StackFormation via composer, it may be a little bit annoying to write the whole path to the `stackformation.php` file.
+Just add the following configuration to your composer.json file and update composer
 
-### Quickstart
-
-#### Setup
-
-Create a `.env.default` file (and add it yo your gitignore: `echo .env.default >> .gitignore`)
+```
+    "config": {
+      "bin-dir": "bin"
+  }    
+```
+Now the stackformation.php file should be available via `bin/stackformation.php` instead of `vendor/aoepeople/stackformation/src/stackformation.php`
+#### Required environment settings
+Now create a `.env.default` file (and add it yo your gitignore: `echo .env.default >> .gitignore`)
 ```
 AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY_HERE
 AWS_SECRET_ACCESS_KEY=INSERT_YOUR_SECRET_KEY_HERE
 AWS_DEFAULT_REGION=INSERT_YOUR_DEFAULT_REGION_HERE
 ```
+#### Short check
+If your access and secret key are correct and the user behind that have enough permissions, you are now able to use the whole magic of StackFormation. Just a quick example, you want to know what and how many ec2 instances are currently running?
 
-#### Your first blueprint
+```
+bin/stackformation.php ec2:list
+```
+### Your first blueprint
 
 Create a `blueprints.yml` in your current directory:
 ```
@@ -63,6 +93,7 @@ blueprints:
 Create you CloudFormation template `my-stack.template`:
 ```
 {
+  "AWSTemplateFormatVersion": "2010-09-09",
   "Resources": { 
     "MyResource1": { "Type": "AWS::CloudFormation::WaitConditionHandle" }
   }
@@ -73,12 +104,16 @@ Deploy your stack:
 ```
 bin/stackformation.php deploy my-stack
 ```
+The output should be the following
 
-#### Adding parameters
+<img src="https://raw.githubusercontent.com/AOEpeople/StackFormation/master/doc/img/kickstart_demo_deploy.png">
+
+### Adding parameters
 
 Add parameters in your `my-stack.template`:
 ```
 {
+  "AWSTemplateFormatVersion": "2010-09-09",
   "Parameters: {
     "MyParameter1": { "Type": "String" }
   },
@@ -88,7 +123,7 @@ Add parameters in your `my-stack.template`:
 }
 ```
 
-...and configure that parameter in the `blueprint.yml` file:
+... and configure that parameter in the `blueprint.yml` file:
 ```
 blueprints:
   - stackname: my-stack
@@ -96,16 +131,14 @@ blueprints:
     parameters:
       MyParameter1: 'Hello World'
 ```
+### Referencing outputs/resources/parameters from other stacks
 
-#### Referencing outputs/resources/parameters from other stacks
+TODO
+### Inject user data
 
 TODO
 
-#### Inject user data
-
-TODO
-
-### Structuring your blueprints
+## Structuring your blueprints
 
 Structure your blueprints including all templates and other files (e.g. userdata) in "modules".
 StackFormation will load all stack.yml files from following locations:
@@ -130,7 +163,7 @@ blueprints/
 
 All `blueprints.yml` files will be merged together.
 
-### Using stack policies
+## Using stack policies
 
 To prevent stack resources from being unintentionally updated or deleted during a stack update you can use [stack policies](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html).
 Stack policies apply only during stack updates and should be used only as a fail-safe mechanism to prevent accidental 
@@ -160,7 +193,7 @@ blueprints:
     stackPolicy: 'stack_policies/my-stack.json'
 ```
 
-### Using composer
+## Using composer
 
 You can pull in StackFormation modules via composer. Look at the [cfn-lambdahelper](https://github.com/AOEpeople/cfn-lambdahelper) 
 for an example. A custom composer installer (configured as `require` dependency) will take care of putting all the
@@ -180,8 +213,7 @@ blueprints:
     Capabilities: CAPABILITY_IAM
 ```
 
-
-### Parameter Values
+## Parameter Values
 
 - Output lookup: `{output:<stack>:<output>}` -> output value
 - Resource lookup: `{resource:<stack>:<logicalResource>}` -> physical Id of that resource
@@ -234,7 +266,7 @@ blueprints:
       BaseAmi: '[profile:myDevAccountProfile:{output:bakestack:BaseAmi}]'
 ```
 
-### Conditional parameter values
+## Conditional parameter values
 
 You might end up deploying the same stacks to multiple environments or accounts. Instead of duplicating the blueprints (or using YAML reference) you'll probably
 want to parameterize your blueprints like this 
@@ -289,8 +321,7 @@ Allowed conditions:
 - 'default' (will always evaluate to true. Make sure you put this at the very end since everything after this will be ignored).
 Placeholders will be resolved before the conditions are evaluated.
 
-
-### Wildcards
+## Wildcards
 
 When referencing a stack in `{output:<stack>:<output>}`, `{resource:<stack>:<logicalResource>}`, or `{parameter:<stack>:<logicalResource>}` you can use a wildcard
 to specify a stack. In this case StackFormation looks up all live stacks and finds a stack matching the pattern. If there's no stack or more than a single stack 
@@ -307,7 +338,7 @@ blueprints:
       Elb: '{output:deployment-*:Elb}'
 ```
 
-### Effective stackname
+## Effective stackname
 
 You can include environment variable in your stackname (which is very handy for automation via Jenkins).
 In this case your effective stackname (e.g. `build-5`) will be different from the configured stackname (e.g. `build-{env:BUILD_NUMBER}`)
@@ -319,7 +350,7 @@ blueprints:
     template: templates/deploy_build.template
 ```
 
-### Relative file paths
+## Relative file paths
 
 Please note that all files paths in the `template` section of a `blueprints.yml` are relative to the current `blueprints.yml` file
 and all files included via `Fn::FileContent`/ `Fn:FileContentTrimLines` or `Fn:FileContentMinify` are relative to the 
@@ -354,7 +385,7 @@ my.template
 }
 ```
 
-### Template merging
+## Template merging
 
 StackFormation allows you to configure more than one template:
 
@@ -377,7 +408,7 @@ You can always inspect the final merged and preprocessed template:
 bin/stackformation.php stack:template iam
 ```
 
-### Prefixed template merging
+## Prefixed template merging
 
 If you list your templates with attributes instead of a plain list, the attribute keys will be used to prefix every element of that template.
 This way you can you the same template with different input parameters instead of duplicating resources. This comes in handy for VPC setups.
@@ -421,6 +452,8 @@ blueprints:
       ZoneBAZ: 'eu-west-1b'
       [...]
 ```
+
+## Execute shell commands before or/and after
 
 ### `before`
 
@@ -511,7 +544,8 @@ blueprints:
       echo "Line 1"
       echo "Line 2"
 ```
-### AWS SDK
+
+## AWS SDK
 
 StackFormation uses the AWS SDK for PHP. You should configure your keys in env vars:
 ```
@@ -519,6 +553,8 @@ export AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY
 export AWS_SECRET_ACCESS_KEY=INSERT_YOUR_PRIVATE_KEY
 export AWS_DEFAULT_REGION=eu-west-1
 ```
+
+## Functions
 
 ### Function `Fn::FileContent`
 
@@ -557,7 +593,7 @@ results in:
 "Aliases": ["www.example.com","cdn.example.com"]
 ```
 
-### Inject Parameters
+## Inject Parameters
 
 The scripts (included via `Fn::FileContent`) may contain references to other CloudFormation resources or parameters. 
 Part of the pre-processing is to convert snippets like `{Ref:MagentoWaitConditionHandle}` or `{Ref:AWS::Region}` or `{Fn::GetAtt:[resource,attribute]}` (note the missing quotes!)
@@ -596,7 +632,7 @@ will be converted to:
 ]]}
 ```
 
-### Include file content
+## Include file content
 
 You can include content from a different file into a script. Use this is you have duplicate code that you need to embed into multiple 
 resource's UserData:
@@ -610,7 +646,7 @@ Example:
 [...]
 ```
 
-### Inject raw JSON
+## Inject raw JSON
 
 ```
 ###JSON###
@@ -618,7 +654,7 @@ Example:
 ######
 ```
 
-### Stackname filter
+## Stackname filter
 
 You can configure a regular expression in the `STACKFORMATION_NAME_FILTER` environment variable (e.g. via `.env.default`) which
 will filter all your stack lists to the stacks matching this pattern. This is useful if you have a naming convention in place and
@@ -629,7 +665,7 @@ Example:
 STACKFORMATION_NAME_FILTER=/^myproject-(a|b)-/
 ```
 
-### Comments
+## Comments
 
 You can add comments to your JSON file. Due to a current bug you can't have double quotes in your comment block.
 
@@ -639,7 +675,7 @@ Example:
 {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "5.6.7.8/32"}, /* Fabrizio Home Office */
 ```
 
-### Port
+## Port
 
 `"Port":"..."` will automatically expanded to `"FromPort": "...", "ToPort": "..."`. So if you're specifying a single
 port instead of a range of ports you can reduce the redundancy:
@@ -651,7 +687,7 @@ Example:
 {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"},
 ```
 
-### Expand strings with {Ref:...}
+## Expand strings with {Ref:...}
 
 Tired of concatenating strings with `{"Fn::Join": ["", [` manually? Just add the references in a string and StackFormation will
 expand this for you:
@@ -663,7 +699,7 @@ Example:
 "Key": "Name", "Value": {"Fn::Join": ["", ["magento-", {"Ref":"Environment"}, "-", {"Ref":"Build"}, "-instance"]]}
 ```
 
-### Reverse blueprint match
+## Reverse blueprint match
 
 Let's say you have a blueprint `ecom-{env:ACCOUNT}-{env:ENVIRONMENT}-static-stack` and you want to deploy it with ACCOUNT=t and ENVIRONMENT=dpl.
 You would do this by setting the env vars ACCOUNT and ENVIRONMENT and then run the deploy command:
@@ -688,10 +724,20 @@ Setting env var: ENVIRONMENT=tst
 ...
 ```
 
-### Misc
+## Misc
 
 Use the `jq` tool to create a simple list of all parameters (almost) ready to paste it in the blueprints.yml
+
 
 ```
 cat my.template | jq '.Parameters | keys' | sed 's/",/: \'\'/g' | sed 's/"//g'
 ```
+
+## Contributing
+
+Your contributions are always welcome! Please feel free to fork this repository and submit pull request as many you want!
+If you have any questions please feel free to contact us.
+
+## License
+
+[Open Software License v. 3.0 (OSL-3.0)](https://github.com/AOEpeople/StackFormation/blob/master/LICENSE.md) 
