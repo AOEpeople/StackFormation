@@ -1,8 +1,39 @@
-Parameters
+**********
+Blueprints
 **********
 
+Structuring your blueprints
+===========================
+
+Structure your blueprints including all templates and other files (e.g. userdata) in "modules". StackFormation will load all stack.yml files from following locations: 
+
+- ``blueprints/*/*/*/blueprints.yml``
+- ``blueprints/*/*/blueprints.yml``
+- ``blueprints/*/blueprints.yml``
+- ``blueprints/blueprints.yml``
+- ``blueprints.yml``
+
+So it's suggested to create a directory structure like this one:
+
+.. code-block:: yaml
+
+    blueprints/
+      stack1/
+        userdata/
+          provisioning.sh
+        blueprints.yml
+        my.template
+      stack2/
+        blueprints.yml
+      ...
+
+All ``blueprints.yml`` files will be merged together.
+
+Parameters
+==========
+
 Adding parameters
-=================
+-----------------
 
 Add parameters in your ``my-stack.template``:
 
@@ -29,7 +60,7 @@ Add parameters in your ``my-stack.template``:
           MyParameter1: 'Hello World'
           
 Parameter values
-================
+----------------
 
 +-------------------------------+---------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
 | Parameter                     | Syntax                                      | Result                                                                                                             |
@@ -100,7 +131,7 @@ Switch Profile Example (in this example an AMI is baked in a different account a
           BaseAmi: '[profile:myDevAccountProfile:{output:bakestack:BaseAmi}]'
 
 Conditional parameter values
-============================
+----------------------------
 
 You might end up deploying the same stacks to multiple environments or accounts. Instead of duplicating the blueprints (or using YAML reference) you'll probably want to parameterize your blueprints like this
 

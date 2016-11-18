@@ -23,7 +23,7 @@ This version of the documentation covering StackFormation |release| has been ren
    :caption: StackFormation Documentation
 
    GettingStarted/index
-   Parameters/index
+   Blueprints/index
    StackReferences/index
    UserData/index
    StackPolicies/index
