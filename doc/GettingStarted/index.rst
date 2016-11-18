@@ -1,11 +1,11 @@
 Getting Started
-===============
+***************
 
 Installation
----------------
+============
 
 Via composer
-~~~~~~~~~~~~~~~~~~~
+------------
 
 `Install composer <https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx>`__ first, then:
 
@@ -14,7 +14,7 @@ Via composer
     $ composer require aoepeople/stackformation
 
 Using the phar
-~~~~~~~~~~~~~~~~~~~
+--------------
 
 Grab the latest release from https://github.com/AOEpeople/StackFormation/releases/latest or use this shortcut (requires ``jq`` to be installed)
 
@@ -33,10 +33,10 @@ Grab the latest release from https://github.com/AOEpeople/StackFormation/release
         
         
 Quickstart
----------------
+==========
 
 AWS access keys
-~~~~~~~~~~~~~~~~~~~~
+---------------
 
 Create a ``.env.default`` file (and add it yo your gitignore: ``echo .env.default >> .gitignore``)
 
@@ -47,7 +47,7 @@ Create a ``.env.default`` file (and add it yo your gitignore: ``echo .env.defaul
     AWS_DEFAULT_REGION=INSERT_YOUR_DEFAULT_REGION_HERE
     
 Create a blueprint
-~~~~~~~~~~~~~~~~~~~~
+------------------
 
 Create a ``blueprints.yml`` in your project directory:
 
@@ -58,7 +58,7 @@ Create a ``blueprints.yml`` in your project directory:
         template: my-stack.template
 
 Create a CloudFormation template
-~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 Create a CloudFormation template ``my-stack.template`` in your project directory:
 
@@ -72,7 +72,7 @@ Create a CloudFormation template ``my-stack.template`` in your project directory
     }
 
 Deploy your stack
-~~~~~~~~~~~~~~~~~~~~
+-----------------
 
 .. code-block:: shell
 

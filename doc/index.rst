@@ -1,6 +1,5 @@
-=====
 StackFormation |version| Documentation
-=====
+######################################
 
 .. image:: img/stackformation_200px.png
     :align: right

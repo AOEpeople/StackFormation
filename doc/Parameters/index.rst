@@ -1,8 +1,8 @@
 Parameters
-===============
+**********
 
 Adding parameters
----------------
+=================
 
 Add parameters in your ``my-stack.template``:
 
@@ -29,7 +29,7 @@ Add parameters in your ``my-stack.template``:
           MyParameter1: 'Hello World'
           
 Parameter values
----------------
+================
 
 +-------------------------------+---------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
 | Parameter                     | Syntax                                      | Result                                                                                                             |
@@ -97,7 +97,7 @@ Switch Profile Example (in this example an AMI is baked in a different account a
           BaseAmi: '[profile:myDevAccountProfile:{output:bakestack:BaseAmi}]'
 
 Conditional parameter values
----------------
+============================
 
 You might end up deploying the same stacks to multiple environments or accounts. Instead of duplicating the blueprints (or using YAML reference) you'll probably want to parameterize your blueprints like this
 
