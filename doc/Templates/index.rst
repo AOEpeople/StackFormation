@@ -129,6 +129,15 @@ Example:
     ###INCLUDE:../generic/includes/base.sh
     [...]
 
+Inject raw Json
+===============
+
+.. code-block:: json
+
+    ###JSON###
+    { "hello": "world" }
+    ######
+
 Using composer
 ==============
 
