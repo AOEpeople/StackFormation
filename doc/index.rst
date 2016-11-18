@@ -27,6 +27,7 @@ This version of the documentation covering StackFormation |release| has been ren
    Templates/index
    StackReferences/index
    UserData/index
+   Stack/index
    StackPolicies/index
    Functions/index
    ShellCommands/index
