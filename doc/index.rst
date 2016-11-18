@@ -22,6 +22,7 @@ This version of the documentation covering StackFormation |release| has been ren
    :maxdepth: 2
 
    GettingStarted/index
+   Parameters/index
    
 .. |Build Status| image:: https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master
    :target: https://travis-ci.org/AOEpeople/StackFormation
