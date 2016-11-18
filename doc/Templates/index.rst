@@ -156,3 +156,15 @@ Example:
       - stackname: 'lambdacfnhelpers-stack'
         template: 'cfn-lambdahelper/lambda_cfn_helpers.template'
         Capabilities: CAPABILITY_IAM
+
+Comments
+========
+
+You can add comments to your JSON file. Due to a current bug you can't have double quotes in your comment block.
+
+Example:
+
+.. code-block:: json
+
+    {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"}, /* Office */
+    {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "5.6.7.8/32"}, /* Max Musterman HomeOffice */
