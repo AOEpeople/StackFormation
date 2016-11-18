@@ -24,6 +24,7 @@ This version of the documentation covering StackFormation |release| has been ren
 
    GettingStarted/index
    Blueprints/index
+   Templates/index
    StackReferences/index
    UserData/index
    StackPolicies/index
