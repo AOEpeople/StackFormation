@@ -33,6 +33,7 @@ This version of the documentation covering StackFormation |release| has been ren
    FilePaths/index
    ShellCommands/index
    AwsSdk/index
+   Contributing/index
    Misc/index
    
 .. |Build Status| image:: https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master
