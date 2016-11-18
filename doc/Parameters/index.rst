@@ -60,6 +60,7 @@ Output and resource lookup allow you to "connect" stacks to each other by wiring
 Example
 
 .. code-block:: yaml
+  :emphasize-lines: 8,9
 
     blueprints:
       - stackname: stack1-db
@@ -74,7 +75,8 @@ Example
 Variables (global/local, nested into other placeholders)
 
 .. code-block:: yaml
-
+  :emphasize-lines: 9,10
+  
     vars:
       KeyPair: 'mykeypair'
         
@@ -90,7 +92,8 @@ Variables (global/local, nested into other placeholders)
 Switch Profile Example (in this example an AMI is baked in a different account and shared with this account)
 
 .. code-block:: yaml
-
+  :emphasize-lines: 4
+  
     blueprints:
       - stackname: mystack
         parameters:
@@ -102,7 +105,8 @@ Conditional parameter values
 You might end up deploying the same stacks to multiple environments or accounts. Instead of duplicating the blueprints (or using YAML reference) you'll probably want to parameterize your blueprints like this
 
 .. code-block:: yaml
-
+  :emphasize-lines: 2
+  
     blueprints:
       - stackname: 'app-{env:Environment}-build'
         template: 'build.template'
@@ -120,7 +124,8 @@ You might end up deploying the same stacks to multiple environments or accounts.
 But in many cases those stacks do have some minor differences in some of the parameters (e.g. different VPCs or KeyNames,...) You could solve it like this with nested placeholders:
 
 .. code-block:: yaml
-
+  :emphasize-lines: 5,6,8
+  
     blueprints:
       - stackname: 'app-{env:Environment}-build'
         template: 'build.template'
@@ -135,7 +140,8 @@ While this is perfectly possible this gets very confusing soon. Plus you'll have
 Instead you can use a conditional value:
 
 .. code-block:: yaml
-
+  :emphasize-lines: 6,7,8,9
+  
     blueprints:
       - stackname: 'app-{env:Environment}-build'
         template: 'build.template'
