@@ -114,6 +114,21 @@ will be converted to:
     "\"\n",
     ]]}
 
+Include file content
+====================
+
+You can include content from a different file into a script. Use this is you have duplicate code that you need to embed into multiple resource's UserData:
+
+Example:
+
+.. code-block:: bash
+  :emphasize-lines: 3
+
+    #!/usr/bin/env bash
+
+    ###INCLUDE:../generic/includes/base.sh
+    [...]
+
 Using composer
 ==============
 
