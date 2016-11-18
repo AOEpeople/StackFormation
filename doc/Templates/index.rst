@@ -179,5 +179,22 @@ Example:
 .. code-block:: json
 
     {"IpProtocol": "tcp", "Port": "80", "CidrIp": "1.2.3.4/32"}, 
+    
     /* expands to: */
     {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"},
+
+
+Expand strings with {Ref:...}
+=============================
+
+
+Tired of concatenating strings with ``{"Fn::Join": ["", [`` manually? Just add the references in a string and StackFormation will expand this for you:
+
+Example:
+
+.. code-block:: json
+
+    "Key": "Name", "Value": "magento-{Ref:Environment}-{Ref:Build}-instance"
+    
+    /* will be replaced with: */
+    "Key": "Name", "Value": {"Fn::Join": ["", ["magento-", {"Ref":"Environment"}, "-", {"Ref":"Build"}, "-instance"]]}
