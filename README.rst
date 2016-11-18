@@ -1,3 +1,6 @@
+.. raw:: html
+  <img align="right" style="float: right; height: 200px;" src="doc/Images/stackformation_200px.png">
+
 ##############
 StackFormation
 ##############
@@ -8,9 +11,6 @@ StackFormation
 
 If you want to use StackFormation, please have a look at the `StackFormation documentation
 <http://stackformation.readthedocs.org/>`_
-
-.. image:: doc/Images/stackformation_200px.png
-    :align: right
    
 **License**
 
