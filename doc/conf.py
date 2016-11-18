@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'StackFormation'
-copyright = u'2016, Fabrizio Branca & Julian Kleinhans'
+copyright = u'2016, AOE GmbH'
 author = u'Fabrizio Branca, Julian Kleinhans'
 
 # The version info for the project you're documenting, acts as replacement for
