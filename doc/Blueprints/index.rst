@@ -199,3 +199,17 @@ Example: Stackname: ``deployment-{env:BUILD_NUMBER}`` In blueprints.yml:
       - stackname: mystack
         parameters:
           Elb: '{output:deployment-*:Elb}'
+          
+Effective stackname
+===================
+
+You can include environment variable in your stackname (which is very handy for automation via Jenkins). In this case your effective stackname (e.g. ``build-5``) will be different from the configured stackname (e.g. ``build-{env:BUILD_NUMBER}``)
+
+Example
+
+.. code-block:: yaml
+  :emphasize-lines: 2
+
+    blueprints:
+      - stackname: 'build-{env:BUILD_NUMBER}'
+        template: templates/deploy_build.template
