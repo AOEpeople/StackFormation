@@ -24,6 +24,7 @@ This version of the documentation covering StackFormation |release| has been ren
    GettingStarted/index
    Parameters/index
    StackReferences/index
+   UserData/index
    
 .. |Build Status| image:: https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master
    :target: https://travis-ci.org/AOEpeople/StackFormation
