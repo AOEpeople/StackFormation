@@ -511,6 +511,18 @@ blueprints:
       echo "Line 1"
       echo "Line 2"
 ```
+
+#### Forving ENV vars
+
+This will automatically set environment variables in the context of that stack. 
+```
+blueprints:
+  - stackname: 'demo'
+    env:
+      ACCOUNT: t
+      ENVIRONMENT: prod
+```
+
 ### AWS SDK
 
 StackFormation uses the AWS SDK for PHP. You should configure your keys in env vars:
