@@ -2,7 +2,7 @@
 StackFormation |version| Documentation
 ######################################
 
-.. image:: img/stackformation_200px.png
+.. image:: Images/stackformation_200px.png
     :align: right
 
 |Build Status| |Code Climate| |Test Coverage|
@@ -19,9 +19,15 @@ This version of the documentation covering StackFormation |release| has been ren
 
 .. toctree::
    :maxdepth: 3
-   :caption: StackFormation Documentation
+   :caption: Getting started Documentation
 
    GettingStarted/index
+   Greenfield/index
+  
+.. toctree::
+   :maxdepth: 3
+   :caption: StackFormation Documentation
+  
    Blueprints/index
    Templates/index
    StackReferences/index
@@ -32,8 +38,13 @@ This version of the documentation covering StackFormation |release| has been ren
    FilePaths/index
    ShellCommands/index
    AwsSdk/index
-   Contributing/index
    Misc/index
+   
+.. toctree::
+   :maxdepth: 3
+   :caption: User Documentation
+  
+   Contributing/index
    
 **License**
 
