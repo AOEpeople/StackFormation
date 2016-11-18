@@ -184,3 +184,18 @@ Instead you can use a conditional value:
             'default': MyDevKey
 
 StackFormation will evaluate all keys from top to bottom and the first key that evaluates to true will be returned. Allowed conditions: - ``A==B`` - ``A!=B`` - ``A~=/^regex$/`` - 'default' (will always evaluate to true. Make sure you put this at the very end since everything after this will be ignored). Placeholders will be resolved before the conditions are evaluated.
+
+Wildcards
+=========
+
+When referencing a stack in ``{output:<stack>:<output>}``, ``{resource:<stack>:<logicalResource>}``, or ``{parameter:<stack>:<logicalResource>}`` you can use a wildcard to specify a stack. In this case StackFormation looks up all live stacks and finds a stack matching the pattern. If there's no stack or more than a single stack matching the pattern StackFormation will throw an exception. This feature is helpful when you know there's always only a single stack of one type that has a placeholder in it's stackname:
+
+Example: Stackname: ``deployment-{env:BUILD_NUMBER}`` In blueprints.yml:
+
+.. code-block:: yaml
+  :emphasize-lines: 4
+  
+    blueprints:
+      - stackname: mystack
+        parameters:
+          Elb: '{output:deployment-*:Elb}'
