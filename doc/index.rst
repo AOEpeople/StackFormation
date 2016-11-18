@@ -1,3 +1,4 @@
+######################################
 StackFormation |version| Documentation
 ######################################
 
@@ -18,7 +19,8 @@ In addition to that StackFormation makes it easy to embed scripts into UserData.
 This version of the documentation covering StackFormation |release| has been rendered at: |today|
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
+   :caption: StackFormation Documentation
 
    GettingStarted/index
    Parameters/index
