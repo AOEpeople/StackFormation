@@ -32,6 +32,7 @@ This version of the documentation covering StackFormation |release| has been ren
    Functions/index
    ShellCommands/index
    AwsSdk/index
+   Misc/index
    
 .. |Build Status| image:: https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master
    :target: https://travis-ci.org/AOEpeople/StackFormation
