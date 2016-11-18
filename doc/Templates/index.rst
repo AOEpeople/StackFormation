@@ -70,6 +70,50 @@ If you have a parameter that needs to be passed to all templates you can prefix 
           ZoneBAZ: 'eu-west-1b'
           [...]
           
+Inject Parameters
+=================
+
+The scripts (included via ``Fn::FileContent``) may contain references to other CloudFormation resources or parameters. Part of the pre-processing is to convert snippets like ``{Ref:MagentoWaitConditionHandle}`` or ``{Ref:AWS::Region}`` or ``{Fn::GetAtt:[resource,attribute]}`` (note the missing quotes!) into correct JSON snippets and embed them into the ``Fn::Join`` array.
+
+Usage Example:
+
+.. code-block:: bash
+
+    #!/usr/bin/env bash
+    /usr/local/bin/cfn-signal --exit-code $? '{Ref:WaitConditionHandle}'
+
+will be converted to:
+
+.. code-block:: json
+
+    {"Fn::Join": ["", [
+    "#!\/usr\/bin\/env bash\n",
+    "\/usr\/local\/bin\/cfn-signal --exit-code $? '", {"Ref": "WaitConditionHandle"}, "'"
+    ]]}
+
+Usage Example:
+
+.. code-block:: bash
+
+    #!/usr/bin/env bash
+    EIP="{Fn::GetAtt:[NatIp,AllocationId]}"
+
+will be converted to:
+
+.. code-block:: json
+
+    {"Fn::Join": ["", [
+    "#!\/usr\/bin\/env bash\n",
+    "EIP=\"",
+    {
+        "Fn::GetAtt": [
+            "NatIp",
+            "AllocationId"
+        ]
+    },
+    "\"\n",
+    ]]}
+
 Using composer
 ==============
 
