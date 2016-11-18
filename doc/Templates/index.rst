@@ -168,3 +168,16 @@ Example:
 
     {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"}, /* Office */
     {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "5.6.7.8/32"}, /* Max Musterman HomeOffice */
+
+Port
+====
+
+``"Port":"..."`` will automatically expanded to ``"FromPort": "...", "ToPort": "..."``. So if you're specifying a single port instead of a range of ports you can reduce the redundancy:
+
+Example:
+
+.. code-block:: json
+
+    {"IpProtocol": "tcp", "Port": "80", "CidrIp": "1.2.3.4/32"}, 
+    /* expands to: */
+    {"IpProtocol": "tcp", "FromPort": "80", "ToPort": "80", "CidrIp": "1.2.3.4/32"},
