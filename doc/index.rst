@@ -30,6 +30,7 @@ This version of the documentation covering StackFormation |release| has been ren
    Stack/index
    StackPolicies/index
    Functions/index
+   FilePaths/index
    ShellCommands/index
    AwsSdk/index
    Misc/index
