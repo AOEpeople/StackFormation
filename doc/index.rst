@@ -15,6 +15,11 @@ This is where "StackFormation" comes in.
 StackFormation (note the wordplay: CloudFormation / Stacks) will read a stacks.yml file that contains information about stacks, the templates they use and their input parameters. It also allows you to query values for input parameters from other stack's resources or outputs.
 In addition to that StackFormation makes it easy to embed scripts into UserData.
 
+If you have any questions please feel free to contact us:
+
+- `Fabrizio Branca <https://twitter.com/fbrnc>`__
+- `Julian Kleinhans <https://github.com/kj187>`__
+
 This version of the documentation covering StackFormation |release| has been rendered at: |today|
 
 .. toctree::
