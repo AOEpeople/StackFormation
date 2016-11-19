@@ -2,6 +2,8 @@
 Blueprints
 **********
 
+.. image:: Images/overview.png
+
 Structuring your blueprints
 ===========================
 
