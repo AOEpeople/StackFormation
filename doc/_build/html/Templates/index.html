@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Templates &mdash; StackFormation dev-master documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="StackFormation dev-master documentation" href="../index.html"/>
+        <link rel="next" title="Stack references" href="../StackReferences/index.html"/>
+        <link rel="prev" title="Blueprints" href="../Blueprints/index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> StackFormation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                dev-master
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Getting started Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">StackFormation Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Blueprints/index.html">Blueprints</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Templates</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#template-merging">Template merging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prefixed-template-merging">Prefixed template merging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#inject-parameters">Inject Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#include-file-content">Include file content</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inject-raw-json">Inject raw Json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-composer">Using composer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#comments">Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#port">Port</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expand-strings-with-ref">Expand strings with {Ref:...}</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../StackReferences/index.html">Stack references</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserData/index.html">User data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stack/index.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../StackPolicies/index.html">Stack policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Functions/index.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FilePaths/index.html">File paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ShellCommands/index.html">Shell commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../AwsSdk/index.html">AWS Sdk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Misc/index.html">Misc</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contributing/index.html">Contributing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">StackFormation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Templates</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/Templates/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="templates">
+<h1>Templates<a class="headerlink" href="#templates" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="template-merging">
+<h2>Template merging<a class="headerlink" href="#template-merging" title="Permalink to this headline">¶</a></h2>
+<p>StackFormation allows you to configure more than one template:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span>  <span class="l l-Scalar l-Scalar-Plain">blueprints</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">stackname</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">iam</span>
+      <span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span>
+<span class="hll">        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">iam_role_jenkins.template</span>
+</span><span class="hll">        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">iam_user_inspector.template</span>
+</span>      <span class="l l-Scalar l-Scalar-Plain">description</span><span class="p p-Indicator">:</span> <span class="s">&#39;IAM</span><span class="nv"> </span><span class="s">users</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">roles&#39;</span>
+</pre></div>
+</div>
+<p>The template files cannot have duplicate keys in any of the top level attributes. StackFormation will then merge them into a single CloudFormation template and deploy this one instead. This feature helps you to structure your template logically without having to deploy and manage them separatly. Also with this you can choose which template to include in case you&#8217;re pulling in a StackFormation module like <a class="reference external" href="https://github.com/AOEpeople/cfn-lambdahelper">https://github.com/AOEpeople/cfn-lambdahelper</a>.</p>
+<p>You can always inspect the final merged and preprocessed template:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ vendor/bin/stackformation.php stack:template iam
+</pre></div>
+</div>
+<div class="section" id="prefixed-template-merging">
+<h3>Prefixed template merging<a class="headerlink" href="#prefixed-template-merging" title="Permalink to this headline">¶</a></h3>
+<p>If you list your templates with attributes instead of a plain list, the attribute keys will be used to prefix every element of that template. This way you can use the same template with different input parameters instead of duplicating resources. This comes in handy for VPC setups.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">blueprints</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">stackname</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">vpc-subnets</span>
+    <span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneA</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">az.template</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneB</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">az.template</span>
+    <span class="l l-Scalar l-Scalar-Plain">parameters</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneAVpc</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">MyVPC</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneAPublicSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.0.0/24&#39;</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneAPrivateSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.10.0/24&#39;</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneAAZ</span><span class="p p-Indicator">:</span> <span class="s">&#39;eu-west-1a&#39;</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneBVpc</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">MyVPC</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneBAPublicSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.1.0/24&#39;</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneBPrivateSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.11.0/24&#39;</span>
+      <span class="l l-Scalar l-Scalar-Plain">ZoneBAZ</span><span class="p p-Indicator">:</span> <span class="s">&#39;eu-west-1b&#39;</span>
+      <span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>If you have a parameter that needs to be passed to all templates you can prefix it with &#8216;*&#8217; (make sure you add quotes around that key since JSON will consider this a reference instead) and StackFormation will replace &#8216;<a href="#id1"><span class="problematic" id="id2">*</span></a>&#8216; with each prefix used in the <code class="docutils literal"><span class="pre">template:</span></code> section.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span>  <span class="l l-Scalar l-Scalar-Plain">blueprints</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">stackname</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">vpc-subnets</span>
+      <span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneA</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">az.template</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneB</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">az.template</span>
+      <span class="l l-Scalar l-Scalar-Plain">parameters</span><span class="p p-Indicator">:</span>
+<span class="hll">        <span class="s">&#39;*Vpc&#39;</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">MyVPC</span> <span class="c1"># Will automatically be expanded to &#39;ZoneAVpc: MyVPC&#39; and &#39;ZoneBVpc: MyVPC&#39;</span>
+</span><span class="hll">        <span class="s">&#39;*Igw&#39;</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">MyInternetGateway</span>
+</span>        <span class="l l-Scalar l-Scalar-Plain">ZoneAPublicSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.0.0/24&#39;</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneAPrivateSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.10.0/24&#39;</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneAAZ</span><span class="p p-Indicator">:</span> <span class="s">&#39;eu-west-1a&#39;</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneBVpc</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">MyVPC</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneBAPublicSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.1.0/24&#39;</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneBPrivateSubnetCidrBlock</span><span class="p p-Indicator">:</span> <span class="s">&#39;10.0.11.0/24&#39;</span>
+        <span class="l l-Scalar l-Scalar-Plain">ZoneBAZ</span><span class="p p-Indicator">:</span> <span class="s">&#39;eu-west-1b&#39;</span>
+        <span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="inject-parameters">
+<h2>Inject Parameters<a class="headerlink" href="#inject-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The scripts (included via <code class="docutils literal"><span class="pre">Fn::FileContent</span></code>) may contain references to other CloudFormation resources or parameters. Part of the pre-processing is to convert snippets like <code class="docutils literal"><span class="pre">{Ref:MagentoWaitConditionHandle}</span></code> or <code class="docutils literal"><span class="pre">{Ref:AWS::Region}</span></code> or <code class="docutils literal"><span class="pre">{Fn::GetAtt:[resource,attribute]}</span></code> (note the missing quotes!) into correct JSON snippets and embed them into the <code class="docutils literal"><span class="pre">Fn::Join</span></code> array.</p>
+<p>Usage Example:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env bash</span>
+/usr/local/bin/cfn-signal --exit-code <span class="nv">$?</span> <span class="s1">&#39;{Ref:WaitConditionHandle}&#39;</span>
+</pre></div>
+</div>
+<p>will be converted to:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[</span>
+<span class="s2">&quot;#!\/usr\/bin\/env bash\n&quot;</span><span class="p">,</span>
+<span class="s2">&quot;\/usr\/local\/bin\/cfn-signal --exit-code $? &#39;&quot;</span><span class="p">,</span> <span class="p">{</span><span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;WaitConditionHandle&quot;</span><span class="p">},</span> <span class="s2">&quot;&#39;&quot;</span>
+<span class="p">]]}</span>
+</pre></div>
+</div>
+<p>Usage Example:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env bash</span>
+<span class="nv">EIP</span><span class="o">=</span><span class="s2">&quot;{Fn::GetAtt:[NatIp,AllocationId]}&quot;</span>
+</pre></div>
+</div>
+<p>will be converted to:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[</span>
+<span class="s2">&quot;#!\/usr\/bin\/env bash\n&quot;</span><span class="p">,</span>
+<span class="s2">&quot;EIP=\&quot;&quot;</span><span class="p">,</span>
+<span class="p">{</span>
+    <span class="nt">&quot;Fn::GetAtt&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;NatIp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;AllocationId&quot;</span>
+    <span class="p">]</span>
+<span class="p">},</span>
+<span class="s2">&quot;\&quot;\n&quot;</span><span class="p">,</span>
+<span class="p">]]}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="include-file-content">
+<h2>Include file content<a class="headerlink" href="#include-file-content" title="Permalink to this headline">¶</a></h2>
+<p>You can include content from a different file into a script. Use this is you have duplicate code that you need to embed into multiple resource&#8217;s UserData:</p>
+<p>Example:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>  <span class="c1">#!/usr/bin/env bash</span>
+
+<span class="hll">  <span class="c1">###INCLUDE:../generic/includes/base.sh</span>
+</span>  <span class="o">[</span>...<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="inject-raw-json">
+<h2>Inject raw Json<a class="headerlink" href="#inject-raw-json" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-json"><div class="highlight"><pre><span></span>###JSON###
+{ &quot;hello&quot;: &quot;world&quot; }
+######
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-composer">
+<h2>Using composer<a class="headerlink" href="#using-composer" title="Permalink to this headline">¶</a></h2>
+<p>You can pull in StackFormation modules via composer. Look at the <a class="reference external" href="https://github.com/AOEpeople/cfn-lambdahelper">cfn-lambdahelper</a> for an example. A custom composer installer (configured as <code class="docutils literal"><span class="pre">require</span></code> dependency) will take care of putting all the module files in your <code class="docutils literal"><span class="pre">blueprints/</span></code> directory. This way you can have project specific and generic modules next to each other.</p>
+<p>Please note that a &#8220;StackFormation module&#8221; will probably not come with a <code class="docutils literal"><span class="pre">blueprints.yml</span></code> file since this (and especially the stack parameter configuration) is project specific.</p>
+<p>You will need to create the stack configuration for the parts you want to use. A good place would be <code class="docutils literal"><span class="pre">blueprints/blueprints.yml</span></code> where you reference the imported module.</p>
+<p>Example:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span>  <span class="l l-Scalar l-Scalar-Plain">blueprints</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">stackname</span><span class="p p-Indicator">:</span> <span class="s">&#39;lambdacfnhelpers-stack&#39;</span>
+<span class="hll">      <span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span> <span class="s">&#39;cfn-lambdahelper/lambda_cfn_helpers.template&#39;</span>
+</span>      <span class="l l-Scalar l-Scalar-Plain">Capabilities</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">CAPABILITY_IAM</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="comments">
+<h2>Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h2>
+<p>You can add comments to your JSON file. Due to a current bug you can&#8217;t have double quotes in your comment block.</p>
+<p>Example:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&quot;IpProtocol&quot;: &quot;tcp&quot;, &quot;FromPort&quot;: &quot;80&quot;, &quot;ToPort&quot;: &quot;80&quot;, &quot;CidrIp&quot;: &quot;1.2.3.4/32&quot;}, /* Office */
+{&quot;IpProtocol&quot;: &quot;tcp&quot;, &quot;FromPort&quot;: &quot;80&quot;, &quot;ToPort&quot;: &quot;80&quot;, &quot;CidrIp&quot;: &quot;5.6.7.8/32&quot;}, /* Max Musterman HomeOffice */
+</pre></div>
+</div>
+</div>
+<div class="section" id="port">
+<h2>Port<a class="headerlink" href="#port" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">&quot;Port&quot;:&quot;...&quot;</span></code> will automatically expanded to <code class="docutils literal"><span class="pre">&quot;FromPort&quot;:</span> <span class="pre">&quot;...&quot;,</span> <span class="pre">&quot;ToPort&quot;:</span> <span class="pre">&quot;...&quot;</span></code>. So if you&#8217;re specifying a single port instead of a range of ports you can reduce the redundancy:</p>
+<p>Example:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>{&quot;IpProtocol&quot;: &quot;tcp&quot;, &quot;Port&quot;: &quot;80&quot;, &quot;CidrIp&quot;: &quot;1.2.3.4/32&quot;},
+
+/* expands to: */
+{&quot;IpProtocol&quot;: &quot;tcp&quot;, &quot;FromPort&quot;: &quot;80&quot;, &quot;ToPort&quot;: &quot;80&quot;, &quot;CidrIp&quot;: &quot;1.2.3.4/32&quot;},
+</pre></div>
+</div>
+</div>
+<div class="section" id="expand-strings-with-ref">
+<h2>Expand strings with {Ref:...}<a class="headerlink" href="#expand-strings-with-ref" title="Permalink to this headline">¶</a></h2>
+<p>Tired of concatenating strings with <code class="docutils literal"><span class="pre">{&quot;Fn::Join&quot;:</span> <span class="pre">[&quot;&quot;,</span> <span class="pre">[</span></code> manually? Just add the references in a string and StackFormation will expand this for you:</p>
+<p>Example:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span>&quot;Key&quot;: &quot;Name&quot;, &quot;Value&quot;: &quot;magento-{Ref:Environment}-{Ref:Build}-instance&quot;
+
+/* will be replaced with: */
+&quot;Key&quot;: &quot;Name&quot;, &quot;Value&quot;: {&quot;Fn::Join&quot;: [&quot;&quot;, [&quot;magento-&quot;, {&quot;Ref&quot;:&quot;Environment&quot;}, &quot;-&quot;, {&quot;Ref&quot;:&quot;Build&quot;}, &quot;-instance&quot;]]}
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../StackReferences/index.html" class="btn btn-neutral float-right" title="Stack references" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../Blueprints/index.html" class="btn btn-neutral" title="Blueprints" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, AOE GmbH.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'dev-master',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,383 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting Started &mdash; StackFormation dev-master documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="StackFormation dev-master documentation" href="../index.html"/>
+        <link rel="next" title="Blueprints" href="../Blueprints/index.html"/>
+        <link rel="prev" title="StackFormation dev-master Documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> StackFormation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                dev-master
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Getting started Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#via-composer">Via composer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-phar">Using the phar</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quickstart">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#aws-access-keys">AWS access keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-blueprint">Create a blueprint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-cloudformation-template">Create a CloudFormation template</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deploy-your-stack">Deploy your stack</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#kickstart-a-project">Kickstart a project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#required-environment-settings">Required environment settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#short-check">Short check</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#your-first-blueprint">Your first blueprint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Deploy your stack</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">StackFormation Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Blueprints/index.html">Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Templates/index.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../StackReferences/index.html">Stack references</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UserData/index.html">User data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stack/index.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../StackPolicies/index.html">Stack policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Functions/index.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FilePaths/index.html">File paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ShellCommands/index.html">Shell commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../AwsSdk/index.html">AWS Sdk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Misc/index.html">Misc</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contributing/index.html">Contributing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">StackFormation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/GettingStarted/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="via-composer">
+<h3>Via composer<a class="headerlink" href="#via-composer" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx">Install composer</a> first, then:</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ composer require aoepeople/stackformation
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-the-phar">
+<h3>Using the phar<a class="headerlink" href="#using-the-phar" title="Permalink to this headline">¶</a></h3>
+<p>Grab the latest release from <a class="reference external" href="https://github.com/AOEpeople/StackFormation/releases/latest">https://github.com/AOEpeople/StackFormation/releases/latest</a> or use this shortcut (requires <code class="docutils literal"><span class="pre">jq</span></code> to be installed)</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ wget <span class="k">$(</span>curl -s https://api.github.com/repos/AOEpeople/StackFormation/releases/latest <span class="p">|</span> jq -r <span class="s1">&#39;.assets[0].browser_download_url&#39;</span><span class="k">)</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>If you want to use StackFormation globally:</p>
+<div class="last highlight-shell"><div class="highlight"><pre><span></span>$ mv stackformation.phar /usr/local/bin/stackformation
+$ chmod +x /usr/local/bin/stackformation
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="aws-access-keys">
+<h3>AWS access keys<a class="headerlink" href="#aws-access-keys" title="Permalink to this headline">¶</a></h3>
+<p>Create a <code class="docutils literal"><span class="pre">.env.default</span></code> file (and add it yo your gitignore: <code class="docutils literal"><span class="pre">echo</span> <span class="pre">.env.default</span> <span class="pre">&gt;&gt;</span> <span class="pre">.gitignore</span></code>)</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="n">INSERT_YOUR_ACCESS_KEY_HERE</span>
+<span class="n">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="n">INSERT_YOUR_SECRET_KEY_HERE</span>
+<span class="n">AWS_DEFAULT_REGION</span><span class="o">=</span><span class="n">INSERT_YOUR_DEFAULT_REGION_HERE</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-a-blueprint">
+<h3>Create a blueprint<a class="headerlink" href="#create-a-blueprint" title="Permalink to this headline">¶</a></h3>
+<p>Create a <code class="docutils literal"><span class="pre">blueprints.yml</span></code> in your project directory:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">blueprints</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">stackname</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-stack</span>
+    <span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-stack.template</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-a-cloudformation-template">
+<h3>Create a CloudFormation template<a class="headerlink" href="#create-a-cloudformation-template" title="Permalink to this headline">¶</a></h3>
+<p>Create a CloudFormation template <code class="docutils literal"><span class="pre">my-stack.template</span></code> in your project directory:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">&quot;AWSTemplateFormatVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;2010-09-09&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;Resources&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;MyResource1&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::CloudFormation::WaitConditionHandle&quot;</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="deploy-your-stack">
+<h3>Deploy your stack<a class="headerlink" href="#deploy-your-stack" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ bin/stackformation.php deploy my-stack
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="kickstart-a-project">
+<h2>Kickstart a project<a class="headerlink" href="#kickstart-a-project" title="Permalink to this headline">¶</a></h2>
+<p>Imagine we are starting from scratch, on a so called green field.</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ mkdir DemoProject
+$ <span class="nb">cd</span> DemoProject
+</pre></div>
+</div>
+<div class="section" id="id1">
+<h3>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>First of all, we have to install StackFormation, for this demo we will da that via composer</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ composer require aoepeople/stackformation
+</pre></div>
+</div>
+<p>Your first level project structure should be looking like that now</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>├── composer.json
+├── composer.lock
+└── vendor
+</pre></div>
+</div>
+<p>To check if StackFormation is working properly execute the following command</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ vendor/bin/stackformation.php
+</pre></div>
+</div>
+<p>You should see all available StackFormation commands and options now.</p>
+</div>
+<div class="section" id="required-environment-settings">
+<h3>Required environment settings<a class="headerlink" href="#required-environment-settings" title="Permalink to this headline">¶</a></h3>
+<p>Now create a <code class="docutils literal"><span class="pre">.env.default</span></code> file (and add it yo your gitignore: <code class="docutils literal"><span class="pre">echo</span> <span class="pre">.env.default</span> <span class="pre">&gt;&gt;</span> <span class="pre">.gitignore</span></code>)</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY_HERE
+AWS_SECRET_ACCESS_KEY=INSERT_YOUR_SECRET_KEY_HERE
+AWS_DEFAULT_REGION=INSERT_YOUR_DEFAULT_REGION_HERE
+</pre></div>
+</div>
+</div>
+<div class="section" id="short-check">
+<h3>Short check<a class="headerlink" href="#short-check" title="Permalink to this headline">¶</a></h3>
+<p>If your access and secret key are correct and the user behind that have enough permissions, you are now able to use the whole magic of StackFormation. Just a quick example, you want to know what and how many ec2 instances are currently running?</p>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ vendor/bin/stackformation.php ec2:list
+</pre></div>
+</div>
+<img alt="../_images/kickstart_demo_ec2list.png" src="../_images/kickstart_demo_ec2list.png" />
+</div>
+<div class="section" id="your-first-blueprint">
+<h3>Your first blueprint<a class="headerlink" href="#your-first-blueprint" title="Permalink to this headline">¶</a></h3>
+<p>Create a <code class="docutils literal"><span class="pre">blueprints.yml</span></code> in your current directory:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">blueprints</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">stackname</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-stack</span>
+    <span class="l l-Scalar l-Scalar-Plain">template</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my-stack.template</span>
+</pre></div>
+</div>
+<p>Create you CloudFormation template <code class="docutils literal"><span class="pre">my-stack.template</span></code>:</p>
+<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">&quot;AWSTemplateFormatVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;2010-09-09&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;Resources&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;MyResource1&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::CloudFormation::WaitConditionHandle&quot;</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Deploy your stack<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ vendor/bin/stackformation.php deploy my-stack
+</pre></div>
+</div>
+<p>The output should be the following</p>
+<img alt="../_images/kickstart_demo_deploy.png" src="../_images/kickstart_demo_deploy.png" />
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ vendor/bin/stackformation.php stack:list
+</pre></div>
+</div>
+<img alt="../_images/kickstart_demo_stacklist.png" src="../_images/kickstart_demo_stacklist.png" />
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Blueprints/index.html" class="btn btn-neutral float-right" title="Blueprints" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="StackFormation dev-master Documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, AOE GmbH.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'dev-master',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

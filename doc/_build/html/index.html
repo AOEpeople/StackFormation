@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>StackFormation dev-master Documentation &mdash; StackFormation dev-master documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="StackFormation dev-master documentation" href="#"/>
+        <link rel="next" title="Getting Started" href="GettingStarted/index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> StackFormation
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                dev-master
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Getting started Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted/index.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">StackFormation Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Blueprints/index.html">Blueprints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/index.html">Templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="StackReferences/index.html">Stack references</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UserData/index.html">User data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Stack/index.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="StackPolicies/index.html">Stack policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Functions/index.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FilePaths/index.html">File paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShellCommands/index.html">Shell commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="AwsSdk/index.html">AWS Sdk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Misc/index.html">Misc</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Contributing/index.html">Contributing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">StackFormation</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>StackFormation dev-master Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="stackformation-version-documentation">
+<h1>StackFormation dev-master Documentation<a class="headerlink" href="#stackformation-version-documentation" title="Permalink to this headline">¶</a></h1>
+<img alt="_images/stackformation_200px.png" class="align-right" src="_images/stackformation_200px.png" />
+<p><a class="reference external" href="https://travis-ci.org/AOEpeople/StackFormation"><img alt="Build Status" src="https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master" /></a> <a class="reference external" href="https://codeclimate.com/github/AOEpeople/StackFormation"><img alt="Code Climate" src="https://codeclimate.com/github/AOEpeople/StackFormation/badges/gpa.svg" /></a> <a class="reference external" href="https://codeclimate.com/github/AOEpeople/StackFormation/coverage"><img alt="Test Coverage" src="https://codeclimate.com/github/AOEpeople/StackFormation/badges/coverage.svg" /></a></p>
+<p><strong>Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor</strong></p>
+<p>Deploying CloudFormation stacks to AWS can be done using the AWS Console, AWS Cli or any SDK. While this is perfectly ok it can be a challenge to keep track of what template is used for what stack and manage the input parameters.
+This is where &#8220;StackFormation&#8221; comes in.</p>
+<p>StackFormation (note the wordplay: CloudFormation / Stacks) will read a stacks.yml file that contains information about stacks, the templates they use and their input parameters. It also allows you to query values for input parameters from other stack&#8217;s resources or outputs.
+In addition to that StackFormation makes it easy to embed scripts into UserData.</p>
+<img alt="_images/StackFormation.svg" src="_images/StackFormation.svg" /><p>If you have any questions please feel free to contact us:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://twitter.com/fbrnc">Fabrizio Branca</a></li>
+<li><a class="reference external" href="https://github.com/kj187">Julian Kleinhans</a></li>
+</ul>
+<p>This version of the documentation covering StackFormation dev-master has been rendered at: Nov 21, 2016</p>
+<div class="toctree-wrapper compound" id="getting-started-documentation">
+<p class="caption"><span class="caption-text">Getting started Documentation</span><a class="headerlink" href="#getting-started-documentation" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted/index.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted/index.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#via-composer">Via composer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#using-the-phar">Using the phar</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted/index.html#quickstart">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#aws-access-keys">AWS access keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#create-a-blueprint">Create a blueprint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#create-a-cloudformation-template">Create a CloudFormation template</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#deploy-your-stack">Deploy your stack</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted/index.html#kickstart-a-project">Kickstart a project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#id1">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#required-environment-settings">Required environment settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#short-check">Short check</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#your-first-blueprint">Your first blueprint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="GettingStarted/index.html#id2">Deploy your stack</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="stackformation-documentation">
+<p class="caption"><span class="caption-text">StackFormation Documentation</span><a class="headerlink" href="#stackformation-documentation" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Blueprints/index.html">Blueprints</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Blueprints/index.html#structuring-your-blueprints">Structuring your blueprints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Blueprints/index.html#parameters">Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Blueprints/index.html#adding-parameters">Adding parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Blueprints/index.html#parameter-values">Parameter values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Blueprints/index.html#conditional-parameter-values">Conditional parameter values</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Blueprints/index.html#wildcards">Wildcards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Blueprints/index.html#effective-stackname">Effective stackname</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Blueprints/index.html#reverse-blueprint-match">Reverse blueprint match</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Templates/index.html">Templates</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#template-merging">Template merging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Templates/index.html#prefixed-template-merging">Prefixed template merging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#inject-parameters">Inject Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#include-file-content">Include file content</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#inject-raw-json">Inject raw Json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#using-composer">Using composer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#comments">Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#port">Port</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Templates/index.html#expand-strings-with-ref">Expand strings with {Ref:...}</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="StackReferences/index.html">Stack references</a></li>
+<li class="toctree-l1"><a class="reference internal" href="UserData/index.html">User data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="UserData/index.html#inject-user-data">Inject user data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Stack/index.html">Stack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Stack/index.html#stackname-filter">Stackname filter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="StackPolicies/index.html">Stack policies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="StackPolicies/index.html#using-stack-policies">Using stack policies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Functions/index.html">Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Functions/index.html#fn-filecontent">Fn::FileContent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Functions/index.html#fn-filecontenttrimlines">Fn::FileContentTrimLines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Functions/index.html#fn-filecontentminify">Fn::FileContentMinify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Functions/index.html#fn-filecontentunpretty">Fn::FileContentUnpretty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Functions/index.html#fn-split">Fn::Split</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FilePaths/index.html">File paths</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="FilePaths/index.html#relative-file-paths">Relative file paths</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ShellCommands/index.html">Shell commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ShellCommands/index.html#before">Before</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ShellCommands/index.html#after">After</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ShellCommands/index.html#before-and-after">Before and after</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="AwsSdk/index.html">AWS Sdk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Misc/index.html">Misc</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="user-documentation">
+<p class="caption"><span class="caption-text">User Documentation</span><a class="headerlink" href="#user-documentation" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Contributing/index.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Contributing/index.html#contributors">Contributors</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p><strong>License</strong></p>
+<p><a class="reference external" href="https://github.com/AOEpeople/StackFormation/blob/master/LICENSE.md">Open Software License v. 3.0 (OSL-3.0)</a></p>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="GettingStarted/index.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, AOE GmbH.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'dev-master',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
