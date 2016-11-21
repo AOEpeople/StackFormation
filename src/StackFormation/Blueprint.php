@@ -133,8 +133,20 @@ class Blueprint
         return $this->blueprintConfig;
     }
 
+    public function applyEnvVars()
+    {
+        if (!isset($this->blueprintConfig['env'])) {
+            return;
+        }
+        foreach ($this->blueprintConfig['env'] as $var => $value) {
+            putenv("$var=$value");
+        }
+    }
+
     public function getParameters($resolvePlaceholders = true)
     {
+        $this->applyEnvVars();
+
         $parameters = [];
 
         if (!isset($this->blueprintConfig['parameters'])) {

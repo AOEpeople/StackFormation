@@ -48,6 +48,12 @@ class ConfigTreeBuilder implements ConfigurationInterface
                                 ->treatNullLike(array())
                                 ->defaultValue(array())
                             ->end()
+                            ->variableNode('env')
+                                ->treatTrueLike(array())
+                                ->treatFalseLike(array())
+                                ->treatNullLike(array())
+                                ->defaultValue(array())
+                            ->end()
                             ->variableNode('before')->end()
                             ->variableNode('after')->end()
                             ->scalarNode('basepath')->isRequired()->end() // will be automatically set to the current blueprints.yml file's dir
