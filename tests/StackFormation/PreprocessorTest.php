@@ -28,7 +28,7 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
         $templatePath = $prefix . 'blueprint/input.template';
         $fileContent = file_get_contents($templatePath);
         $this->assertEquals(
-            $this->preprocessor->processJson($fileContent, dirname($templatePath)),
+            $this->preprocessor->process($fileContent, dirname($templatePath)),
             file_get_contents($prefix. 'blueprint/expected.template')
         );
     }
@@ -44,17 +44,17 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param string $inputJson
-     * @param string $expectedJson
+     * @param string $input
+     * @param string $expected
      * @throws \Exception
      * @test
      * @dataProvider processJsonDataProvider
      */
-    public function processJson($inputJson, $expectedJson)
+    public function processJson($input, $expected)
     {
         $this->assertEquals(
-            $this->preprocessor->processJson($inputJson, sys_get_temp_dir()),
-            $expectedJson
+            $this->preprocessor->process($input, sys_get_temp_dir()),
+            $expected
         );
     }
 

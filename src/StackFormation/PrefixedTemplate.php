@@ -51,13 +51,13 @@ class PrefixedTemplate extends Template
         }
     }
 
-    public function getDecodedJson()
+    public function getData()
     {
         if ($this->prefix) {
             if (!$this->cache->has(__METHOD__)) {
-                $array = parent::getDecodedJson();
+                $data = parent::getData();
 
-                foreach ($array as $topLevelKey => $topLevelData) {
+                foreach ($data as $topLevelKey => $topLevelData) {
                     if (is_array($topLevelData)) {
                         $prefixedData = [];
                         foreach ($topLevelData as $key => $value) {
@@ -66,12 +66,12 @@ class PrefixedTemplate extends Template
                         $array[$topLevelKey] = $prefixedData;
                     }
                 }
-                $this->cache->set(__METHOD__, $array);
+                $this->cache->set(__METHOD__, $data);
             }
 
             return $this->cache->get(__METHOD__);
         } else {
-            return parent::getDecodedJson();
+            return parent::getData();
         }
     }
 

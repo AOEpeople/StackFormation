@@ -39,17 +39,17 @@ class TemplateMerger
             }
 
             try {
-                $array = $template->getDecodedJson();
+                $data = $template->getData();
 
                 // Copy the current description into the final template
-                if (!empty($array['Description'])) {
-                    $mergedTemplate['Description'] = $array['Description'];
+                if (!empty($data['Description'])) {
+                    $mergedTemplate['Description'] = $data['Description'];
                 }
 
                 // Merge keys from current template with final template
                 foreach ($mergeKeys as $mergeKey) {
-                    if (isset($array[$mergeKey]) && is_array($array[$mergeKey])) {
-                        foreach ($array[$mergeKey] as $key => $value) {
+                    if (isset($data[$mergeKey]) && is_array($data[$mergeKey])) {
+                        foreach ($data[$mergeKey] as $key => $value) {
                             if (isset($mergedTemplate[$mergeKey][$key])) {
                                 // it's ok if the parameter has the same name and type...
                                 if (($mergeKey != 'Parameters') || ($value['Type'] != $mergedTemplate[$mergeKey][$key]['Type'])) {

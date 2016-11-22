@@ -39,12 +39,12 @@ class Template
         return $this->cache->get(
             __METHOD__,
             function () {
-                return $this->preProcessor->processJson($this->getFileContent(), $this->getBasePath());
+                return $this->preProcessor->process($this->getFileContent(), $this->getBasePath());
             }
         );
     }
 
-    public function getDecodedJson()
+    public function getData()
     {
         if (!$this->cache->has(__METHOD__)) {
             $templateBody = $this->getProcessedTemplate();
@@ -64,7 +64,7 @@ class Template
 
     public function getDescription()
     {
-        $data = $this->getDecodedJson();
+        $data = $this->getData();
 
         return isset($data['Description']) ? $data['Description'] : '';
     }
