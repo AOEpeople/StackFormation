@@ -240,7 +240,7 @@ But instead you can also simply run the deploy command with the resulting stack 
     Setting env var: ENVIRONMENT=tst
     ...
 
-Forving ENV vars
+Forcing ENV vars
 ================
 
 This will automatically set environment variables in the context of that stack.
