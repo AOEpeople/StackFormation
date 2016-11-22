@@ -1,8 +1,7 @@
-<img align="right" style="float: right; height: 200px;" src="doc/Images/stackformation_200px.png">
-
 # StackFormation
 
 **Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor**
+<img align="right" style="float: right; height: 200px;" src="doc/Images/stackformation_200px.png">
 
 [![Build Status](https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master)](https://travis-ci.org/AOEpeople/StackFormation)
 [![Code Climate](https://codeclimate.com/github/AOEpeople/StackFormation/badges/gpa.svg)](https://codeclimate.com/github/AOEpeople/StackFormation)
