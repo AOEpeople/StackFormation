@@ -10,7 +10,6 @@
 
 If you want to use StackFormation, please have a look at the [StackFormation documentation](http://stackformation.readthedocs.org)
 
-**License**
-
+## License
 [Open Software License v. 3.0 (OSL-3.0)](https://github.com/AOEpeople/StackFormation/blob/master/LICENSE.md)
    
