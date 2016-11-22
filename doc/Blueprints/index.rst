@@ -239,3 +239,17 @@ But instead you can also simply run the deploy command with the resulting stack 
     Setting env var: ACCOUNT=t
     Setting env var: ENVIRONMENT=tst
     ...
+
+Forving ENV vars
+================
+
+This will automatically set environment variables in the context of that stack.
+
+.. code-block:: yaml
+  :emphasize-lines: 3,4,5
+
+    blueprints:
+      - stackname: 'demo'
+        env:
+          ACCOUNT: t
+          ENVIRONMENT: prod
