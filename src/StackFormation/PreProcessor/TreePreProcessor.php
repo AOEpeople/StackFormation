@@ -9,6 +9,7 @@ class TreePreProcessor {
 
     /**
      * @param Template $template
+     * @return Template $template
      */
     public function process(Template $template)
     {
@@ -30,7 +31,7 @@ class TreePreProcessor {
             $pipeline->addStage(new $stageClass($this));
         }
 
-        $pipeline->process($template);
+        return $pipeline->process($template);
     }
 
     /**

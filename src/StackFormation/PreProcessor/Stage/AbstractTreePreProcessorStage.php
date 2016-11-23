@@ -17,6 +17,7 @@ abstract class AbstractTreePreProcessorStage
 
     /**
      * @param Template $template
+     * @return Template $template
      * @throws \StackFormation\Exception\TreePreProcessorException
      */
     public function __invoke(Template $template)

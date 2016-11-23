@@ -9,6 +9,7 @@ class ExpandPort extends AbstractTreePreProcessorStage
 {
     /**
      * @param Template $template
+     * @return Template $template
      */
     public function invoke(Template $template)
     {
@@ -19,5 +20,7 @@ class ExpandPort extends AbstractTreePreProcessorStage
             $tree['ToPort'] = $value;
         }, 'key');
         $template->setTree($tree);
+
+        return $template;
     }
 }
