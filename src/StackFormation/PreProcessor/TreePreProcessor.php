@@ -15,10 +15,10 @@ class TreePreProcessor {
     {
         $stageClasses = [
             '\StackFormation\PreProcessor\Stage\Tree\ExpandPort',
+            '\StackFormation\PreProcessor\Stage\Tree\InjectFilecontent',
 
             # TODO, check also if we still need that
             #'\StackFormation\PreProcessor\Stage\Tree\ParseRefInDoubleQuotedStrings',
-            #'\StackFormation\PreProcessor\Stage\Tree\InjectFilecontent',
             #'\StackFormation\PreProcessor\Stage\Tree\Base64encodedJson',
             #'\StackFormation\PreProcessor\Stage\Tree\Split',
             #'\StackFormation\PreProcessor\Stage\Tree\ReplaceFnGetAttr',
@@ -28,30 +28,32 @@ class TreePreProcessor {
 
         $pipeline = new Pipeline();
         foreach ($stageClasses as $stageClass) {
-            $pipeline->addStage(new $stageClass($this));
+            $pipeline->addStage(new $stageClass($this, $template));
         }
 
-        return $pipeline->process($template);
+        $pipeline->process('');
     }
 
     /**
      * @param string $expression
      * @param array $tree
      * @param callable $callback
-     * @param string $mode
+     * @param bool $expressionUsedOnKey
      */
-    public function searchTreeByExpression($expression, array &$tree, callable $callback, $mode = '')
+    public function searchTreeByExpression($expression, array &$tree, callable $callback, $expressionUsedOnKey = false)
     {
+        #print_r($tree);die();
+
         foreach ($tree as $key => &$leaf) {
             if (is_array($leaf)) {
-                $this->searchTreeByExpression($expression, $leaf, $callback, $mode);
+                $this->searchTreeByExpression($expression, $leaf, $callback, $expressionUsedOnKey);
                 continue;
             }
 
-            $subject = ($mode == 'key' ? $key : $leaf);
-            if (preg_match($expression, $subject)) {
-                $callback($tree, $key, $leaf);
-            }
+            $subject = ($expressionUsedOnKey === true ? $key : $leaf);
+            preg_replace_callback($expression, function(array $matches) use ($callback, &$tree, $key, $leaf) {
+                $callback($tree, $key, $leaf, $matches);
+            }, $subject);
         }
     }
 }

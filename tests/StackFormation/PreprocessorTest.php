@@ -12,6 +12,19 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
+
+
+
+        #
+        #
+        # TODO switch Preprocessor and rewrite/add tests
+        #
+        #
+        #
+        #
+
+
+
         $this->preprocessor = new \StackFormation\Preprocessor();
     }
 

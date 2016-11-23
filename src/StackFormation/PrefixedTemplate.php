@@ -37,6 +37,13 @@ class PrefixedTemplate extends Template
         if ($this->prefix) {
             if (!$this->cache->has(__METHOD__)) {
                 $content = parent::getProcessedTemplate();
+
+
+
+
+                # TODO $content is now an Template object
+
+
                 $content = $this->updateRef($this->prefix, $content);
                 $content = $this->updateDependsOn($this->prefix, $content);
                 $content = $this->updateDependsOnMultiple($this->prefix, $content);
@@ -47,6 +54,14 @@ class PrefixedTemplate extends Template
 
             return $this->cache->get(__METHOD__);
         } else {
+
+
+
+
+            # TODO return $this instead of
+
+
+
             return parent::getProcessedTemplate();
         }
     }

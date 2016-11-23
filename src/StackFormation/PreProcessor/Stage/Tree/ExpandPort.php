@@ -3,24 +3,18 @@
 namespace StackFormation\PreProcessor\Stage\Tree;
 
 use StackFormation\PreProcessor\Stage\AbstractTreePreProcessorStage;
-use StackFormation\Template;
 
 class ExpandPort extends AbstractTreePreProcessorStage
 {
     /**
-     * @param Template $template
-     * @return Template $template
+     * @param array $tree
      */
-    public function invoke(Template $template)
+    public function invoke(array &$tree)
     {
-        $tree = $template->getTree();
-        $this->treePreProcessor->searchTreeByExpression('/^Port$/', $tree, function (&$tree, $key, $value) {
+        $this->treePreProcessor->searchTreeByExpression('/^Port$/', $tree, function (&$tree, $key, $value, $matches) {
             unset($tree[$key]);
             $tree['FromPort'] = $value;
             $tree['ToPort'] = $value;
-        }, 'key');
-        $template->setTree($tree);
-
-        return $template;
+        }, true);
     }
 }

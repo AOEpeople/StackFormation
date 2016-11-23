@@ -60,7 +60,8 @@ class Template
         return $this->cache->get(
             __METHOD__,
             function () {
-                return $this->treePreProcessor->process($this);
+                $this->treePreProcessor->process($this);
+                return $this;
             }
         );
     }
@@ -78,16 +79,16 @@ class Template
             $yamlParser = new \Symfony\Component\Yaml\Parser();
             $this->tree = $yamlParser->parse($fileContent);
 
-            $this->getProcessedTemplate();
+            $template = $this->getProcessedTemplate();
 
-            if (!is_array($this->tree)) {
-                throw new TemplateDecodeException($this->getFilePath(), sprintf("Error decoding file '%s'", $this->getFilePath()));
+            if (!is_array($template->getTree())) {
+                throw new TemplateDecodeException($template->getFilePath(), sprintf("Error decoding file '%s'", $template->getFilePath()));
             }
-            if ($this->tree['AWSTemplateFormatVersion'] != '2010-09-09') {
-                throw new TemplateInvalidException($this->getFilePath(), 'Invalid AWSTemplateFormatVersion');
+            if ($template->tree['AWSTemplateFormatVersion'] != '2010-09-09') {
+                throw new TemplateInvalidException($template->getFilePath(), 'Invalid AWSTemplateFormatVersion');
             }
 
-            $this->cache->set(__METHOD__, $this->tree);
+            $this->cache->set(__METHOD__, $template->tree);
         }
 
         return $this->cache->get(__METHOD__);

@@ -64,8 +64,7 @@ class TemplateMerger
                 if (Div::isProgramInstalled('jq')) {
                     $tmpfile = tempnam(sys_get_temp_dir(), 'json_validate_');
                     $yaml = new \Symfony\Component\Yaml\Yaml();
-                    $output = $yaml->dump($template->getProcessedTemplate());
-                    file_put_contents($tmpfile, $output);
+                    file_put_contents($tmpfile, $yaml->dump($data));
                     passthru('jq . ' . $tmpfile);
                     unlink($tmpfile);
                 }
