@@ -4,6 +4,17 @@ namespace StackFormation;
 
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
+#
+#
+#
+#
+# Obsolete,
+# TODO delete after finishing the new PreProcessor
+#
+#
+#
+#
+
 class Preprocessor
 {
     const MAX_JS_FILE_INCLUDE_SIZE = 4096;
