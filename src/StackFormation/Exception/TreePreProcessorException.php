@@ -14,6 +14,6 @@ class TreePreProcessorException extends \Exception
     public function __construct(Template $template, \Exception $previous = null)
     {
         // TODO
-        parent::__construct($this->getFilePath(), 1, $previous);
+        parent::__construct($template->getFilePath(), 1, $previous);
     }
 }
