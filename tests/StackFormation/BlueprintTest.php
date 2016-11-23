@@ -394,10 +394,13 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
         $blueprint = $blueprintFactory->getBlueprint('fixture1');
         $template = $blueprint->getPreprocessedTemplate();
-        $template = json_decode($template, true);
-        $this->assertArrayHasKey('Resources', $template);
-        $this->assertArrayHasKey('MyResource', $template['Resources']);
-        $this->assertEquals('AWS::CloudFormation::WaitConditionHandle', $template['Resources']['MyResource']['Type']);
+
+        $yamlParser = new \Symfony\Component\Yaml\Parser();
+        $tree = $yamlParser->parse($template);
+
+        $this->assertArrayHasKey('Resources', $tree);
+        $this->assertArrayHasKey('MyResource', $tree['Resources']);
+        $this->assertEquals('AWS::CloudFormation::WaitConditionHandle', $tree['Resources']['MyResource']['Type']);
     }
 
     /**
@@ -411,18 +414,21 @@ class BlueprintTest extends \PHPUnit_Framework_TestCase
         $blueprintFactory = new \StackFormation\BlueprintFactory($config, $valueResolver);
         $blueprint = $blueprintFactory->getBlueprint('reference-fixture-{env:FOO1}');
         $template = $blueprint->getPreprocessedTemplate();
-        $template = json_decode($template, true);
-        $this->assertArrayHasKey('Metadata', $template);
-        $this->assertArrayHasKey('StackFormation', $template['Metadata']);
-        $this->assertArrayHasKey('Blueprint', $template['Metadata']['StackFormation']);
-        $this->assertEquals('reference-fixture-{env:FOO1}', $template['Metadata']['StackFormation']['Blueprint']);
 
-        $this->assertArrayHasKey('EnvironmentVariables', $template['Metadata']['StackFormation']);
+        $yamlParser = new \Symfony\Component\Yaml\Parser();
+        $tree = $yamlParser->parse($template);
+
+        $this->assertArrayHasKey('Metadata', $tree);
+        $this->assertArrayHasKey('StackFormation', $tree['Metadata']);
+        $this->assertArrayHasKey('Blueprint', $tree['Metadata']['StackFormation']);
+        $this->assertEquals('reference-fixture-{env:FOO1}', $tree['Metadata']['StackFormation']['Blueprint']);
+
+        $this->assertArrayHasKey('EnvironmentVariables', $tree['Metadata']['StackFormation']);
         $this->assertEquals([
             'FOO1' => 'BAR1',
             'FOO2' => 'BAR2',
             'FOO3' => 'BAR3'
-        ], $template['Metadata']['StackFormation']['EnvironmentVariables']);
+        ], $tree['Metadata']['StackFormation']['EnvironmentVariables']);
     }
 
 }

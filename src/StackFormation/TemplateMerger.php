@@ -63,7 +63,9 @@ class TemplateMerger
             } catch (TemplateDecodeException $e) {
                 if (Div::isProgramInstalled('jq')) {
                     $tmpfile = tempnam(sys_get_temp_dir(), 'json_validate_');
-                    file_put_contents($tmpfile, $template->getProcessedTemplate());
+                    $yaml = new \Symfony\Component\Yaml\Yaml();
+                    $output = $yaml->dump($template->getProcessedTemplate());
+                    file_put_contents($tmpfile, $output);
                     passthru('jq . ' . $tmpfile);
                     unlink($tmpfile);
                 }
@@ -82,18 +84,19 @@ class TemplateMerger
 
         $mergedTemplate = array_merge_recursive($mergedTemplate, $additionalData);
 
-        $json = json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $yaml = new \Symfony\Component\Yaml\Yaml();
+        $output = $yaml->dump($mergedTemplate);
 
         // Check for max template size
-        if (strlen($json) > self::MAX_CF_TEMPLATE_SIZE) {
-            $json = json_encode($mergedTemplate, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (strlen($output) > self::MAX_CF_TEMPLATE_SIZE) {
+            $output = $yaml->dump($mergedTemplate, 1);
 
             // Re-check for max template size
-            if (strlen($json) > self::MAX_CF_TEMPLATE_SIZE) {
-                throw new \Exception(sprintf('Template too big (%s bytes). Maximum template size is %s bytes.', strlen($json), self::MAX_CF_TEMPLATE_SIZE));
+            if (strlen($output) > self::MAX_CF_TEMPLATE_SIZE) {
+                throw new \Exception(sprintf('Template too big (%s bytes). Maximum template size is %s bytes.', strlen($output), self::MAX_CF_TEMPLATE_SIZE));
             }
         }
 
-        return $json;
+        return $output;
     }
 }
