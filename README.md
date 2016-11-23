@@ -6,7 +6,7 @@
 [![Build Status](https://travis-ci.org/AOEpeople/StackFormation.svg?branch=master)](https://travis-ci.org/AOEpeople/StackFormation)
 [![Code Climate](https://codeclimate.com/github/AOEpeople/StackFormation/badges/gpa.svg)](https://codeclimate.com/github/AOEpeople/StackFormation)
 [![Test Coverage](https://codeclimate.com/github/AOEpeople/StackFormation/badges/coverage.svg)](https://codeclimate.com/github/AOEpeople/StackFormation/coverage)
-[![Documentation](https://readthedocs.org/projects/stackformation/badge/?version=documentation)](http://stackformation.readthedocs.io)
+[![Documentation](https://readthedocs.org/projects/stackformation/badge/?version=latest)](http://stackformation.readthedocs.io)
 
 If you want to use StackFormation, please have a look at the [StackFormation documentation](http://stackformation.readthedocs.org)
 
