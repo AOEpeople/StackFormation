@@ -11,6 +11,7 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
 class SetupCommand extends Command
 {
+    const ENV_FILE = '.env.default';
 
     protected function configure()
     {
@@ -21,6 +22,13 @@ class SetupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $fs = new Filesystem();
+        
+        if ($fs->exists(self::ENV_FILE)) {
+            $output->writeln(self::ENV_FILE . ' already exist!');
+            return;
+        }
+        
         $helper = $this->getHelper('question');
         $data = [];
         
@@ -34,11 +42,13 @@ class SetupCommand extends Command
         $data['AWS_DEFAULT_REGION'] = $helper->ask($input, $output, $regionQuestion);
         
         try {
-            $fs = new Filesystem();
-            $fs->dumpFile('.env.default', $this->parseContent($data));
-            $output->writeln('.env.default file was successfully created');
+            $fs->dumpFile(self::ENV_FILE, $this->parseContent($data));
+            $output->writeln('');
+            $output->writeln(self::ENV_FILE . ' file was successfully created.');
+            $output->writeln('You should also add it to your .gitignore with:');
+            $output->writeln('echo .env.default >> .gitignore');
         } catch (IOExceptionInterface $e) {
-            echo "An error occurred while creating .env.default file at ".$e->getPath();
+            echo 'An error occurred while creating ' . self::ENV_FILE . ' file at ' . $e->getPath();
         }
     }
     
