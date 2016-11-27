@@ -8,6 +8,8 @@ class CommandRegistry
     public static function getCommands()
     {
         return [
+            new Command\SetupCommand(),
+                        
             new Command\Stack\ListCommand(),
             new Command\Stack\TreeCommand(),
             new Command\Stack\ObserveCommand(),
