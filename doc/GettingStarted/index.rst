@@ -39,13 +39,13 @@ Quickstart
 AWS access keys
 ---------------
 
-Create a ``.env.default`` file (and add it yo your gitignore: ``echo .env.default >> .gitignore``)
+Execute the setup command to add all necessary AWS env vars
 
-::
+.. code-block:: shell
 
-    AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY_HERE
-    AWS_SECRET_ACCESS_KEY=INSERT_YOUR_SECRET_KEY_HERE
-    AWS_DEFAULT_REGION=INSERT_YOUR_DEFAULT_REGION_HERE
+    $ vendor/bin/stackformation.php setup
+    
+Add it to your gitignore: ``echo .env.default >> .gitignore``
     
 Create a blueprint
 ------------------
@@ -118,13 +118,13 @@ You should see all available StackFormation commands and options now.
 Required environment settings
 -----------------------------
 
-Now create a ``.env.default`` file (and add it yo your gitignore: ``echo .env.default >> .gitignore``)
+Execute the setup command to add all necessary AWS env vars
 
-.. code-block:: text
+.. code-block:: shell
 
-    AWS_ACCESS_KEY_ID=INSERT_YOUR_ACCESS_KEY_HERE
-    AWS_SECRET_ACCESS_KEY=INSERT_YOUR_SECRET_KEY_HERE
-    AWS_DEFAULT_REGION=INSERT_YOUR_DEFAULT_REGION_HERE
+    $ vendor/bin/stackformation.php setup
+    
+Add it to your gitignore: ``echo .env.default >> .gitignore``
 
 Short check
 -----------
