@@ -4,10 +4,11 @@ namespace StackFormation\PreProcessor\Stage\Tree;
 
 use StackFormation\PreProcessor\Stage\AbstractTreePreProcessorStage;
 use StackFormation\PreProcessor\Rootline;
+use StackFormation\PreProcessor\RootlineItem;
+use StackFormation\PreProcessor\RecursiveArrayObject;
 
 class ExpandCidrIp extends AbstractTreePreProcessorStage
 {
-
     /**
      * This one will resolve comma-separated list of IP addresses
      *

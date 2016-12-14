@@ -13,7 +13,7 @@ abstract class AbstractTreePreProcessorStage
      * @param \StackFormation\PreProcessor\TreePreProcessor $treePreProcessor
      * @param string $basePath
      */
-    public function __construct(\StackFormation\PreProcessor\TreePreProcessor $treePreProcessor, $basePath) {
+    public function __construct(\StackFormation\PreProcessor\TreePreProcessor $treePreProcessor, $basePath = '') {
         $this->treePreProcessor = $treePreProcessor;
         $this->basePath = $basePath;
     }
