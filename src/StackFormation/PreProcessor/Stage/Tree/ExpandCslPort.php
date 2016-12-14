@@ -4,6 +4,8 @@ namespace StackFormation\PreProcessor\Stage\Tree;
 
 use StackFormation\PreProcessor\Stage\AbstractTreePreProcessorStage;
 use StackFormation\PreProcessor\Rootline;
+use StackFormation\PreProcessor\RootlineItem;
+use StackFormation\PreProcessor\RecursiveArrayObject;
 
 class ExpandCslPort extends AbstractTreePreProcessorStage
 {
