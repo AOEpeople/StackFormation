@@ -83,13 +83,18 @@ class Instance extends \AwsInspector\Model\AbstractResource
      * Overwrite this method in your inheriting class and return
      * a \AwsInspector\Model\Ec2\Instance representing your bastion server
      *
-     * @return null|Instance
+     * @return Instance|null
+     * @throws \Exception
      */
     public function getJumpHost()
     {
         if ($config = $this->getInspectorConfiguration('jumptags')) {
             $ec2Repository = new Repository();
-            return $ec2Repository->findEc2InstancesByTags($config)->getFirst();
+            $instances = $ec2Repository->findEc2InstancesByTags($config);
+            if (count($instances) == 0) {
+                throw new \Exception('Could not fund jump host for: ' . var_export($config, true));
+            }
+            return $instances->getFirst();
         }
         return null;
     }
