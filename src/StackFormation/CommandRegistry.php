@@ -29,7 +29,9 @@ class CommandRegistry
             new Command\Blueprint\Show\ParametersCommand(),
             new Command\Blueprint\Show\DependenciesCommand(),
             new Command\Blueprint\Show\ChangesetCommand(),
-            new Command\Blueprint\Show\StacknameCommand()
+            new Command\Blueprint\Show\StacknameCommand(),
+            
+            new Command\SetupCommand()
         ];
     }
 }
