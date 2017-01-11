@@ -92,7 +92,7 @@ class Instance extends \AwsInspector\Model\AbstractResource
             $ec2Repository = new Repository();
             $instances = $ec2Repository->findEc2InstancesByTags($config);
             if (count($instances) == 0) {
-                throw new \Exception('Could not fund jump host for: ' . var_export($config, true));
+                throw new \Exception('Could not find jump host for: ' . var_export($config, true));
             }
             return $instances->getFirst();
         }
