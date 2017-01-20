@@ -2,8 +2,8 @@
 Getting Started
 ***************
 
-Installation
-============
+Installation/Usage
+==================
 
 Via composer
 ------------
@@ -13,6 +13,21 @@ Via composer
 .. code-block:: shell
 
     $ composer require aoepeople/stackformation
+
+Via docker
+----------
+
+```
+$ docker run --rm -it -v $(pwd):/app -w /app stackformation:latest bash
+$ stackformation <COMMAND>
+```
+
+Or if you use lambda with golang for instance
+```
+$ docker run --rm -it -v $(pwd):/app -w /app stackformation:latest-golang bash
+```
+
+For more details, see https://hub.docker.com/r/kj187/stackformation/
 
 Using the phar
 --------------

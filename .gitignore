@@ -3,3 +3,5 @@
 /vendor/
 *.phar
 doc/_build
+docker/golang/php-fpm.conf
+docker/slim/php-fpm.conf
