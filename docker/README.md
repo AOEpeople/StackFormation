@@ -16,12 +16,14 @@ The Golang version includes the slim version as basis and on top it supports go.
 ## Usage
 
 ```
-$ docker run --rm -it -v $(pwd):/app -w /app stackformation:latest bash
+$ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest bash
+$ stackformation <COMMAND>
 ```
 
 Or if you use lambda with golang for instance
 ```
-$ docker run --rm -it -v $(pwd):/app -w /app stackformation:latest-golang bash
+$ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest-golang bash
+$ stackformation <COMMAND>
 ```
 
 ## Build a new image version

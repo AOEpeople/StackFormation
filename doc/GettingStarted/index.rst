@@ -18,14 +18,14 @@ Via docker
 ----------
 
 .. code-block:: shell
-    $ docker run --rm -it -v $(pwd):/app -w /app stackformation:latest bash
+    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest bash
     $ stackformation <COMMAND>
 
 
 Or if you use lambda with golang for instance
 
 .. code-block:: shell
-    $ docker run --rm -it -v $(pwd):/app -w /app stackformation:latest-golang bash
+    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest-golang bash
 
 
 For more details, see https://hub.docker.com/r/kj187/stackformation/
