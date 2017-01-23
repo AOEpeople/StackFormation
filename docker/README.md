@@ -19,14 +19,12 @@ Golang could be used for AWS Lambda for instance
 ## Usage
 
 ```
-$ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest bash
-$ stackformation <COMMAND>
+$ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest <COMMAND>
 ```
 
 Or if you want to use lambda with golang
 ```
-$ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest-golang bash
-$ stackformation <COMMAND>
+$ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest-golang <COMMAND>
 ```
 
 ## Build a new image version

@@ -31,3 +31,4 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY php-fpm.conf /etc/php/7.0/fpm/php-fpm.conf
 
+ENTRYPOINT ["stackformation"]

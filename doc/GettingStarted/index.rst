@@ -18,14 +18,18 @@ Via docker
 ----------
 
 .. code-block:: shell
-    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest bash
-    $ stackformation <COMMAND>
+    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest <COMMAND>
+
+Example
+.. code-block:: shell
+    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest setup
+    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest blueprint:deploy
 
 
 Or if you use lambda with golang for instance
 
 .. code-block:: shell
-    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest-golang bash
+    $ docker run --rm -it -v $(pwd):/app -w /app kj187/stackformation:latest-golang <COMMAND>
 
 
 For more details, see https://hub.docker.com/r/kj187/stackformation/
