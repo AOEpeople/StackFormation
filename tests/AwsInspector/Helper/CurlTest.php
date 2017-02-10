@@ -14,16 +14,16 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     {
         if (empty($output)) {
             $output = [
+                'HTTP/1.1 301 Moved Permanently',
+                'Location: http://www.google.com/',
+                'Content-Type: text/html; charset=UTF-8',
+                '', // Implicit test of an empty line in parseHeader
                 '<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">',
                 '<TITLE>301 Moved</TITLE></HEAD><BODY>',
                 '<H1>301 Moved</H1>',
                 'The document has moved',
                 '<A HREF="http://www.google.com/">here</A>.',
-                '</BODY></HTML>',
-                'HTTP/1.1 301 Moved Permanently',
-                'Location: http://www.google.com/',
-                'Content-Type: text/html; charset=UTF-8',
-                ' ' // Implicit test of an empty line in parseHeader
+                '</BODY></HTML>'
             ];
         }
 
@@ -41,15 +41,15 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('Exception', "Header without colon found: Line without colon");
         $curl = $this->getCurlObject([
+            'HTTP/1.1 301 Moved Permanently',
+            'Location: http://www.google.com/',
+            'Line without colon',
             '<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">',
             '<TITLE>301 Moved</TITLE></HEAD><BODY>',
             '<H1>301 Moved</H1>',
             'The document has moved',
             '<A HREF="http://www.google.com/">here</A>.',
-            '</BODY></HTML>',
-            'HTTP/1.1 301 Moved Permanently',
-            'Location: http://www.google.com/',
-            'Line without colon'
+            '</BODY></HTML>'
         ]);
     }
 
@@ -101,8 +101,8 @@ class CurlTest extends \PHPUnit_Framework_TestCase
         $curl = $this->getCurlObject();
         $this->assertSame(
             [
-                'Content-Type' => 'text/html; charset=UTF-8',
                 'Location' => 'http://www.google.com/',
+                'Content-Type' => 'text/html; charset=UTF-8',
             ],
             $curl->getResponseHeaders()
         );
@@ -114,23 +114,24 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     public function getResponseHeadersReturnsExpectedHeaderArrayWithNestedArray()
     {
         $curl = $this->getCurlObject([
+            'HTTP/1.1 301 Moved Permanently',
+            'Location: http://www.google.com/',
+            'X-StackFormation: Test',
+            'X-StackFormation: Test2',
+            'X-StackFormation: Test3',
+            '',
             '<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">',
             '<TITLE>301 Moved</TITLE></HEAD><BODY>',
             '<H1>301 Moved</H1>',
             'The document has moved',
             '<A HREF="http://www.google.com/">here</A>.',
             '</BODY></HTML>',
-            'HTTP/1.1 301 Moved Permanently',
-            'Location: http://www.google.com/',
-            'X-StackFormation: Test',
-            'X-StackFormation: Test2',
-            'X-StackFormation: Test3'
         ]);
 
         $this->assertSame(
             [
-                'X-StackFormation' => ['Test3', 'Test2', 'Test'],
-                'Location' => 'http://www.google.com/'
+                'Location' => 'http://www.google.com/',
+                'X-StackFormation' => ['Test', 'Test2', 'Test3']
             ],
             $curl->getResponseHeaders()
         );
@@ -180,14 +181,15 @@ class CurlTest extends \PHPUnit_Framework_TestCase
     public function getResponseBodyReturnsAlsoTheRestOfInvalidHeaderData()
     {
         $curl = $this->getCurlObject([
+            'StackFormationHTTP/1.1 301 Moved Permanently',
+            'Location: http://www.google.com/',
+            '',
             '<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">',
             '<TITLE>301 Moved</TITLE></HEAD><BODY>',
             '<H1>301 Moved</H1>',
             'The document has moved',
             '<A HREF="http://www.google.com/">here</A>.',
-            '</BODY></HTML>',
-            'StackFormationHTTP/1.1 301 Moved Permanently',
-            'Location: http://www.google.com/'
+            '</BODY></HTML>'
         ]);
         $this->assertContains('StackFormation', $curl->getResponseBody());
     }
