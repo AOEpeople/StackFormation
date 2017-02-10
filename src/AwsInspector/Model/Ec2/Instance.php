@@ -5,6 +5,7 @@ namespace AwsInspector\Model\Ec2;
 use AwsInspector\Helper\Curl;
 use AwsInspector\Ssh\Connection;
 use AwsInspector\Ssh\PrivateKey;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 /**
  * Class Instance
@@ -74,7 +75,11 @@ class Instance extends \AwsInspector\Model\AbstractResource
             return null;
             // throw new \Exception('No KeyName found');
         }
-        return PrivateKey::get('keys/' . $keyName . '.pem');
+        try {
+            return PrivateKey::get('keys/' . $keyName . '.pem');
+        } catch(FileNotFoundException $e) {
+            return PrivateKey::get($_SERVER['HOME'] . '/keys/' . $keyName . '.pem');
+        }
     }
 
     /**
