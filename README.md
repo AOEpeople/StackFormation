@@ -1,5 +1,7 @@
 # StackFormation
 
+[![Join the chat at https://gitter.im/AOEpeople/StackFormation](https://badges.gitter.im/AOEpeople/StackFormation.svg)](https://gitter.im/AOEpeople/StackFormation?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 **Lightweight AWS CloudFormation Stack, Template and Parameter Manager and Preprocessor**
 <img align="right" style="float: right; height: 200px;" src="doc/Images/stackformation_200px.png">
 
