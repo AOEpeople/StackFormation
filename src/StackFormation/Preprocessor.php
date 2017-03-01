@@ -4,11 +4,22 @@ namespace StackFormation;
 
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
+#
+#
+#
+#
+# Obsolete,
+# TODO delete after finishing the new PreProcessor
+#
+#
+#
+#
+
 class Preprocessor
 {
     const MAX_JS_FILE_INCLUDE_SIZE = 4096;
 
-    public function processJson($json, $basePath)
+    public function process($json, $basePath)
     {
         if (!is_string($json)) {
             throw new \InvalidArgumentException('Expected json string');

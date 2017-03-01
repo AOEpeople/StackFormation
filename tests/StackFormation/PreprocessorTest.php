@@ -12,6 +12,19 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
+
+
+
+        #
+        #
+        # TODO switch Preprocessor and rewrite/add tests
+        #
+        #
+        #
+        #
+
+
+
         $this->preprocessor = new \StackFormation\Preprocessor();
     }
 
@@ -27,8 +40,13 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
         $prefix .= $fixtureDirectory . '/';
         $templatePath = $prefix . 'blueprint/input.template';
         $fileContent = file_get_contents($templatePath);
+
+        $template = $this->getTemplateMock(['getFileContent', 'getBasePath']);
+        $template->method('getFileContent')->willReturn($fileContent);
+        $template->method('getBasePath')->willReturn(dirname($templatePath));
+
         $this->assertEquals(
-            $this->preprocessor->processJson($fileContent, dirname($templatePath)),
+            $this->preprocessor->process($template),
             file_get_contents($prefix. 'blueprint/expected.template')
         );
     }
@@ -44,17 +62,21 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param string $inputJson
-     * @param string $expectedJson
+     * @param string $input
+     * @param string $expected
      * @throws \Exception
      * @test
      * @dataProvider processJsonDataProvider
      */
-    public function processJson($inputJson, $expectedJson)
+    public function processJson($input, $expected)
     {
+        $template = $this->getTemplateMock(['getFileContent', 'getBasePath']);
+        $template->method('getFileContent')->willReturn($input);
+        $template->method('getBasePath')->willReturn(sys_get_temp_dir());
+
         $this->assertEquals(
-            $this->preprocessor->processJson($inputJson, sys_get_temp_dir()),
-            $expectedJson
+            $this->preprocessor->process($template),
+            $expected
         );
     }
 
@@ -86,5 +108,17 @@ class PreprocessorTest extends \PHPUnit_Framework_TestCase
             ['"Aliases": { "Fn::Split": ["+", "a,b,c"] }', '"Aliases": ["a,b,c"]'],
             ['"Aliases": { "Fn::Split": ["+", "a+b+c"] }', '"Aliases": ["a", "b", "c"]'],
         ];
+    }
+
+    /**
+     * @param array $methods
+     * @return \PHPUnit_Framework_MockObject_MockObject<\StackFormation\Template>
+     */
+    public function getTemplateMock(array $methods)
+    {
+        return $this->getMockBuilder('\StackFormation\Template')
+            ->disableOriginalConstructor()
+            ->setMethods($methods)
+            ->getMock();
     }
 }

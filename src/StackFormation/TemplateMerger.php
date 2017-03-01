@@ -39,17 +39,17 @@ class TemplateMerger
             }
 
             try {
-                $array = $template->getDecodedJson();
+                $data = $template->getData();
 
                 // Copy the current description into the final template
-                if (!empty($array['Description'])) {
-                    $mergedTemplate['Description'] = $array['Description'];
+                if (!empty($data['Description'])) {
+                    $mergedTemplate['Description'] = $data['Description'];
                 }
 
                 // Merge keys from current template with final template
                 foreach ($mergeKeys as $mergeKey) {
-                    if (isset($array[$mergeKey]) && is_array($array[$mergeKey])) {
-                        foreach ($array[$mergeKey] as $key => $value) {
+                    if (isset($data[$mergeKey]) && is_array($data[$mergeKey])) {
+                        foreach ($data[$mergeKey] as $key => $value) {
                             if (isset($mergedTemplate[$mergeKey][$key])) {
                                 // it's ok if the parameter has the same name and type...
                                 if (($mergeKey != 'Parameters') || ($value['Type'] != $mergedTemplate[$mergeKey][$key]['Type'])) {
@@ -63,7 +63,8 @@ class TemplateMerger
             } catch (TemplateDecodeException $e) {
                 if (Div::isProgramInstalled('jq')) {
                     $tmpfile = tempnam(sys_get_temp_dir(), 'json_validate_');
-                    file_put_contents($tmpfile, $template->getProcessedTemplate());
+                    $yaml = new \Symfony\Component\Yaml\Yaml();
+                    file_put_contents($tmpfile, $yaml->dump($data));
                     passthru('jq . ' . $tmpfile);
                     unlink($tmpfile);
                 }
@@ -82,18 +83,19 @@ class TemplateMerger
 
         $mergedTemplate = array_merge_recursive($mergedTemplate, $additionalData);
 
-        $json = json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $yaml = new \Symfony\Component\Yaml\Yaml();
+        $output = $yaml->dump($mergedTemplate);
 
         // Check for max template size
-        if (strlen($json) > self::MAX_CF_TEMPLATE_SIZE) {
-            $json = json_encode($mergedTemplate, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (strlen($output) > self::MAX_CF_TEMPLATE_SIZE) {
+            $output = $yaml->dump($mergedTemplate, 1);
 
             // Re-check for max template size
-            if (strlen($json) > self::MAX_CF_TEMPLATE_SIZE) {
-                throw new \Exception(sprintf('Template too big (%s bytes). Maximum template size is %s bytes.', strlen($json), self::MAX_CF_TEMPLATE_SIZE));
+            if (strlen($output) > self::MAX_CF_TEMPLATE_SIZE) {
+                throw new \Exception(sprintf('Template too big (%s bytes). Maximum template size is %s bytes.', strlen($output), self::MAX_CF_TEMPLATE_SIZE));
             }
         }
 
-        return $json;
+        return $output;
     }
 }

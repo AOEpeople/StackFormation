@@ -35,4 +35,17 @@ class Div
         @exec('which ' . $program, $out, $return);
         return $return === 0;
     }
+
+    /**
+     * @param string $string
+     * @return bool
+     */
+    public static function isJson($string) {
+        $string = trim($string);
+
+        // TODO just a workaround to check if the string is a valid JSON
+        // we could not check that with json_decode because, it could be that the JSON file has some comments inside
+        // and the StringPreProcessor/StripComments is invoked after that check!!
+        return preg_match('/\A\{(.*)/', $string);
+    }
 }
