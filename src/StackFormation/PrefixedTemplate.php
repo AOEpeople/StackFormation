@@ -51,11 +51,11 @@ class PrefixedTemplate extends Template
         }
     }
 
-    public function getDecodedJson()
+    public function getData()
     {
         if ($this->prefix) {
             if (!$this->cache->has(__METHOD__)) {
-                $array = parent::getDecodedJson();
+                $array = parent::getData();
 
                 foreach ($array as $topLevelKey => $topLevelData) {
                     if (is_array($topLevelData)) {
@@ -71,7 +71,7 @@ class PrefixedTemplate extends Template
 
             return $this->cache->get(__METHOD__);
         } else {
-            return parent::getDecodedJson();
+            return parent::getData();
         }
     }
 

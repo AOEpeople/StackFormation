@@ -25,6 +25,14 @@ class Pipeline
     }
 
     /**
+     * @return \callable[]
+     */
+    public function getStages()
+    {
+        return $this->stages;
+    }
+
+    /**
      * Process the payload.
      *
      * @param $payload

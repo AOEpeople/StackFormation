@@ -39,7 +39,7 @@ class TemplateMerger
             }
 
             try {
-                $array = $template->getDecodedJson();
+                $array = $template->getData();
 
                 // Copy the current description into the final template
                 if (!empty($array['Description'])) {
@@ -82,18 +82,25 @@ class TemplateMerger
 
         $mergedTemplate = array_merge_recursive($mergedTemplate, $additionalData);
 
-        $json = json_encode($mergedTemplate, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $yaml = new \Symfony\Component\Yaml\Yaml();
+        $output = $yaml->dump($mergedTemplate);
 
         // Check for max template size
-        if (strlen($json) > self::MAX_CF_TEMPLATE_SIZE) {
-            $json = json_encode($mergedTemplate, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (strlen($output) > self::MAX_CF_TEMPLATE_SIZE) {
+            $output = $yaml->dump($mergedTemplate, 1);
 
             // Re-check for max template size
-            if (strlen($json) > self::MAX_CF_TEMPLATE_SIZE) {
-                throw new \Exception(sprintf('Template too big (%s bytes). Maximum template size is %s bytes.', strlen($json), self::MAX_CF_TEMPLATE_SIZE));
+            if (strlen($output) > self::MAX_CF_TEMPLATE_SIZE) {
+                throw new \Exception(sprintf('Template too big (%s bytes). Maximum template size is %s bytes.', strlen($output), self::MAX_CF_TEMPLATE_SIZE));
             }
         }
 
-        return $json;
+
+        // TODO
+        #print_r($mergedTemplate);
+        #print_r($output);
+        #die('MERGE_TEMPLATE_DIE');
+
+        return $output;
     }
 }
