@@ -54,7 +54,9 @@ class BlueprintAction {
         }
 
         if ($this->output && !$this->output->isQuiet()) { $this->output->writeln("Running scripts ($type)"); }
-
+        foreach($this->blueprint->getParameters() as $parameter) {
+            $envVars[] = $parameter['ParameterKey'] . '=' . $parameter['ParameterValue'];
+        }
         $envVars = array_merge([
             "BLUEPRINT=".$this->blueprint->getName(),
             "STACKNAME=".$this->blueprint->getStackName(),
